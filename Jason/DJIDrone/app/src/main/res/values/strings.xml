@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">DJIDrone</string>
+    <string name="battery">battery</string>
+    <string name="sensor">sensor</string>
+    <string name="signal">signal</string>
+    <string name="controller">controller</string>
+    <string name="otherSetting">other setting</string>
+</resources>
