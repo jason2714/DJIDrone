@@ -5,4 +5,7 @@
     <string name="signal">signal</string>
     <string name="controller">controller</string>
     <string name="otherSetting">other setting</string>
+    <string name="account">DJIDrone</string>
+    <string name="password">ntoucse</string>
+    <string name="api_key">3afcbfbcba1e0e72936a8144</string>
 </resources>
