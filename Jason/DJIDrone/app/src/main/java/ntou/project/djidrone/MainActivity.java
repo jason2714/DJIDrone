@@ -118,19 +118,47 @@ public class MainActivity extends AppCompatActivity {
             showToast("progressRunning");
         }
     };
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         // When the compile and target version is higher than 22, please request the following permission at runtime to ensure the SDK works well.
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-//            checkAndRequestPermissions();
-//        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            checkAndRequestPermissions();
+        }
         initViewId();
         initLinstener();
         //Initialize DJI SDK Manager
-        //mHandler = new Handler(Looper.getMainLooper());
+        mHandler = new Handler(Looper.getMainLooper());
     }
+
+    /**
+     * Result of runtime permission request
+     */
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        // Check for granted permission and remove from missing list
+        if (requestCode == REQUEST_PERMISSION_CODE) {
+            for (int i = grantResults.length - 1; i >= 0; i--) {
+                if (grantResults[i] == PackageManager.PERMISSION_GRANTED) {
+                    missingPermission.remove(permissions[i]);
+                }
+            }
+        }
+        // If there is enough permission, we will start the registration
+        if (missingPermission.isEmpty()) {
+            startSDKRegistration();
+        } else {
+            showToast("Missing permissions!!!");
+        }
+    }
+
+
     private void initViewId(){
         account=findViewById(R.id.userId);
         password=findViewById(R.id.password);
@@ -196,30 +224,6 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    /**
-     * Result of runtime permission request
-     */
-    @Override
-    public void onRequestPermissionsResult(int requestCode,
-                                           @NonNull String[] permissions,
-                                           @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        // Check for granted permission and remove from missing list
-        if (requestCode == REQUEST_PERMISSION_CODE) {
-            for (int i = grantResults.length - 1; i >= 0; i--) {
-                if (grantResults[i] == PackageManager.PERMISSION_GRANTED) {
-                    missingPermission.remove(permissions[i]);
-                }
-            }
-        }
-        // If there is enough permission, we will start the registration
-        if (missingPermission.isEmpty()) {
-            startSDKRegistration();
-        } else {
-            showToast("Missing permissions!!!");
-        }
-    }
-
     private void startSDKRegistration() {
         if (isRegistrationInProgress.compareAndSet(false, true)) {
             AsyncTask.execute(new Runnable() {
@@ -233,11 +237,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void notifyStatusChange() {
-       // DJISampleApplication.getEventBus().post(new ConnectivityChangeEvent());
+//        MyApplication.getEventBus().post(new ConnectivityChangeEvent());
         mHandler.removeCallbacks(updateRunnable);
         mHandler.postDelayed(updateRunnable, 500);
     }
-
+//    public static class ConnectivityChangeEvent {
+//    }
     private Runnable updateRunnable = new Runnable() {
 
         @Override
@@ -246,7 +251,6 @@ public class MainActivity extends AppCompatActivity {
             sendBroadcast(intent);
         }
     };
-
     private void showToast(final String toastMsg) {
 
         Handler handler = new Handler(Looper.getMainLooper());

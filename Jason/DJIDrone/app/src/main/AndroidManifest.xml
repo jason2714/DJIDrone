@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     package="ntou.project.djidrone">
-
+    <!-- Permissions and features -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
@@ -26,6 +26,8 @@
     <uses-feature
         android:name="android.hardware.usb.accessory"
         android:required="true" />
+    <!-- Permissions and features -->
+    <!--android:name=".MyApplication"加入便無法執行-->
     <application
         android:name=".MyApplication"
         android:allowBackup="true"
