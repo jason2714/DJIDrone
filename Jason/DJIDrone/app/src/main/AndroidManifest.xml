@@ -27,7 +27,6 @@
         android:name="android.hardware.usb.accessory"
         android:required="true" />
     <!-- Permissions and features -->
-    <!--android:name=".MyApplication"加入便無法執行-->
     <application
         android:name=".MyApplication"
         android:allowBackup="true"
@@ -40,9 +39,10 @@
 
         <!-- DJI SDK -->
         <uses-library android:name="com.android.future.usb.accessory" />
+        <uses-library android:name="org.apache.http.legacy" android:required="false" />
         <meta-data
             android:name="com.dji.sdk.API_KEY"
-            android:value="3afcbfbcba1e0e72936a8144" />
+            android:value="4aab3e2d20fc07cd07e029e7" />
         <activity
             android:name="dji.sdk.sdkmanager.DJIAoaControllerActivity"
             android:theme="@android:style/Theme.Translucent" >
@@ -53,8 +53,7 @@
                 android:name="android.hardware.usb.action.USB_ACCESSORY_ATTACHED"
                 android:resource="@xml/accessory_filter" />
         </activity>
-        <service android:name="dji.sdk.sdkmanager.DJIGlobalService" >
-        </service>
+        <service android:name="dji.sdk.sdkmanager.DJIGlobalService" />
         <!-- DJI SDK -->
         <activity android:name=".MobileActivity"/>
         <activity android:name=".define" />

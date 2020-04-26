@@ -4,13 +4,12 @@ import android.app.Application;
 import android.content.Context;
 
 import com.secneo.sdk.Helper;
-import com.squareup.otto.Bus;
 
 public class MyApplication extends Application {
     @Override
     protected void attachBaseContext(Context paramContext) {
         super.attachBaseContext(paramContext);
-        Helper.install(this);
+        Helper.install(MyApplication.this);
     }
 }
 //package ntou.project.djidrone;
@@ -94,4 +93,4 @@ public class MyApplication extends Application {
 //        app = this;
 //    }
 //}
-
+//
