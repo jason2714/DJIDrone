@@ -58,66 +58,66 @@ public class MainActivity extends AppCompatActivity {
             Manifest.permission.READ_PHONE_STATE, // Device UUID accessed upon registration
             Manifest.permission.RECORD_AUDIO // Speaker accessory
     };
-//    private BaseComponent.ComponentListener mDJIComponentListener = new BaseComponent.ComponentListener() {
-//
-//        @Override
-//        public void onConnectivityChange(boolean isConnected) {
-//            Log.d(TAG, "onComponentConnectivityChanged: " + isConnected);
-//            notifyStatusChange();
-//        }
-//    };
-//    private DJISDKManager.SDKManagerCallback myDJISDKManagerCallback =  new DJISDKManager.SDKManagerCallback() {
-//        @Override
-//        public void onRegister(DJIError djiError) {
-//            if (djiError == DJISDKError.REGISTRATION_SUCCESS) {
-//                showToast("Register Success");
-//                DJISDKManager.getInstance().startConnectionToProduct();
-//            } else {
-//                showToast("Register sdk fails, please check the bundle id and network connection!");
-//            }
-//            Log.v(TAG, djiError.getDescription());
-//            //hideProcess();
-//        }
-//
-//        @Override
-//        public void onProductDisconnect() {
-//            Log.d(TAG, "onProductDisconnect");
-//            showToast("Product Disconnected");
-//            notifyStatusChange();
-//
-//        }
-//        @Override
-//        public void onProductConnect(BaseProduct baseProduct) {
-//            Log.d(TAG, String.format("onProductConnect newProduct:%s", baseProduct));
-//            showToast("Product Connected");
-//            notifyStatusChange();
-//
-//        }
-//
-//        @Override
-//        public void onComponentChange(BaseProduct.ComponentKey componentKey, BaseComponent oldComponent,
-//                                      BaseComponent newComponent) {
-//
-//            if (newComponent != null) {
-//                newComponent.setComponentListener(mDJIComponentListener);
-//            }
-//            Log.d(TAG,
-//                    String.format("onComponentChange key:%s, oldComponent:%s, newComponent:%s",
-//                            componentKey,
-//                            oldComponent,
-//                            newComponent));
-//
-//        }
-//        @Override
-//        public void onInitProcess(DJISDKInitEvent djisdkInitEvent, int i) {
-//
-//        }
-//
-//        @Override
-//        public void onDatabaseDownloadProgress(long l, long l1) {
-//            showToast("progressRunning");
-//        }
-//    };
+    private BaseComponent.ComponentListener mDJIComponentListener = new BaseComponent.ComponentListener() {
+
+        @Override
+        public void onConnectivityChange(boolean isConnected) {
+            Log.d(TAG, "onComponentConnectivityChanged: " + isConnected);
+            notifyStatusChange();
+        }
+    };
+    private DJISDKManager.SDKManagerCallback myDJISDKManagerCallback =  new DJISDKManager.SDKManagerCallback() {
+        @Override
+        public void onRegister(DJIError djiError) {
+            if (djiError == DJISDKError.REGISTRATION_SUCCESS) {
+                showToast("Register Success");
+                DJISDKManager.getInstance().startConnectionToProduct();
+            } else {
+                showToast("Register sdk fails, please check the bundle id and network connection!");
+            }
+            Log.v(TAG, djiError.getDescription());
+            //hideProcess();
+        }
+
+        @Override
+        public void onProductDisconnect() {
+            Log.d(TAG, "onProductDisconnect");
+            showToast("Product Disconnected");
+            notifyStatusChange();
+
+        }
+        @Override
+        public void onProductConnect(BaseProduct baseProduct) {
+            Log.d(TAG, String.format("onProductConnect newProduct:%s", baseProduct));
+            showToast("Product Connected");
+            notifyStatusChange();
+
+        }
+
+        @Override
+        public void onComponentChange(BaseProduct.ComponentKey componentKey, BaseComponent oldComponent,
+                                      BaseComponent newComponent) {
+
+            if (newComponent != null) {
+                newComponent.setComponentListener(mDJIComponentListener);
+            }
+            Log.d(TAG,
+                    String.format("onComponentChange key:%s, oldComponent:%s, newComponent:%s",
+                            componentKey,
+                            oldComponent,
+                            newComponent));
+
+        }
+        @Override
+        public void onInitProcess(DJISDKInitEvent djisdkInitEvent, int i) {
+
+        }
+
+        @Override
+        public void onDatabaseDownloadProgress(long l, long l1) {
+            showToast("progressRunning");
+        }
+    };
 
 
     @Override
@@ -125,41 +125,41 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         // When the compile and target version is higher than 22, please request the following permission at runtime to ensure the SDK works well.
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-//            checkAndRequestPermissions();
-//        }
-        initViewId();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            checkAndRequestPermissions();
+        }
+        initView();
         initLinstener();
         //Initialize DJI SDK Manager
         mHandler = new Handler(Looper.getMainLooper());
     }
 
-//    /**
-//     * Result of runtime permission request
-//     */
-//    @Override
-//    public void onRequestPermissionsResult(int requestCode,
-//                                           @NonNull String[] permissions,
-//                                           @NonNull int[] grantResults) {
-//        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-//        // Check for granted permission and remove from missing list
-//        if (requestCode == REQUEST_PERMISSION_CODE) {
-//            for (int i = grantResults.length - 1; i >= 0; i--) {
-//                if (grantResults[i] == PackageManager.PERMISSION_GRANTED) {
-//                    missingPermission.remove(permissions[i]);
-//                }
-//            }
-//        }
-//        // If there is enough permission, we will start the registration
-//        if (missingPermission.isEmpty()) {
-//            startSDKRegistration();
-//        } else {
-//            showToast("Missing permissions!!!");
-//        }
-//    }
+    /**
+     * Result of runtime permission request
+     */
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        // Check for granted permission and remove from missing list
+        if (requestCode == REQUEST_PERMISSION_CODE) {
+            for (int i = grantResults.length - 1; i >= 0; i--) {
+                if (grantResults[i] == PackageManager.PERMISSION_GRANTED) {
+                    missingPermission.remove(permissions[i]);
+                }
+            }
+        }
+        // If there is enough permission, we will start the registration
+        if (missingPermission.isEmpty()) {
+            startSDKRegistration();
+        } else {
+            showToast("Missing permissions!!!");
+        }
+    }
 
 
-    private void initViewId(){
+    private void initView(){
         account=findViewById(R.id.userId);
         password=findViewById(R.id.password);
         submit=findViewById(R.id.submit);
@@ -205,36 +205,36 @@ public class MainActivity extends AppCompatActivity {
      * Checks if there is any missing permissions, and
      * requests runtime permission if needed.
      */
-//    private void checkAndRequestPermissions() {
-//        // Check for permissions
-//        for (String eachPermission : REQUIRED_PERMISSION_LIST) {
-//            if (ContextCompat.checkSelfPermission(this, eachPermission) != PackageManager.PERMISSION_GRANTED) {
-//                missingPermission.add(eachPermission);
-//            }
-//        }
-//        // Request for missing permissions
-//        if (missingPermission.isEmpty()) {
-//            startSDKRegistration();
-//        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-//            showToast("Need to grant the permissions!");
-//            ActivityCompat.requestPermissions(this,
-//                    missingPermission.toArray(new String[missingPermission.size()]),
-//                    REQUEST_PERMISSION_CODE);
-//        }
-//
-//    }
+    private void checkAndRequestPermissions() {
+        // Check for permissions
+        for (String eachPermission : REQUIRED_PERMISSION_LIST) {
+            if (ContextCompat.checkSelfPermission(this, eachPermission) != PackageManager.PERMISSION_GRANTED) {
+                missingPermission.add(eachPermission);
+            }
+        }
+        // Request for missing permissions
+        if (missingPermission.isEmpty()) {
+            startSDKRegistration();
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            showToast("Need to grant the permissions!");
+            ActivityCompat.requestPermissions(this,
+                    missingPermission.toArray(new String[missingPermission.size()]),
+                    REQUEST_PERMISSION_CODE);
+        }
 
-//    private void startSDKRegistration() {
-//        if (isRegistrationInProgress.compareAndSet(false, true)) {
-//            AsyncTask.execute(new Runnable() {
-//                @Override
-//                public void run() {
-//                    showToast("registering, pls wait...");
-//                    DJISDKManager.getInstance().registerApp(MainActivity.this.getApplicationContext(), myDJISDKManagerCallback);
-//                }
-//            });
-//        }
-//    }
+    }
+
+    private void startSDKRegistration() {
+        if (isRegistrationInProgress.compareAndSet(false, true)) {
+            AsyncTask.execute(new Runnable() {
+                @Override
+                public void run() {
+                    showToast("registering, pls wait...");
+                    DJISDKManager.getInstance().registerApp(MainActivity.this.getApplicationContext(), myDJISDKManagerCallback);
+                }
+            });
+        }
+    }
 
     private void notifyStatusChange() {
         mHandler.removeCallbacks(updateRunnable);
