@@ -71,6 +71,7 @@ public class MainActivity extends AppCompatActivity {
         public void onRegister(DJIError djiError) {
             if (djiError == DJISDKError.REGISTRATION_SUCCESS) {
                 showToast("Register Success");
+                showToast("在登入前請先連接裝置");
                 DJISDKManager.getInstance().startConnectionToProduct();
             } else {
                 showToast("Register sdk fails, please check the bundle id and network connection!");
@@ -81,6 +82,7 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void onProductDisconnect() {
+            submit.setEnabled(false);
             Log.d(TAG, "onProductDisconnect");
             showToast("Product Disconnected");
             notifyStatusChange();
@@ -88,6 +90,7 @@ public class MainActivity extends AppCompatActivity {
         }
         @Override
         public void onProductConnect(BaseProduct baseProduct) {
+            submit.setEnabled(true);
             Log.d(TAG, String.format("onProductConnect newProduct:%s", baseProduct));
             showToast("Product Connected");
             notifyStatusChange();
@@ -118,7 +121,6 @@ public class MainActivity extends AppCompatActivity {
             showToast("progressRunning");
         }
     };
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -235,7 +237,7 @@ public class MainActivity extends AppCompatActivity {
             });
         }
     }
-
+//            無用
     private void notifyStatusChange() {
         mHandler.removeCallbacks(updateRunnable);
         mHandler.postDelayed(updateRunnable, 500);

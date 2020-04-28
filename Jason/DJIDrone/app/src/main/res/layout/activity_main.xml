@@ -50,6 +50,7 @@
             android:background="@drawable/submit_button"
             android:textSize="30dp"
             android:text="送出"
-            android:textColor="#FFF"/>
+            android:textColor="#FFF"
+            android:enabled="false"/>
     </LinearLayout>
 </LinearLayout>
