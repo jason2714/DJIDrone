@@ -5,11 +5,22 @@ import android.content.Context;
 
 import com.secneo.sdk.Helper;
 
+import dji.midware.natives.FPVController;
+
 public class MyApplication extends Application {
+
+    private  FPVDemoApplication fpvDemoApplication;
+
     @Override
     protected void attachBaseContext(Context paramContext) {
         super.attachBaseContext(paramContext);
         Helper.install(MyApplication.this);
+//        if (fpvDemoApplication == null) {
+//            fpvDemoApplication = new FPVDemoApplication();
+////            fpvDemoApplication.setContext(this);
+//        }
+
+
     }
 }
 //package ntou.project.djidrone;

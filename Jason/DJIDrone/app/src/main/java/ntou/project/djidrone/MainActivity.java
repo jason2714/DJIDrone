@@ -6,7 +6,10 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import android.Manifest;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -26,14 +29,18 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import dji.common.error.DJIError;
 import dji.common.error.DJISDKError;
+import dji.common.product.Model;
 import dji.sdk.base.BaseComponent;
 import dji.sdk.base.BaseProduct;
+import dji.sdk.camera.Camera;
+import dji.sdk.camera.VideoFeeder;
+import dji.sdk.products.Aircraft;
 import dji.sdk.sdkmanager.DJISDKInitEvent;
 import dji.sdk.sdkmanager.DJISDKManager;
 
 public class MainActivity extends AppCompatActivity {
 
-    private EditText account,password;
+    private EditText account, password;
     private Button submit;
     //android integrate import
     private static final String TAG = MainActivity.class.getName();
@@ -66,31 +73,31 @@ public class MainActivity extends AppCompatActivity {
             notifyStatusChange();
         }
     };
-    private DJISDKManager.SDKManagerCallback myDJISDKManagerCallback =  new DJISDKManager.SDKManagerCallback() {
+    private DJISDKManager.SDKManagerCallback myDJISDKManagerCallback = new DJISDKManager.SDKManagerCallback() {
         @Override
         public void onRegister(DJIError djiError) {
             if (djiError == DJISDKError.REGISTRATION_SUCCESS) {
                 showToast("Register Success");
                 showToast("在登入前請先連接裝置");
+                //register success後啟動 開始等裝置連接,成功連接後跑onProductConnect
                 DJISDKManager.getInstance().startConnectionToProduct();
             } else {
                 showToast("Register sdk fails, please check the bundle id and network connection!");
             }
             Log.v(TAG, djiError.getDescription());
-            //hideProcess();
         }
 
         @Override
         public void onProductDisconnect() {
-            submit.setEnabled(false);
+            mProduct = DJISDKManager.getInstance().getProduct();
             Log.d(TAG, "onProductDisconnect");
             showToast("Product Disconnected");
             notifyStatusChange();
 
         }
+
         @Override
         public void onProductConnect(BaseProduct baseProduct) {
-            submit.setEnabled(true);
             Log.d(TAG, String.format("onProductConnect newProduct:%s", baseProduct));
             showToast("Product Connected");
             notifyStatusChange();
@@ -111,6 +118,7 @@ public class MainActivity extends AppCompatActivity {
                             newComponent));
 
         }
+
         @Override
         public void onInitProcess(DJISDKInitEvent djisdkInitEvent, int i) {
 
@@ -133,8 +141,34 @@ public class MainActivity extends AppCompatActivity {
         initView();
         initLinstener();
         //Initialize DJI SDK Manager
+//        IntentFilter filter = new IntentFilter();
+//        filter.addAction(FPVDemoApplication.FLAG_CONNECTION_CHANGE);
+//        registerReceiver(mReceiver, filter);
         mHandler = new Handler(Looper.getMainLooper());
     }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        //init receiver
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(FLAG_CONNECTION_CHANGE);
+        registerReceiver(mReceiver, filter);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        Log.e(TAG, "onPause");
+        unregisterReceiver(mReceiver);
+    }
+
+//    @Override
+//    protected void onDestroy() {
+//        Log.e(TAG, "onDestroy");
+//        unregisterReceiver(mReceiver);
+//        super.onDestroy();
+//    }
 
     /**
      * Result of runtime permission request
@@ -161,43 +195,60 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    private void initView(){
-        account=findViewById(R.id.userId);
-        password=findViewById(R.id.password);
-        submit=findViewById(R.id.submit);
+    private void initView() {
+        account = findViewById(R.id.userId);
+        password = findViewById(R.id.password);
+        submit = findViewById(R.id.submit);
     }
 
-    private void initLinstener(){
+    private void initLinstener() {
         Onclick onclick = new Onclick();
+        /*
+        test
+        */
+        findViewById(R.id.btn_skip)
+                .setOnClickListener(onclick);
+        findViewById(R.id.btn_sendBroadcast)
+                .setOnClickListener(onclick);
+        /*
+        test
+        */
         submit.setOnClickListener(onclick);
         password.setOnKeyListener(new View.OnKeyListener() {
             @Override
             public boolean onKey(View v, int keyCode, KeyEvent event) {
-                if(keyCode==KeyEvent.KEYCODE_ENTER)
+                if (keyCode == KeyEvent.KEYCODE_ENTER)
                     checkInformation();
                 return false;
             }
         });
     }
-    private void checkInformation(){
+
+    private void checkInformation() {
         Intent intent = null;
-        if(account.getText().toString().equals(getResources().getString(R.string.account))&&
-                password.getText().toString().equals(getResources().getString(R.string.password))){
+        if (account.getText().toString().equals(getResources().getString(R.string.account)) &&
+                password.getText().toString().equals(getResources().getString(R.string.password))) {
             intent = new Intent(MainActivity.this, MobileActivity.class);
             startActivity(intent);
-        }
-        else{
-            Log.d(define.LOG_TAG, "account : "+account.getText().toString()+
-                    "\npassword : "+password.getText().toString());
-            Toast.makeText(MainActivity.this,"帳號或密碼錯誤",Toast.LENGTH_SHORT).show();
+        } else {
+            Log.d(define.LOG_TAG, "account : " + account.getText().toString() +
+                    "\npassword : " + password.getText().toString());
+            Toast.makeText(MainActivity.this, "帳號或密碼錯誤", Toast.LENGTH_SHORT).show();
         }
     }
+
     private class Onclick implements View.OnClickListener {
         @Override
         public void onClick(View v) {
             switch (v.getId()) {
                 case R.id.submit:
                     checkInformation();
+                    break;
+                case R.id.btn_skip:
+                    startActivity(new Intent(MainActivity.this, MobileActivity.class));
+                    break;
+                case R.id.btn_sendBroadcast:
+                    notifyStatusChange();
                     break;
             }
         }
@@ -237,12 +288,14 @@ public class MainActivity extends AppCompatActivity {
             });
         }
     }
-//            無用
+
+    //            無用
     private void notifyStatusChange() {
         mHandler.removeCallbacks(updateRunnable);
         mHandler.postDelayed(updateRunnable, 500);
     }
-//    public static class ConnectivityChangeEvent {
+
+    //    public static class ConnectivityChangeEvent {
 //    }
     private Runnable updateRunnable = new Runnable() {
 
@@ -252,6 +305,7 @@ public class MainActivity extends AppCompatActivity {
             sendBroadcast(intent);
         }
     };
+
     private void showToast(final String toastMsg) {
 
         Handler handler = new Handler(Looper.getMainLooper());
@@ -259,9 +313,35 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void run() {
                 Toast.makeText(getApplicationContext(), toastMsg, Toast.LENGTH_LONG).show();
-                Log.d(TAG,toastMsg);
+                Log.d(TAG, toastMsg);
             }
         });
 
     }
+
+    //receive notify change
+    protected BroadcastReceiver mReceiver = new BroadcastReceiver() {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            submit.setEnabled(true);
+//            refreshSDKRelativeUI();
+        }
+    };
+
+    private void refreshSDKRelativeUI() {
+        mProduct = DJISDKManager.getInstance().getProduct();
+
+        if (null != mProduct && mProduct.isConnected()) {
+            Log.v(TAG, "refreshSDK: True");
+            submit.setEnabled(true);
+
+
+        } else {
+            Log.v(TAG, "refreshSDK: False");
+            submit.setEnabled(false);
+
+        }
+    }
+
 }

@@ -11,7 +11,11 @@ import android.annotation.SuppressLint;
 import android.content.pm.ActivityInfo;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.transition.TransitionManager;
+import android.util.Log;
+import android.view.TextureView;
 import android.view.View;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
@@ -20,31 +24,51 @@ import android.widget.RelativeLayout;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
+import dji.common.product.Model;
+import dji.sdk.base.BaseProduct;
+import dji.sdk.camera.VideoFeeder;
 import ntou.project.djidrone.fragment.MainFragment;
 
 public class MobileActivity extends AppCompatActivity {
-    private ConstraintLayout mainLayout,constraintBottom;
+    private ConstraintLayout mainLayout, constraintBottom;
     private ToggleButton btn_changeMode, relativeLeftToggle;
-    private LinearLayout linearLeft,linearRight;
-    private ImageView droneView,mapView;
-    private ImageView stickLeft,stickRight;
+    private LinearLayout linearLeft, linearRight;
+    private ImageView mapView;
+    private ImageView stickLeft, stickRight;
     private MainFragment mainFragment;
+    protected TextureView mVideoSurface = null;
+    //camera
+    private static final String TAG = MainActivity.class.getName();
+    protected VideoFeeder.VideoDataListener mReceivedVideoDataListener = null;
+    //camera
+    @Override
+    protected void onResume() {
+        super.onResume();
+        initPreviewer();
+    }
 
-    @SuppressLint("SourceLockedOrientationActivity")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_mobile);
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+
+
+        Toast.makeText(MobileActivity.this, "登入成功", Toast.LENGTH_SHORT).show();
+        initUI();
+        initViewId();
+        initLinstener();
+    }
+
+    @SuppressLint("SourceLockedOrientationActivity")
+    private void initUI() {
+//        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
         getWindow().getDecorView().setSystemUiVisibility(
                 View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION//隱藏狀態欄和標題欄
                         | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION//全螢幕顯示
                         | View.SYSTEM_UI_FLAG_FULLSCREEN | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);//隱藏手機虛擬按鍵HOME/BACK/LIST按鍵
+        if (mVideoSurface == null)
+            mVideoSurface.setSurfaceTextureListener(new TextureListener());
 
-        Toast.makeText(MobileActivity.this, "登入成功", Toast.LENGTH_SHORT).show();
-
-        initViewId();
-        initLinstener();
     }
 
     private void initViewId() {
@@ -54,10 +78,10 @@ public class MobileActivity extends AppCompatActivity {
         linearRight = findViewById(R.id.linearRight);
         constraintBottom = findViewById(R.id.constraintBottomBottom);
         relativeLeftToggle = findViewById(R.id.relativeLeftToggle);
-        droneView = findViewById(R.id.droneView);
         mapView = findViewById(R.id.mapView);
         stickLeft = findViewById(R.id.leftStick);
         stickRight = findViewById(R.id.rightStick);
+        mVideoSurface = findViewById(R.id.droneView);
     }
 
     private void initLinstener() {
@@ -68,7 +92,16 @@ public class MobileActivity extends AppCompatActivity {
         stickRight.setOnClickListener(onclick);
         stickLeft.setOnClickListener(onclick);
         mainFragment = new MainFragment();
-        getSupportFragmentManager().beginTransaction().add(R.id.container,mainFragment).commitAllowingStateLoss();
+        getSupportFragmentManager().beginTransaction().add(R.id.container, mainFragment).commitAllowingStateLoss();
+        mReceivedVideoDataListener = new VideoFeeder.VideoDataListener() {
+
+            @Override
+            public void onReceive(byte[] videoBuffer, int size) {
+                if (mCodecManager != null) {
+                    mCodecManager.sendDataToDecoder(videoBuffer, size);
+                }
+            }
+        };
     }
 
     private class Toggle implements CompoundButton.OnCheckedChangeListener {
@@ -82,18 +115,18 @@ public class MobileActivity extends AppCompatActivity {
                 case R.id.btn_changeMode:
                     TransitionManager.beginDelayedTransition(mainLayout);
                     if (isChecked) {
-                        layoutMainSet.connect(droneView.getId(), ConstraintSet.RIGHT, ConstraintSet.PARENT_ID, ConstraintSet.RIGHT);
-                        layoutMainSet.connect(droneView.getId(), ConstraintSet.BOTTOM, ConstraintSet.PARENT_ID, ConstraintSet.BOTTOM);
+                        layoutMainSet.connect(mVideoSurface.getId(), ConstraintSet.RIGHT, ConstraintSet.PARENT_ID, ConstraintSet.RIGHT);
+                        layoutMainSet.connect(mVideoSurface.getId(), ConstraintSet.BOTTOM, ConstraintSet.PARENT_ID, ConstraintSet.BOTTOM);
                         layoutMainSet.connect(mapView.getId(), ConstraintSet.LEFT, ConstraintSet.PARENT_ID, ConstraintSet.LEFT);
-                        layoutMainSet.clear(mapView.getId(),ConstraintSet.RIGHT);
+                        layoutMainSet.clear(mapView.getId(), ConstraintSet.RIGHT);
                         layoutMainSet.applyTo(mainLayout);
                         constraintBottom.setVisibility(View.GONE);
                         linearRight.setVisibility(View.GONE);
                     } else {
-                        layoutMainSet.connect(droneView.getId(), ConstraintSet.RIGHT, R.id.gdlnvtRight, ConstraintSet.LEFT);
-                        layoutMainSet.connect(droneView.getId(), ConstraintSet.BOTTOM, R.id.gdlnhzBottom, ConstraintSet.TOP);
+                        layoutMainSet.connect(mVideoSurface.getId(), ConstraintSet.RIGHT, R.id.gdlnvtRight, ConstraintSet.LEFT);
+                        layoutMainSet.connect(mVideoSurface.getId(), ConstraintSet.BOTTOM, R.id.gdlnhzBottom, ConstraintSet.TOP);
                         layoutMainSet.connect(mapView.getId(), ConstraintSet.RIGHT, R.id.gdlnvtMap, ConstraintSet.LEFT);
-                        layoutMainSet.clear(mapView.getId(),ConstraintSet.LEFT);
+                        layoutMainSet.clear(mapView.getId(), ConstraintSet.LEFT);
                         layoutMainSet.applyTo(mainLayout);
                         linearRight.setVisibility(View.VISIBLE);
                         constraintBottom.setVisibility(View.VISIBLE);
@@ -133,5 +166,21 @@ public class MobileActivity extends AppCompatActivity {
             //startActivity(intent);
         }
     }
+
+    private void initPreviewer() {
+        BaseProduct product = FPVDemoApplication.getProductInstance();
+
+        if (product == null || !product.isConnected()) {
+            showToast(getString(R.string.disconnected));
+        } else {
+            if (null != mVideoSurface) {
+                mVideoSurface.setSurfaceTextureListener(new TextureListener());
+            }
+            if (!product.getModel().equals(Model.UNKNOWN_AIRCRAFT)) {
+                VideoFeeder.getInstance().getPrimaryVideoFeed().addVideoDataListener(mReceivedVideoDataListener);
+            }
+        }
+    }
+
 }
 
