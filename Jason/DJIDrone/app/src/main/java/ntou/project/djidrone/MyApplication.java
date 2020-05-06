@@ -15,12 +15,10 @@ public class MyApplication extends Application {
     protected void attachBaseContext(Context paramContext) {
         super.attachBaseContext(paramContext);
         Helper.install(MyApplication.this);
-//        if (fpvDemoApplication == null) {
-//            fpvDemoApplication = new FPVDemoApplication();
-////            fpvDemoApplication.setContext(this);
-//        }
-
-
+        if (fpvDemoApplication == null) {
+            fpvDemoApplication = new FPVDemoApplication();
+            fpvDemoApplication.setContext(this);
+        }
     }
 }
 //package ntou.project.djidrone;

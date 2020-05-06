@@ -9,6 +9,7 @@ import androidx.constraintlayout.widget.ConstraintSet;
 
 import android.annotation.SuppressLint;
 import android.content.pm.ActivityInfo;
+import android.graphics.SurfaceTexture;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -26,7 +27,9 @@ import android.widget.ToggleButton;
 
 import dji.common.product.Model;
 import dji.sdk.base.BaseProduct;
+import dji.sdk.camera.Camera;
 import dji.sdk.camera.VideoFeeder;
+import dji.sdk.codec.DJICodecManager;
 import ntou.project.djidrone.fragment.MainFragment;
 
 public class MobileActivity extends AppCompatActivity {
@@ -40,11 +43,20 @@ public class MobileActivity extends AppCompatActivity {
     //camera
     private static final String TAG = MainActivity.class.getName();
     protected VideoFeeder.VideoDataListener mReceivedVideoDataListener = null;
+    protected DJICodecManager mCodecManager = null;
+    protected TextureView.SurfaceTextureListener textureListener = null;
+
     //camera
     @Override
     protected void onResume() {
         super.onResume();
         initPreviewer();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        uninitPreviewer();
     }
 
     @Override
@@ -66,9 +78,8 @@ public class MobileActivity extends AppCompatActivity {
                 View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION//隱藏狀態欄和標題欄
                         | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION//全螢幕顯示
                         | View.SYSTEM_UI_FLAG_FULLSCREEN | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);//隱藏手機虛擬按鍵HOME/BACK/LIST按鍵
-        if (mVideoSurface == null)
-            mVideoSurface.setSurfaceTextureListener(new TextureListener());
-
+        if (mVideoSurface != null)
+            mVideoSurface.setSurfaceTextureListener(textureListener);
     }
 
     private void initViewId() {
@@ -100,6 +111,35 @@ public class MobileActivity extends AppCompatActivity {
                 if (mCodecManager != null) {
                     mCodecManager.sendDataToDecoder(videoBuffer, size);
                 }
+            }
+        };
+        textureListener = new TextureView.SurfaceTextureListener() {
+            @Override
+            public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height) {
+                Log.e(TAG, "onSurfaceTextureAvailable");
+                if (mCodecManager == null) {
+                    mCodecManager = new DJICodecManager(MobileActivity.this, surface, width, height);
+                }
+            }
+
+            @Override
+            public void onSurfaceTextureSizeChanged(SurfaceTexture surface, int width, int height) {
+                Log.e(TAG, "onSurfaceTextureSizeChanged");
+            }
+
+            @Override
+            public boolean onSurfaceTextureDestroyed(SurfaceTexture surface) {
+                Log.e(TAG, "onSurfaceTextureDestroyed");
+                if (mCodecManager != null) {
+                    mCodecManager.cleanSurface();
+                    mCodecManager = null;
+                }
+
+                return false;
+            }
+
+            @Override
+            public void onSurfaceTextureUpdated(SurfaceTexture surface) {
             }
         };
     }
@@ -174,12 +214,33 @@ public class MobileActivity extends AppCompatActivity {
             showToast(getString(R.string.disconnected));
         } else {
             if (null != mVideoSurface) {
-                mVideoSurface.setSurfaceTextureListener(new TextureListener());
+                mVideoSurface.setSurfaceTextureListener(textureListener);
             }
             if (!product.getModel().equals(Model.UNKNOWN_AIRCRAFT)) {
                 VideoFeeder.getInstance().getPrimaryVideoFeed().addVideoDataListener(mReceivedVideoDataListener);
             }
         }
+    }
+
+    private void uninitPreviewer() {
+        Camera camera = FPVDemoApplication.getCameraInstance();
+        if (camera != null) {
+            // Reset the callback
+            VideoFeeder.getInstance().getPrimaryVideoFeed().addVideoDataListener(null);
+        }
+    }
+
+    private void showToast(final String toastMsg) {
+
+        Handler handler = new Handler(Looper.getMainLooper());
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                Toast.makeText(getApplicationContext(), toastMsg, Toast.LENGTH_LONG).show();
+                Log.d(TAG, toastMsg);
+            }
+        });
+
     }
 
 }
