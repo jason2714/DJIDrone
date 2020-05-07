@@ -21,6 +21,7 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
@@ -42,6 +43,7 @@ public class MainActivity extends AppCompatActivity {
 
     private EditText account, password;
     private Button submit;
+    private TextView mProductInformation,mProductState;
     //android integrate import
     private static final String TAG = MainActivity.class.getName();
     public static final String FLAG_CONNECTION_CHANGE = "dji_sdk_connection_change";
@@ -78,7 +80,6 @@ public class MainActivity extends AppCompatActivity {
         public void onRegister(DJIError djiError) {
             if (djiError == DJISDKError.REGISTRATION_SUCCESS) {
                 showToast("Register Success");
-                showToast("在登入前請先連接裝置");
                 //register success後啟動 開始等裝置連接,成功連接後跑onProductConnect
                 DJISDKManager.getInstance().startConnectionToProduct();
             } else {
@@ -140,10 +141,6 @@ public class MainActivity extends AppCompatActivity {
         }
         initView();
         initLinstener();
-        //Initialize DJI SDK Manager
-//        IntentFilter filter = new IntentFilter();
-//        filter.addAction(FPVDemoApplication.FLAG_CONNECTION_CHANGE);
-//        registerReceiver(mReceiver, filter);
         mHandler = new Handler(Looper.getMainLooper());
     }
 
@@ -199,6 +196,8 @@ public class MainActivity extends AppCompatActivity {
         account = findViewById(R.id.userId);
         password = findViewById(R.id.password);
         submit = findViewById(R.id.submit);
+        mProductInformation = findViewById(R.id.tv_product_information);
+        mProductState = findViewById(R.id.tv_product_state);
     }
 
     private void initLinstener() {
@@ -207,8 +206,6 @@ public class MainActivity extends AppCompatActivity {
         test
         */
         findViewById(R.id.btn_skip)
-                .setOnClickListener(onclick);
-        findViewById(R.id.btn_sendBroadcast)
                 .setOnClickListener(onclick);
         /*
         test
@@ -246,9 +243,6 @@ public class MainActivity extends AppCompatActivity {
                     break;
                 case R.id.btn_skip:
                     startActivity(new Intent(MainActivity.this, MobileActivity.class));
-                    break;
-                case R.id.btn_sendBroadcast:
-                    notifyStatusChange();
                     break;
             }
         }
@@ -324,23 +318,31 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            submit.setEnabled(true);
-//            refreshSDKRelativeUI();
+            refreshSDKRelativeUI();
         }
     };
 
     private void refreshSDKRelativeUI() {
         mProduct = DJISDKManager.getInstance().getProduct();
-
-        if (null != mProduct && mProduct.isConnected()) {
-            Log.v(TAG, "refreshSDK: True");
-            submit.setEnabled(true);
-
-
-        } else {
-            Log.v(TAG, "refreshSDK: False");
+        if (null != mProduct) {
+            Log.d(TAG, "refreshSDK: True");
+            if(mProduct.isConnected()){
+                Log.d(TAG, "connect to aircraft");
+                mProductState.setText(R.string.connection_success);
+                mProductInformation.setText(mProduct.getModel().getDisplayName());
+                submit.setEnabled(true);
+            }
+            else if(mProduct instanceof Aircraft){
+                Log.d(TAG, "only connect to remote controller");
+                mProductState.setText(R.string.connection_only_rc);
+                mProductInformation.setText(R.string.product_information);
+                submit.setEnabled(false);
+            }
+        } else{
+            Log.d(TAG, "refreshSDK: False");
+            mProductState.setText(R.string.connection_loose);
+            mProductInformation.setText(R.string.product_information);
             submit.setEnabled(false);
-
         }
     }
 

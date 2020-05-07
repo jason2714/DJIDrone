@@ -9,15 +9,33 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">
-
-        <ImageView
-            android:id="@+id/logo"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="20dp"
-            android:src="@drawable/logo" />
-
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <ImageView
+                android:id="@+id/logo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:src="@drawable/logo" />
+            <TextView
+                android:id="@+id/tv_product_information"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_toRightOf="@id/logo"
+                android:layout_margin="10dp"
+                android:textSize="20sp"
+                android:text="@string/product_information"/>
+            <TextView
+                android:id="@+id/tv_product_state"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_toRightOf="@id/logo"
+                android:layout_below="@id/tv_product_information"
+                android:layout_margin="10dp"
+                android:textSize="20sp"
+                android:text="@string/connection_loose"/>
+        </RelativeLayout>
         <EditText
             android:id="@+id/userId"
             android:layout_width="match_parent"
@@ -63,15 +81,6 @@
             android:layout_marginTop="30dp"
             android:background="@drawable/submit_button"
             android:text="skip"
-            android:textColor="#FFF"
-            android:textSize="30sp" />
-        <Button
-            android:id="@+id/btn_sendBroadcast"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="30dp"
-            android:background="@drawable/submit_button"
-            android:text="sendBroadcast"
             android:textColor="#FFF"
             android:textSize="30sp" />
 

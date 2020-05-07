@@ -75,6 +75,7 @@ public class MainContent extends RelativeLayout {
     private static final int MSG_INFORM_ACTIVATION = 1;
     private static final int ACTIVATION_DALAY_TIME = 1000;
     private AppActivationState.AppActivationStateListener appActivationStateListener;
+
     public MainContent(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
@@ -117,7 +118,7 @@ public class MainContent extends RelativeLayout {
                     return;
                 }
                 bluetoothView =
-                    new ViewWrapper(new BluetoothView(getContext()), R.string.component_listview_bluetooth);
+                        new ViewWrapper(new BluetoothView(getContext()), R.string.component_listview_bluetooth);
                 DJISampleApplication.getEventBus().post(bluetoothView);
             }
         });
@@ -246,7 +247,7 @@ public class MainContent extends RelativeLayout {
         if (TextUtils.isEmpty(version)) {
             mTextModelAvailable.setText("Firmware version:N/A"); //Firmware version:
         } else {
-            mTextModelAvailable.setText("Firmware version:"+version); //"Firmware version: " +
+            mTextModelAvailable.setText("Firmware version:" + version); //"Firmware version: " +
             removeFirmwareVersionListener();
         }
     }
@@ -266,7 +267,7 @@ public class MainContent extends RelativeLayout {
     private void refreshSDKRelativeUI() {
         mProduct = DJISampleApplication.getProductInstance();
         Log.d(TAG, "mProduct: " + (mProduct == null ? "null" : "unnull"));
-        if (null != mProduct ) {
+        if (null != mProduct) {
             if (mProduct.isConnected()) {
                 mBtnOpen.setEnabled(true);
                 String str = mProduct instanceof Aircraft ? "DJIAircraft" : "DJIHandHeld";
@@ -281,7 +282,7 @@ public class MainContent extends RelativeLayout {
                 } else {
                     mTextProduct.setText(R.string.product_information);
                 }
-            } else if (mProduct instanceof Aircraft){
+            } else if (mProduct instanceof Aircraft) {
                 Aircraft aircraft = (Aircraft) mProduct;
                 if (aircraft.getRemoteController() != null && aircraft.getRemoteController().isConnected()) {
                     mTextConnectionStatus.setText(R.string.connection_only_rc);
@@ -313,7 +314,7 @@ public class MainContent extends RelativeLayout {
             };
             firmwareKey = ProductKey.create(ProductKey.FIRMWARE_PACKAGE_VERSION);
             if (KeyManager.getInstance() != null) {
-                KeyManager.getInstance().addListener(firmwareKey, firmwareVersionUpdater );
+                KeyManager.getInstance().addListener(firmwareKey, firmwareVersionUpdater);
             }
             hasStartedFirmVersionListener = true;
         }
@@ -359,18 +360,18 @@ public class MainContent extends RelativeLayout {
     private void loginToActivationIfNeeded() {
         if (AppActivationManager.getInstance().getAppActivationState() == AppActivationState.LOGIN_REQUIRED) {
             UserAccountManager.getInstance()
-                              .logIntoDJIUserAccount(getContext(),
-                                                     new CommonCallbacks.CompletionCallbackWith<UserAccountState>() {
-                                                         @Override
-                                                         public void onSuccess(UserAccountState userAccountState) {
-                                                             ToastUtils.setResultToToast("Login Successed!");
-                                                         }
+                    .logIntoDJIUserAccount(getContext(),
+                            new CommonCallbacks.CompletionCallbackWith<UserAccountState>() {
+                                @Override
+                                public void onSuccess(UserAccountState userAccountState) {
+                                    ToastUtils.setResultToToast("Login Successed!");
+                                }
 
-                                                         @Override
-                                                         public void onFailure(DJIError djiError) {
-                                                             ToastUtils.setResultToToast("Login Failed!");
-                                                         }
-                                                     });
+                                @Override
+                                public void onFailure(DJIError djiError) {
+                                    ToastUtils.setResultToToast("Login Failed!");
+                                }
+                            });
         }
     }
 }

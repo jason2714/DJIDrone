@@ -8,7 +8,6 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
 
 import android.annotation.SuppressLint;
-import android.content.pm.ActivityInfo;
 import android.graphics.SurfaceTexture;
 import android.os.Build;
 import android.os.Bundle;
@@ -21,10 +20,10 @@ import android.view.View;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
+import dji.common.camera.ResolutionAndFrameRate;
 import dji.common.product.Model;
 import dji.sdk.base.BaseProduct;
 import dji.sdk.camera.Camera;
@@ -80,6 +79,14 @@ public class MobileActivity extends AppCompatActivity {
                         | View.SYSTEM_UI_FLAG_FULLSCREEN | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);//隱藏手機虛擬按鍵HOME/BACK/LIST按鍵
         if (mVideoSurface != null)
             mVideoSurface.setSurfaceTextureListener(textureListener);
+        Camera camera = DJIApplication.getCameraInstance();
+        if(null!= camera){
+            ResolutionAndFrameRate []resolutionAndFrameRates =
+                    camera.getCapabilities().videoResolutionAndFrameRateRange();
+            showToast(""+resolutionAndFrameRates[0].getResolution());
+            showToast(""+resolutionAndFrameRates[0].getFrameRate());
+
+        }
     }
 
     private void initViewId() {
@@ -124,6 +131,7 @@ public class MobileActivity extends AppCompatActivity {
 
             @Override
             public void onSurfaceTextureSizeChanged(SurfaceTexture surface, int width, int height) {
+                mCodecManager.onSurfaceSizeChanged(width,height,2);
                 Log.e(TAG, "onSurfaceTextureSizeChanged");
             }
 
@@ -208,7 +216,7 @@ public class MobileActivity extends AppCompatActivity {
     }
 
     private void initPreviewer() {
-        BaseProduct product = FPVDemoApplication.getProductInstance();
+        BaseProduct product = DJIApplication.getProductInstance();
 
         if (product == null || !product.isConnected()) {
             showToast(getString(R.string.disconnected));
@@ -223,7 +231,7 @@ public class MobileActivity extends AppCompatActivity {
     }
 
     private void uninitPreviewer() {
-        Camera camera = FPVDemoApplication.getCameraInstance();
+        Camera camera = DJIApplication.getCameraInstance();
         if (camera != null) {
             // Reset the callback
             VideoFeeder.getInstance().getPrimaryVideoFeed().addVideoDataListener(null);
