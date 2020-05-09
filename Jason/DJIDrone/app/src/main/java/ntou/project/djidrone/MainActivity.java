@@ -202,14 +202,8 @@ public class MainActivity extends AppCompatActivity {
 
     private void initLinstener() {
         Onclick onclick = new Onclick();
-        /*
-        test
-        */
         findViewById(R.id.btn_skip)
                 .setOnClickListener(onclick);
-        /*
-        test
-        */
         submit.setOnClickListener(onclick);
         password.setOnKeyListener(new View.OnKeyListener() {
             @Override

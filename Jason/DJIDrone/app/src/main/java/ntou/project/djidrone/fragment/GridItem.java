@@ -1,10 +1,10 @@
 package ntou.project.djidrone.fragment;
 
-public class Setting {
+public class GridItem {
     private String name;
     private int imageSrc;
 
-    public Setting(String name,int imageSrc){
+    public GridItem(String name, int imageSrc){
         this.name=name;
         this.imageSrc=imageSrc;
     }

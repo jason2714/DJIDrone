@@ -1,18 +1,11 @@
 package ntou.project.djidrone.fragment;
 
-import android.app.Activity;
-import android.content.Context;
-import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
-
-import com.bumptech.glide.Glide;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,27 +15,27 @@ import ntou.project.djidrone.R;
 public class GridViewAdapter extends BaseAdapter {
 
     private LayoutInflater layoutInflater;
-    private List<Setting> settingList = new ArrayList<>();
+    private List<GridItem> gridItemList = new ArrayList<>();
     private MainFragment context;
 
-    public GridViewAdapter(MainFragment context,List<Setting> settingList) {
-        this.settingList=settingList;
+    public GridViewAdapter(MainFragment context,List<GridItem> gridItemList) {
+        this.gridItemList = gridItemList;
         this.context=context;
     }
 
     @Override
     public int getCount() {
-        return settingList.size();
+        return gridItemList.size();
     }
 
     @Override
     public Object getItem(int position) {
-        return settingList.get(position);
+        return gridItemList.get(position);
     }
 
     @Override
     public long getItemId(int position) {
-        return settingList.get(position).getImageSrc();
+        return gridItemList.get(position).getImageSrc();
     }
 
     @Override
@@ -51,11 +44,11 @@ public class GridViewAdapter extends BaseAdapter {
             layoutInflater=context.getLayoutInflater();
             convertView = layoutInflater.inflate(R.layout.layout_fragment_main_grid_item, null);
         }
-        Setting setting = settingList.get(position);
+        GridItem gridItem = gridItemList.get(position);
         TextView gridViewName = convertView.findViewById(R.id.gridViewName);
-        gridViewName.setText(setting.getName());
+        gridViewName.setText(gridItem.getName());
         ImageView gridViewImage = convertView.findViewById(R.id.gridViewImage);
-        gridViewImage.setImageResource(setting.getImageSrc());
+        gridViewImage.setImageResource(gridItem.getImageSrc());
        /* gridViewImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

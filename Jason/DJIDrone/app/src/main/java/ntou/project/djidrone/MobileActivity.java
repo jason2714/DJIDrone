@@ -6,6 +6,8 @@ import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
 
 import android.annotation.SuppressLint;
 import android.graphics.SurfaceTexture;
@@ -23,12 +25,17 @@ import android.widget.LinearLayout;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import dji.common.camera.ResolutionAndFrameRate;
 import dji.common.product.Model;
 import dji.sdk.base.BaseProduct;
 import dji.sdk.camera.Camera;
 import dji.sdk.camera.VideoFeeder;
 import dji.sdk.codec.DJICodecManager;
+import ntou.project.djidrone.fragment.BatteryFragment;
+import ntou.project.djidrone.fragment.GridItem;
 import ntou.project.djidrone.fragment.MainFragment;
 
 public class MobileActivity extends AppCompatActivity {
@@ -37,13 +44,14 @@ public class MobileActivity extends AppCompatActivity {
     private LinearLayout linearLeft, linearRight;
     private ImageView mapView;
     private ImageView stickLeft, stickRight;
-    private MainFragment mainFragment;
+    private List<Fragment> fragments;
     protected TextureView mVideoSurface = null;
     //camera
     private static final String TAG = MainActivity.class.getName();
     protected VideoFeeder.VideoDataListener mReceivedVideoDataListener = null;
     protected DJICodecManager mCodecManager = null;
     protected TextureView.SurfaceTextureListener textureListener = null;
+    private List<GridItem> gridItems;
 
     //camera
     @Override
@@ -80,11 +88,11 @@ public class MobileActivity extends AppCompatActivity {
         if (mVideoSurface != null)
             mVideoSurface.setSurfaceTextureListener(textureListener);
         Camera camera = DJIApplication.getCameraInstance();
-        if(null!= camera){
-            ResolutionAndFrameRate []resolutionAndFrameRates =
+        if (null != camera) {
+            ResolutionAndFrameRate[] resolutionAndFrameRates =
                     camera.getCapabilities().videoResolutionAndFrameRateRange();
-            showToast(""+resolutionAndFrameRates[0].getResolution());
-            showToast(""+resolutionAndFrameRates[0].getFrameRate());
+            showToast("" + resolutionAndFrameRates[0].getResolution());
+            showToast("" + resolutionAndFrameRates[0].getFrameRate());
 
         }
     }
@@ -100,6 +108,12 @@ public class MobileActivity extends AppCompatActivity {
         stickLeft = findViewById(R.id.leftStick);
         stickRight = findViewById(R.id.rightStick);
         mVideoSurface = findViewById(R.id.droneView);
+        fragments = getFragments();
+        gridItems = ((MainFragment) fragments.get(0)).getList();
+        getSupportFragmentManager()//getFragmentManager
+                .beginTransaction()//要求 FragmentManager 回傳一個 FragmentTransaction 物件，用以進行 Fragment 的切換。
+                .add(R.id.container, fragments.get(0))
+                .commit();
     }
 
     private void initLinstener() {
@@ -109,8 +123,6 @@ public class MobileActivity extends AppCompatActivity {
         relativeLeftToggle.setOnCheckedChangeListener(toggle);
         stickRight.setOnClickListener(onclick);
         stickLeft.setOnClickListener(onclick);
-        mainFragment = new MainFragment();
-        getSupportFragmentManager().beginTransaction().add(R.id.container, mainFragment).commitAllowingStateLoss();
         mReceivedVideoDataListener = new VideoFeeder.VideoDataListener() {
 
             @Override
@@ -131,7 +143,7 @@ public class MobileActivity extends AppCompatActivity {
 
             @Override
             public void onSurfaceTextureSizeChanged(SurfaceTexture surface, int width, int height) {
-                mCodecManager.onSurfaceSizeChanged(width,height,2);
+                mCodecManager.onSurfaceSizeChanged(width, height, 2);
                 Log.e(TAG, "onSurfaceTextureSizeChanged");
             }
 
@@ -251,5 +263,19 @@ public class MobileActivity extends AppCompatActivity {
 
     }
 
+    public void changeFragment(int position) {
+        getSupportFragmentManager()
+                .beginTransaction()
+                .addToBackStack(null)
+                .replace(R.id.container, fragments.get(position))
+                .commit();
+    }
+
+    private List<Fragment> getFragments() {
+        List<Fragment> newFragments = new ArrayList<>();
+        newFragments.add(new MainFragment());
+        newFragments.add(new BatteryFragment());
+        return newFragments;
+    }
 }
 

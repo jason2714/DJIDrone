@@ -54,18 +54,6 @@
       <change afterPath="$PROJECT_DIR$/../../../MyApplication/gradlew" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/../../../MyApplication/gradlew.bat" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/../../../MyApplication/settings.gradle" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/caches/build_file_checksums.ser" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/caches/build_file_checksums.ser" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/AndroidManifest.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/AndroidManifest.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../Jason/DJIDrone/app/src/main/java/ntou/project/djidrone/FPVDemoApplication.java" beforeDir="false" afterPath="$PROJECT_DIR$/../../Jason/DJIDrone/app/src/main/java/ntou/project/djidrone/DJIApplication.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../Jason/DJIDrone/app/src/main/java/ntou/project/djidrone/MainActivity.java" beforeDir="false" afterPath="$PROJECT_DIR$/../../Jason/DJIDrone/app/src/main/java/ntou/project/djidrone/MainActivity.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../Jason/DJIDrone/app/src/main/java/ntou/project/djidrone/MobileActivity.java" beforeDir="false" afterPath="$PROJECT_DIR$/../../Jason/DJIDrone/app/src/main/java/ntou/project/djidrone/MobileActivity.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../Jason/DJIDrone/app/src/main/java/ntou/project/djidrone/MyApplication.java" beforeDir="false" afterPath="$PROJECT_DIR$/../../Jason/DJIDrone/app/src/main/java/ntou/project/djidrone/MyApplication.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../Jason/DJIDrone/app/src/main/res/layout/activity_main.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../../Jason/DJIDrone/app/src/main/res/layout/activity_main.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../Jason/DJIDrone/app/src/main/res/layout/activity_mobile.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../../Jason/DJIDrone/app/src/main/res/layout/activity_mobile.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../Jason/DJIDrone/app/src/main/res/values/strings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../../Jason/DJIDrone/app/src/main/res/values/strings.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../Mobile-SDK-Android-master/Sample Code/app/src/main/java/com/dji/sdk/sample/internal/view/MainContent.java" beforeDir="false" afterPath="$PROJECT_DIR$/../../Mobile-SDK-Android-master/Sample Code/app/src/main/java/com/dji/sdk/sample/internal/view/MainContent.java" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -94,7 +82,7 @@
   <component name="PropertiesComponent">
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="device.picker.selection" value="GSL0217313000169" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../../Jason/DJIDrone" />
     <property name="show.do.not.ask.upgrade.gradle.plugin" value="2.3.2" />
   </component>
   <component name="RunDashboard">

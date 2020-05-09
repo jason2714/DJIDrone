@@ -4,7 +4,7 @@
     <string name="sensor">sensor</string>
     <string name="signal">signal</string>
     <string name="controller">controller</string>
-    <string name="otherSetting">other setting</string>
+    <string name="otherSetting">other gridItem</string>
     <string name="account">DJIDrone</string>
     <string name="password">ntoucse</string>
     <string name="product_information">Product Information</string>
