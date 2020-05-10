@@ -22,6 +22,7 @@ import android.view.View;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
@@ -35,8 +36,13 @@ import dji.sdk.camera.Camera;
 import dji.sdk.camera.VideoFeeder;
 import dji.sdk.codec.DJICodecManager;
 import ntou.project.djidrone.fragment.BatteryFragment;
+import ntou.project.djidrone.fragment.CameraFragment;
+import ntou.project.djidrone.fragment.ControllerFragment;
 import ntou.project.djidrone.fragment.GridItem;
 import ntou.project.djidrone.fragment.MainFragment;
+import ntou.project.djidrone.fragment.SensorFragment;
+import ntou.project.djidrone.fragment.SettingFragment;
+import ntou.project.djidrone.fragment.SignalFragment;
 
 public class MobileActivity extends AppCompatActivity {
     private ConstraintLayout mainLayout, constraintBottom;
@@ -44,6 +50,7 @@ public class MobileActivity extends AppCompatActivity {
     private LinearLayout linearLeft, linearRight;
     private ImageView mapView;
     private ImageView stickLeft, stickRight;
+    private TextView mTvState;
     private List<Fragment> fragments;
     protected TextureView mVideoSurface = null;
     //camera
@@ -51,7 +58,7 @@ public class MobileActivity extends AppCompatActivity {
     protected VideoFeeder.VideoDataListener mReceivedVideoDataListener = null;
     protected DJICodecManager mCodecManager = null;
     protected TextureView.SurfaceTextureListener textureListener = null;
-    private List<GridItem> gridItems;
+    private String resolutionRatio = "16:9";
 
     //camera
     @Override
@@ -73,9 +80,9 @@ public class MobileActivity extends AppCompatActivity {
 
 
         Toast.makeText(MobileActivity.this, "登入成功", Toast.LENGTH_SHORT).show();
-        initUI();
         initViewId();
         initLinstener();
+        initUI();
     }
 
     @SuppressLint("SourceLockedOrientationActivity")
@@ -87,18 +94,28 @@ public class MobileActivity extends AppCompatActivity {
                         | View.SYSTEM_UI_FLAG_FULLSCREEN | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);//隱藏手機虛擬按鍵HOME/BACK/LIST按鍵
         if (mVideoSurface != null)
             mVideoSurface.setSurfaceTextureListener(textureListener);
+        if(null != DJIApplication.getProductInstance())
+            mTvState.setText(R.string.connected);
+        else
+            mTvState.setText(R.string.disconnected);
         Camera camera = DJIApplication.getCameraInstance();
         if (null != camera) {
             ResolutionAndFrameRate[] resolutionAndFrameRates =
                     camera.getCapabilities().videoResolutionAndFrameRateRange();
+            String width = resolutionAndFrameRates[0].getResolution().toString().split("[_]")[1].split("[x]")[0];
+            String height = resolutionAndFrameRates[0].getResolution().toString().split("[_]")[1].split("[x]")[1];
+            ConstraintSet layoutMainSet = new ConstraintSet();
+            layoutMainSet.clone(mainLayout);
+            layoutMainSet.setDimensionRatio(R.id.droneView,width+":"+height);
+            layoutMainSet.applyTo(mainLayout);
             showToast("" + resolutionAndFrameRates[0].getResolution());
-            showToast("" + resolutionAndFrameRates[0].getFrameRate());
-
+            showToast(resolutionRatio);
         }
     }
 
     private void initViewId() {
         mainLayout = findViewById(R.id.mainLayout);
+        mTvState = findViewById(R.id.tv_state);
         btn_changeMode = findViewById(R.id.btn_changeMode);
         linearLeft = findViewById(R.id.linearLeft);
         linearRight = findViewById(R.id.linearRight);
@@ -109,7 +126,6 @@ public class MobileActivity extends AppCompatActivity {
         stickRight = findViewById(R.id.rightStick);
         mVideoSurface = findViewById(R.id.droneView);
         fragments = getFragments();
-        gridItems = ((MainFragment) fragments.get(0)).getList();
         getSupportFragmentManager()//getFragmentManager
                 .beginTransaction()//要求 FragmentManager 回傳一個 FragmentTransaction 物件，用以進行 Fragment 的切換。
                 .add(R.id.container, fragments.get(0))
@@ -124,7 +140,6 @@ public class MobileActivity extends AppCompatActivity {
         stickRight.setOnClickListener(onclick);
         stickLeft.setOnClickListener(onclick);
         mReceivedVideoDataListener = new VideoFeeder.VideoDataListener() {
-
             @Override
             public void onReceive(byte[] videoBuffer, int size) {
                 if (mCodecManager != null) {
@@ -143,7 +158,7 @@ public class MobileActivity extends AppCompatActivity {
 
             @Override
             public void onSurfaceTextureSizeChanged(SurfaceTexture surface, int width, int height) {
-                mCodecManager.onSurfaceSizeChanged(width, height, 2);
+                mCodecManager.onSurfaceSizeChanged(width, height, 0);
                 Log.e(TAG, "onSurfaceTextureSizeChanged");
             }
 
@@ -173,7 +188,7 @@ public class MobileActivity extends AppCompatActivity {
             TransitionManager.beginDelayedTransition(mainLayout);
             switch (buttonView.getId()) {
                 case R.id.btn_changeMode:
-                    TransitionManager.beginDelayedTransition(mainLayout);
+//                    TransitionManager.beginDelayedTransition(mainLayout);
                     if (isChecked) {
                         layoutMainSet.connect(mVideoSurface.getId(), ConstraintSet.RIGHT, ConstraintSet.PARENT_ID, ConstraintSet.RIGHT);
                         layoutMainSet.connect(mVideoSurface.getId(), ConstraintSet.BOTTOM, ConstraintSet.PARENT_ID, ConstraintSet.BOTTOM);
@@ -275,6 +290,11 @@ public class MobileActivity extends AppCompatActivity {
         List<Fragment> newFragments = new ArrayList<>();
         newFragments.add(new MainFragment());
         newFragments.add(new BatteryFragment());
+        newFragments.add(new SensorFragment());
+        newFragments.add(new SignalFragment());
+        newFragments.add(new ControllerFragment());
+        newFragments.add(new CameraFragment());
+        newFragments.add(new SettingFragment());
         return newFragments;
     }
 }

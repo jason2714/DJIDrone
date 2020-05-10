@@ -65,7 +65,7 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         app:layout_constraintBottom_toTopOf="@id/gdlnhzBottom"
-        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintLeft_toLeftOf="@id/gdlnvtLeft"
         app:layout_constraintRight_toLeftOf="@id/gdlnvtRight"
         app:layout_constraintTop_toTopOf="@id/gdlnhzTop"/>
 
@@ -218,7 +218,7 @@
             android:padding="4dp">
 
             <TextView
-                android:id="@+id/state"
+                android:id="@+id/tv_state"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"

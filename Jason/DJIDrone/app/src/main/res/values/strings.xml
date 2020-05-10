@@ -1,17 +1,26 @@
 <resources>
     <string name="app_name">DJIDrone</string>
-    <string name="battery">battery</string>
-    <string name="sensor">sensor</string>
-    <string name="signal">signal</string>
-    <string name="controller">controller</string>
-    <string name="otherSetting">other gridItem</string>
+    <string-array name="setting_array">
+        <item>@string/battery</item>
+        <item>@string/sensor</item>
+        <item>@string/signal</item>
+        <item>@string/controller</item>
+        <item>@string/camera</item>
+        <item>@string/setting</item>
+    </string-array>
+    <string name="battery">Battery</string>
+    <string name="sensor">Sensor</string>
+    <string name="signal">Signal</string>
+    <string name="controller">Controller</string>
+    <string name="camera">Camera</string>
+    <string name="setting">Setting</string>
     <string name="account">DJIDrone</string>
     <string name="password">ntoucse</string>
     <string name="product_information">Product Information</string>
     <string name="connection_success">Status: DJIAircraft Connected</string>
     <string name="connection_loose">Status: No Product Connected</string>
     <string name="connection_only_rc">Status: Only RC Connected</string>
-    <string name="connected">Connected</string>
-    <string name="disconnected">Disconnected</string>
+    <string name="connected">已連接</string>
+    <string name="disconnected">未連接</string>
     <string name="api_key">3afcbfbcba1e0e72936a8144</string>
 </resources>
