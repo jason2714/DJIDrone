@@ -16,6 +16,9 @@
     <string name="setting">Setting</string>
     <string name="account">DJIDrone</string>
     <string name="password">ntoucse</string>
+    <string name="camera_mode_change">切換相機模式</string>
+    <string name="shoot_photo">拍照</string>
+    <string name="record_video">錄影</string>
     <string name="product_information">Product Information</string>
     <string name="connection_success">Status: DJIAircraft Connected</string>
     <string name="connection_loose">Status: No Product Connected</string>

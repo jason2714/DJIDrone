@@ -10,6 +10,7 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 
 import android.annotation.SuppressLint;
+import android.app.Instrumentation;
 import android.graphics.SurfaceTexture;
 import android.os.Build;
 import android.os.Bundle;
@@ -17,9 +18,13 @@ import android.os.Handler;
 import android.os.Looper;
 import android.transition.TransitionManager;
 import android.util.Log;
+import android.view.GestureDetector;
+import android.view.KeyEvent;
+import android.view.MotionEvent;
 import android.view.TextureView;
 import android.view.View;
 import android.widget.CompoundButton;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -43,6 +48,7 @@ import ntou.project.djidrone.fragment.MainFragment;
 import ntou.project.djidrone.fragment.SensorFragment;
 import ntou.project.djidrone.fragment.SettingFragment;
 import ntou.project.djidrone.fragment.SignalFragment;
+import ntou.project.djidrone.listener.GestureListener;
 
 public class MobileActivity extends AppCompatActivity {
     private ConstraintLayout mainLayout, constraintBottom;
@@ -54,11 +60,14 @@ public class MobileActivity extends AppCompatActivity {
     private List<Fragment> fragments;
     protected TextureView mVideoSurface = null;
     //camera
-    private static final String TAG = MainActivity.class.getName();
+    private static final String TAG = MobileActivity.class.getName();
     protected VideoFeeder.VideoDataListener mReceivedVideoDataListener = null;
     protected DJICodecManager mCodecManager = null;
     protected TextureView.SurfaceTextureListener textureListener = null;
     private String resolutionRatio = "16:9";
+    private GestureDetector gestureDetector;
+    private FrameLayout mFrameSetting;
+    private int fragmentPosition;
 
     //camera
     @Override
@@ -94,7 +103,7 @@ public class MobileActivity extends AppCompatActivity {
                         | View.SYSTEM_UI_FLAG_FULLSCREEN | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);//隱藏手機虛擬按鍵HOME/BACK/LIST按鍵
         if (mVideoSurface != null)
             mVideoSurface.setSurfaceTextureListener(textureListener);
-        if(null != DJIApplication.getProductInstance())
+        if (null != DJIApplication.getProductInstance())
             mTvState.setText(R.string.connected);
         else
             mTvState.setText(R.string.disconnected);
@@ -106,7 +115,7 @@ public class MobileActivity extends AppCompatActivity {
             String height = resolutionAndFrameRates[0].getResolution().toString().split("[_]")[1].split("[x]")[1];
             ConstraintSet layoutMainSet = new ConstraintSet();
             layoutMainSet.clone(mainLayout);
-            layoutMainSet.setDimensionRatio(R.id.droneView,width+":"+height);
+            layoutMainSet.setDimensionRatio(R.id.droneView, width + ":" + height);
             layoutMainSet.applyTo(mainLayout);
             showToast("" + resolutionAndFrameRates[0].getResolution());
             showToast(resolutionRatio);
@@ -125,13 +134,16 @@ public class MobileActivity extends AppCompatActivity {
         stickLeft = findViewById(R.id.leftStick);
         stickRight = findViewById(R.id.rightStick);
         mVideoSurface = findViewById(R.id.droneView);
+        mFrameSetting = findViewById(R.id.container);
         fragments = getFragments();
+        fragmentPosition = 0;
         getSupportFragmentManager()//getFragmentManager
                 .beginTransaction()//要求 FragmentManager 回傳一個 FragmentTransaction 物件，用以進行 Fragment 的切換。
-                .add(R.id.container, fragments.get(0))
+                .add(mFrameSetting.getId(), fragments.get(0))
                 .commit();
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     private void initLinstener() {
         Onclick onclick = new Onclick();
         Toggle toggle = new Toggle();
@@ -177,6 +189,42 @@ public class MobileActivity extends AppCompatActivity {
             public void onSurfaceTextureUpdated(SurfaceTexture surface) {
             }
         };
+        //滑動返回main fragment
+        gestureDetector = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
+
+            @Override
+            public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+                final int FLING_MIN_DISTANCE = mFrameSetting.getWidth() / 2, FLING_MIN_VELOCITY = 100;
+                if (fragmentPosition == 0){
+                    Log.d(TAG,"on main fragment");
+                    return super.onFling(e1, e2, velocityX, velocityY);
+                }
+                if (e1.getX() - e2.getX() < -FLING_MIN_DISTANCE
+                        && Math.abs(velocityX) > FLING_MIN_VELOCITY) {
+                    fragmentPosition = 0;
+                    new Thread(() -> {
+                        try {
+                            new Instrumentation().sendKeyDownUpSync(KeyEvent.KEYCODE_BACK);
+                        } catch (Exception e) {
+                            Log.e(TAG, e.toString());
+                        }
+                    }).start();
+                    Log.d(TAG, "back to main");
+                }
+//                Log.d(TAG,""+mFrameSetting.getWidth()+"\t"+mFrameSetting.getHeight());
+//                Log.d(TAG, "" + (e1.getX() - e2.getX()));
+//                Log.d(TAG, "" + FLING_MIN_DISTANCE);
+//                Log.d(TAG, "" + velocityX +"\t"+ velocityY);
+                Log.d(TAG, "onFling");
+                return super.onFling(e1, e2, velocityX, velocityY);
+            }
+        });
+        mFrameSetting.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                return !gestureDetector.onTouchEvent(event);
+            }
+        });
     }
 
     private class Toggle implements CompoundButton.OnCheckedChangeListener {
@@ -279,10 +327,11 @@ public class MobileActivity extends AppCompatActivity {
     }
 
     public void changeFragment(int position) {
+        fragmentPosition = position;
         getSupportFragmentManager()
                 .beginTransaction()
                 .addToBackStack(null)
-                .replace(R.id.container, fragments.get(position))
+                .replace(mFrameSetting.getId(), fragments.get(position))
                 .commit();
     }
 
