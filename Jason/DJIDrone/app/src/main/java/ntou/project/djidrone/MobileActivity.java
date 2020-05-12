@@ -11,6 +11,7 @@ import androidx.fragment.app.FragmentTransaction;
 
 import android.annotation.SuppressLint;
 import android.app.Instrumentation;
+import android.content.Intent;
 import android.graphics.SurfaceTexture;
 import android.os.Build;
 import android.os.Bundle;
@@ -35,7 +36,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import dji.common.camera.ResolutionAndFrameRate;
+import dji.common.camera.SettingsDefinitions;
+import dji.common.error.DJIError;
 import dji.common.product.Model;
+import dji.common.util.CommonCallbacks;
 import dji.sdk.base.BaseProduct;
 import dji.sdk.camera.Camera;
 import dji.sdk.camera.VideoFeeder;
@@ -51,16 +55,17 @@ import ntou.project.djidrone.fragment.SignalFragment;
 import ntou.project.djidrone.listener.GestureListener;
 
 public class MobileActivity extends AppCompatActivity {
+    private static final String TAG = MobileActivity.class.getName();
     private ConstraintLayout mainLayout, constraintBottom;
     private ToggleButton btn_changeMode, relativeLeftToggle;
     private LinearLayout linearLeft, linearRight;
-    private ImageView mapView;
+    private ImageView mapView, mBtnCamera;
     private ImageView stickLeft, stickRight;
     private TextView mTvState;
     private List<Fragment> fragments;
     protected TextureView mVideoSurface = null;
+    private Handler mHandler;
     //camera
-    private static final String TAG = MobileActivity.class.getName();
     protected VideoFeeder.VideoDataListener mReceivedVideoDataListener = null;
     protected DJICodecManager mCodecManager = null;
     protected TextureView.SurfaceTextureListener textureListener = null;
@@ -68,6 +73,8 @@ public class MobileActivity extends AppCompatActivity {
     private GestureDetector gestureDetector;
     private FrameLayout mFrameSetting;
     private int fragmentPosition;
+    private Camera camera;
+    public static boolean isRecording = false;
 
     //camera
     @Override
@@ -107,7 +114,7 @@ public class MobileActivity extends AppCompatActivity {
             mTvState.setText(R.string.connected);
         else
             mTvState.setText(R.string.disconnected);
-        Camera camera = DJIApplication.getCameraInstance();
+        camera = DJIApplication.getCameraInstance();
         if (null != camera) {
             ResolutionAndFrameRate[] resolutionAndFrameRates =
                     camera.getCapabilities().videoResolutionAndFrameRateRange();
@@ -123,6 +130,7 @@ public class MobileActivity extends AppCompatActivity {
     }
 
     private void initViewId() {
+        mHandler = new Handler(Looper.getMainLooper());
         mainLayout = findViewById(R.id.mainLayout);
         mTvState = findViewById(R.id.tv_state);
         btn_changeMode = findViewById(R.id.btn_changeMode);
@@ -133,6 +141,8 @@ public class MobileActivity extends AppCompatActivity {
         mapView = findViewById(R.id.mapView);
         stickLeft = findViewById(R.id.leftStick);
         stickRight = findViewById(R.id.rightStick);
+        mBtnCamera = findViewById(R.id.btn_camera);
+        mBtnCamera.setTag(R.drawable.shoot_photo);
         mVideoSurface = findViewById(R.id.droneView);
         mFrameSetting = findViewById(R.id.container);
         fragments = getFragments();
@@ -151,6 +161,7 @@ public class MobileActivity extends AppCompatActivity {
         relativeLeftToggle.setOnCheckedChangeListener(toggle);
         stickRight.setOnClickListener(onclick);
         stickLeft.setOnClickListener(onclick);
+        mBtnCamera.setOnClickListener(onclick);
         mReceivedVideoDataListener = new VideoFeeder.VideoDataListener() {
             @Override
             public void onReceive(byte[] videoBuffer, int size) {
@@ -195,8 +206,8 @@ public class MobileActivity extends AppCompatActivity {
             @Override
             public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
                 final int FLING_MIN_DISTANCE = mFrameSetting.getWidth() / 2, FLING_MIN_VELOCITY = 100;
-                if (fragmentPosition == 0){
-                    Log.d(TAG,"on main fragment");
+                if (fragmentPosition == 0) {
+                    Log.d(TAG, "on main fragment");
                     return super.onFling(e1, e2, velocityX, velocityY);
                 }
                 if (e1.getX() - e2.getX() < -FLING_MIN_DISTANCE
@@ -277,16 +288,31 @@ public class MobileActivity extends AppCompatActivity {
     private class Onclick implements View.OnClickListener {
         @Override
         public void onClick(View v) {
-            //Intent intent = null;
             switch (v.getId()) {
                 case R.id.leftStick:
                     break;
                 case R.id.rightStick:
                     break;
+                case R.id.btn_camera:
+                    if ((Integer) mBtnCamera.getTag() == R.drawable.shoot_photo) {
+                        captureAction();
+                    } else if ((Integer) mBtnCamera.getTag() == R.drawable.record_video) {
+                        ToggleButton mTbtnCameraMode = findViewById(R.id.tbtn_camera_mode);
+                        if(null != mTbtnCameraMode)
+                            mTbtnCameraMode.setEnabled(isRecording);
+                        isRecording = !isRecording;
+                        if (isRecording) {
+                            mBtnCamera.setImageAlpha(128);
+                            startRecord();
+                        } else {
+                            mBtnCamera.setImageAlpha(255);
+                            stopRecord();
+                        }
+                    }
+                    break;
                 default:
                     break;
             }
-            //startActivity(intent);
         }
     }
 
@@ -306,7 +332,7 @@ public class MobileActivity extends AppCompatActivity {
     }
 
     private void uninitPreviewer() {
-        Camera camera = DJIApplication.getCameraInstance();
+        camera = DJIApplication.getCameraInstance();
         if (camera != null) {
             // Reset the callback
             VideoFeeder.getInstance().getPrimaryVideoFeed().addVideoDataListener(null);
@@ -315,15 +341,13 @@ public class MobileActivity extends AppCompatActivity {
 
     private void showToast(final String toastMsg) {
 
-        Handler handler = new Handler(Looper.getMainLooper());
-        handler.post(new Runnable() {
+        mHandler.post(new Runnable() {
             @Override
             public void run() {
                 Toast.makeText(getApplicationContext(), toastMsg, Toast.LENGTH_LONG).show();
                 Log.d(TAG, toastMsg);
             }
         });
-
     }
 
     public void changeFragment(int position) {
@@ -333,6 +357,71 @@ public class MobileActivity extends AppCompatActivity {
                 .addToBackStack(null)
                 .replace(mFrameSetting.getId(), fragments.get(position))
                 .commit();
+
+    }
+
+    private void captureAction() {
+        camera = DJIApplication.getCameraInstance();
+        if (camera != null) {
+            camera.setShootPhotoMode(CameraFragment.getPhotoMode(), new CommonCallbacks.CompletionCallback() {
+                @Override
+                public void onResult(DJIError djiError) {
+                    if (null == djiError) {
+                        mHandler.postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                camera.startShootPhoto(new CommonCallbacks.CompletionCallback() {
+                                    @Override
+                                    public void onResult(DJIError djiError) {
+                                        if (djiError == null) {
+                                            showToast("take photo: success");
+                                        } else {
+                                            showToast(djiError.getDescription());
+                                        }
+                                    }
+                                });
+                            }
+                        }, 1000);
+                    }
+                }
+            });
+        }
+    }
+
+    // Method for starting recording
+    private void startRecord() {
+        camera = DJIApplication.getCameraInstance();
+        if (camera != null) {
+            camera.startRecordVideo(new CommonCallbacks.CompletionCallback() {
+                @Override
+                public void onResult(DJIError djiError) {
+                    if (djiError == null) {
+                        showToast("Record video: success");
+                    } else {
+                        showToast(djiError.getDescription());
+                    }
+                }
+            }); // Execute the startRecordVideo API
+        }
+    }
+
+    // Method for stopping recording
+    private void stopRecord() {
+        camera = DJIApplication.getCameraInstance();
+        if (camera != null) {
+            camera.stopRecordVideo(new CommonCallbacks.CompletionCallback() {
+
+                @Override
+                public void onResult(DJIError djiError) {
+                    if (djiError == null) {
+                        showToast("Stop recording: success");
+                    } else {
+                        showToast(djiError.getDescription());
+                    }
+                }
+            }); // Execute the stopRecordVideo API
+        }
+
     }
 
     private List<Fragment> getFragments() {
