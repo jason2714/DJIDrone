@@ -7,11 +7,13 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentTransaction;
 
 import android.annotation.SuppressLint;
 import android.app.Instrumentation;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.SurfaceTexture;
 import android.os.Build;
 import android.os.Bundle;
@@ -32,6 +34,14 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapFragment;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -44,6 +54,8 @@ import dji.sdk.base.BaseProduct;
 import dji.sdk.camera.Camera;
 import dji.sdk.camera.VideoFeeder;
 import dji.sdk.codec.DJICodecManager;
+import dji.sdk.products.Aircraft;
+import dji.sdk.sdkmanager.DJISDKManager;
 import ntou.project.djidrone.fragment.BatteryFragment;
 import ntou.project.djidrone.fragment.CameraFragment;
 import ntou.project.djidrone.fragment.ControllerFragment;
@@ -52,41 +64,60 @@ import ntou.project.djidrone.fragment.MainFragment;
 import ntou.project.djidrone.fragment.SensorFragment;
 import ntou.project.djidrone.fragment.SettingFragment;
 import ntou.project.djidrone.fragment.SignalFragment;
+import ntou.project.djidrone.fragment.VideoSurfaceFragment;
 import ntou.project.djidrone.listener.GestureListener;
 
 public class MobileActivity extends AppCompatActivity {
     private static final String TAG = MobileActivity.class.getName();
+    private static BaseProduct mProduct = null;
     private ConstraintLayout mainLayout, constraintBottom;
     private ToggleButton btn_changeMode, relativeLeftToggle;
     private LinearLayout linearLeft, linearRight;
-    private ImageView mapView, mBtnCamera;
+    private ImageView mBtnCamera;
     private ImageView stickLeft, stickRight;
     private TextView mTvState;
     private List<Fragment> fragments;
-    protected TextureView mVideoSurface = null;
+    private VideoSurfaceFragment mVideoSurfaceFragment,mVideoSurfaceFragmentSmall;
     private Handler mHandler;
     //camera
-    protected VideoFeeder.VideoDataListener mReceivedVideoDataListener = null;
-    protected DJICodecManager mCodecManager = null;
-    protected TextureView.SurfaceTextureListener textureListener = null;
+    private Camera camera = null;
     private String resolutionRatio = "16:9";
     private GestureDetector gestureDetector;
-    private FrameLayout mFrameSetting;
+    private FrameLayout mFrameSetting, mapView, droneView;
     private int fragmentPosition;
-    private Camera camera;
     public static boolean isRecording = false;
+    //map
+    private SupportMapFragment gMapFragment,gMapFragmentSmall;
+    private GoogleMapUtil gMapUtil,gMapUtilSmall;
+    private boolean isMapView = false;
+
+    protected BroadcastReceiver mReceiver = new BroadcastReceiver() {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            onProductConnectionChange();
+        }
+    };
 
     //camera
     @Override
     protected void onResume() {
         super.onResume();
-        initPreviewer();
+        getWindow().getDecorView().setSystemUiVisibility(
+                View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION//隱藏狀態欄和標題欄
+                        | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION//全螢幕顯示
+                        | View.SYSTEM_UI_FLAG_FULLSCREEN | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);//隱藏手機虛擬按鍵HOME/BACK/LIST按鍵
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        uninitPreviewer();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        unregisterReceiver(mReceiver);
     }
 
     @Override
@@ -94,6 +125,8 @@ public class MobileActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_mobile);
 
+        IntentFilter filter = new IntentFilter(DJIApplication.FLAG_CONNECTION_CHANGE);
+        registerReceiver(mReceiver, filter);
 
         Toast.makeText(MobileActivity.this, "登入成功", Toast.LENGTH_SHORT).show();
         initViewId();
@@ -101,32 +134,10 @@ public class MobileActivity extends AppCompatActivity {
         initUI();
     }
 
-    @SuppressLint("SourceLockedOrientationActivity")
     private void initUI() {
 //        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
-        getWindow().getDecorView().setSystemUiVisibility(
-                View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION//隱藏狀態欄和標題欄
-                        | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION//全螢幕顯示
-                        | View.SYSTEM_UI_FLAG_FULLSCREEN | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);//隱藏手機虛擬按鍵HOME/BACK/LIST按鍵
-        if (mVideoSurface != null)
-            mVideoSurface.setSurfaceTextureListener(textureListener);
-        if (null != DJIApplication.getProductInstance())
-            mTvState.setText(R.string.connected);
-        else
-            mTvState.setText(R.string.disconnected);
-        camera = DJIApplication.getCameraInstance();
-        if (null != camera) {
-            ResolutionAndFrameRate[] resolutionAndFrameRates =
-                    camera.getCapabilities().videoResolutionAndFrameRateRange();
-            String width = resolutionAndFrameRates[0].getResolution().toString().split("[_]")[1].split("[x]")[0];
-            String height = resolutionAndFrameRates[0].getResolution().toString().split("[_]")[1].split("[x]")[1];
-            ConstraintSet layoutMainSet = new ConstraintSet();
-            layoutMainSet.clone(mainLayout);
-            layoutMainSet.setDimensionRatio(R.id.droneView, width + ":" + height);
-            layoutMainSet.applyTo(mainLayout);
-            showToast("" + resolutionAndFrameRates[0].getResolution());
-            showToast(resolutionRatio);
-        }
+        refreshSDKRelativeUI();
+        setFrameRatio();
     }
 
     private void initViewId() {
@@ -143,13 +154,27 @@ public class MobileActivity extends AppCompatActivity {
         stickRight = findViewById(R.id.rightStick);
         mBtnCamera = findViewById(R.id.btn_camera);
         mBtnCamera.setTag(R.drawable.shoot_photo);
-        mVideoSurface = findViewById(R.id.droneView);
+        droneView = findViewById(R.id.droneView);
         mFrameSetting = findViewById(R.id.container);
+        mVideoSurfaceFragment = new VideoSurfaceFragment();
+        mVideoSurfaceFragmentSmall = new VideoSurfaceFragment();
+        gMapFragment = SupportMapFragment.newInstance();
+        gMapFragmentSmall = SupportMapFragment.newInstance();
+        gMapUtil = new GoogleMapUtil(this,false);
+        gMapUtilSmall = new GoogleMapUtil(this,true);
+        gMapFragment.getMapAsync(gMapUtil);
+        gMapFragmentSmall.getMapAsync(gMapUtilSmall);
         fragments = getFragments();
         fragmentPosition = 0;
         getSupportFragmentManager()//getFragmentManager
                 .beginTransaction()//要求 FragmentManager 回傳一個 FragmentTransaction 物件，用以進行 Fragment 的切換。
                 .add(mFrameSetting.getId(), fragments.get(0))
+                .add(droneView.getId(), mVideoSurfaceFragment)
+                .add(droneView.getId(), gMapFragment)
+                .hide(gMapFragment)
+                .add(mapView.getId(), mVideoSurfaceFragmentSmall)
+                .add(mapView.getId(), gMapFragmentSmall)
+                .hide(mVideoSurfaceFragmentSmall)
                 .commit();
     }
 
@@ -162,44 +187,8 @@ public class MobileActivity extends AppCompatActivity {
         stickRight.setOnClickListener(onclick);
         stickLeft.setOnClickListener(onclick);
         mBtnCamera.setOnClickListener(onclick);
-        mReceivedVideoDataListener = new VideoFeeder.VideoDataListener() {
-            @Override
-            public void onReceive(byte[] videoBuffer, int size) {
-                if (mCodecManager != null) {
-                    mCodecManager.sendDataToDecoder(videoBuffer, size);
-                }
-            }
-        };
-        textureListener = new TextureView.SurfaceTextureListener() {
-            @Override
-            public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height) {
-                Log.e(TAG, "onSurfaceTextureAvailable");
-                if (mCodecManager == null) {
-                    mCodecManager = new DJICodecManager(MobileActivity.this, surface, width, height);
-                }
-            }
+        mapView.setOnClickListener(onclick);
 
-            @Override
-            public void onSurfaceTextureSizeChanged(SurfaceTexture surface, int width, int height) {
-                mCodecManager.onSurfaceSizeChanged(width, height, 0);
-                Log.e(TAG, "onSurfaceTextureSizeChanged");
-            }
-
-            @Override
-            public boolean onSurfaceTextureDestroyed(SurfaceTexture surface) {
-                Log.e(TAG, "onSurfaceTextureDestroyed");
-                if (mCodecManager != null) {
-                    mCodecManager.cleanSurface();
-                    mCodecManager = null;
-                }
-
-                return false;
-            }
-
-            @Override
-            public void onSurfaceTextureUpdated(SurfaceTexture surface) {
-            }
-        };
         //滑動返回main fragment
         gestureDetector = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
 
@@ -249,16 +238,16 @@ public class MobileActivity extends AppCompatActivity {
                 case R.id.btn_changeMode:
 //                    TransitionManager.beginDelayedTransition(mainLayout);
                     if (isChecked) {
-                        layoutMainSet.connect(mVideoSurface.getId(), ConstraintSet.RIGHT, ConstraintSet.PARENT_ID, ConstraintSet.RIGHT);
-                        layoutMainSet.connect(mVideoSurface.getId(), ConstraintSet.BOTTOM, ConstraintSet.PARENT_ID, ConstraintSet.BOTTOM);
+                        layoutMainSet.connect(droneView.getId(), ConstraintSet.RIGHT, ConstraintSet.PARENT_ID, ConstraintSet.RIGHT);
+                        layoutMainSet.connect(droneView.getId(), ConstraintSet.BOTTOM, ConstraintSet.PARENT_ID, ConstraintSet.BOTTOM);
                         layoutMainSet.connect(mapView.getId(), ConstraintSet.LEFT, ConstraintSet.PARENT_ID, ConstraintSet.LEFT);
                         layoutMainSet.clear(mapView.getId(), ConstraintSet.RIGHT);
                         layoutMainSet.applyTo(mainLayout);
                         constraintBottom.setVisibility(View.GONE);
                         linearRight.setVisibility(View.GONE);
                     } else {
-                        layoutMainSet.connect(mVideoSurface.getId(), ConstraintSet.RIGHT, R.id.gdlnvtRight, ConstraintSet.LEFT);
-                        layoutMainSet.connect(mVideoSurface.getId(), ConstraintSet.BOTTOM, R.id.gdlnhzBottom, ConstraintSet.TOP);
+                        layoutMainSet.connect(droneView.getId(), ConstraintSet.RIGHT, R.id.gdlnvtRight, ConstraintSet.LEFT);
+                        layoutMainSet.connect(droneView.getId(), ConstraintSet.BOTTOM, R.id.gdlnhzBottom, ConstraintSet.TOP);
                         layoutMainSet.connect(mapView.getId(), ConstraintSet.RIGHT, R.id.gdlnvtMap, ConstraintSet.LEFT);
                         layoutMainSet.clear(mapView.getId(), ConstraintSet.LEFT);
                         layoutMainSet.applyTo(mainLayout);
@@ -292,13 +281,15 @@ public class MobileActivity extends AppCompatActivity {
                 case R.id.leftStick:
                     break;
                 case R.id.rightStick:
+                    //test
+                    changeMapFragment();
                     break;
                 case R.id.btn_camera:
                     if ((Integer) mBtnCamera.getTag() == R.drawable.shoot_photo) {
                         captureAction();
                     } else if ((Integer) mBtnCamera.getTag() == R.drawable.record_video) {
                         ToggleButton mTbtnCameraMode = findViewById(R.id.tbtn_camera_mode);
-                        if(null != mTbtnCameraMode)
+                        if (null != mTbtnCameraMode)
                             mTbtnCameraMode.setEnabled(isRecording);
                         isRecording = !isRecording;
                         if (isRecording) {
@@ -310,44 +301,18 @@ public class MobileActivity extends AppCompatActivity {
                         }
                     }
                     break;
+                case R.id.mapView:
+                    Log.d(TAG,"change fragment");
+                    changeMapFragment();
+                    break;
                 default:
                     break;
             }
         }
     }
 
-    private void initPreviewer() {
-        BaseProduct product = DJIApplication.getProductInstance();
-
-        if (product == null || !product.isConnected()) {
-            showToast(getString(R.string.disconnected));
-        } else {
-            if (null != mVideoSurface) {
-                mVideoSurface.setSurfaceTextureListener(textureListener);
-            }
-            if (!product.getModel().equals(Model.UNKNOWN_AIRCRAFT)) {
-                VideoFeeder.getInstance().getPrimaryVideoFeed().addVideoDataListener(mReceivedVideoDataListener);
-            }
-        }
-    }
-
-    private void uninitPreviewer() {
-        camera = DJIApplication.getCameraInstance();
-        if (camera != null) {
-            // Reset the callback
-            VideoFeeder.getInstance().getPrimaryVideoFeed().addVideoDataListener(null);
-        }
-    }
-
-    private void showToast(final String toastMsg) {
-
-        mHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                Toast.makeText(getApplicationContext(), toastMsg, Toast.LENGTH_LONG).show();
-                Log.d(TAG, toastMsg);
-            }
-        });
+    public void triggerOnMapClick(){
+        mapView.performClick();
     }
 
     public void changeFragment(int position) {
@@ -357,7 +322,27 @@ public class MobileActivity extends AppCompatActivity {
                 .addToBackStack(null)
                 .replace(mFrameSetting.getId(), fragments.get(position))
                 .commit();
+    }
 
+    private void changeMapFragment() {
+        isMapView = !isMapView;
+        if (isMapView) {
+            getSupportFragmentManager()//getFragmentManager
+                    .beginTransaction()//要求 FragmentManager 回傳一個 FragmentTransaction 物件，用以進行 Fragment 的切換。
+                    .hide(gMapFragmentSmall)
+                    .hide(mVideoSurfaceFragment)
+                    .show(gMapFragment)
+                    .show(mVideoSurfaceFragmentSmall)
+                    .commit();
+        } else {
+            getSupportFragmentManager()//getFragmentManager
+                    .beginTransaction()//要求 FragmentManager 回傳一個 FragmentTransaction 物件，用以進行 Fragment 的切換。
+                    .hide(gMapFragment)
+                    .hide(mVideoSurfaceFragmentSmall)
+                    .show(gMapFragmentSmall)
+                    .show(mVideoSurfaceFragment)
+                    .commit();
+        }
     }
 
     private void captureAction() {
@@ -374,9 +359,9 @@ public class MobileActivity extends AppCompatActivity {
                                     @Override
                                     public void onResult(DJIError djiError) {
                                         if (djiError == null) {
-                                            showToast("take photo: success");
+                                            ToastUtil.showToast("take photo: success");
                                         } else {
-                                            showToast(djiError.getDescription());
+                                            ToastUtil.showToast(djiError.getDescription());
                                         }
                                     }
                                 });
@@ -396,9 +381,9 @@ public class MobileActivity extends AppCompatActivity {
                 @Override
                 public void onResult(DJIError djiError) {
                     if (djiError == null) {
-                        showToast("Record video: success");
+                        ToastUtil.showToast("Record video: success");
                     } else {
-                        showToast(djiError.getDescription());
+                        ToastUtil.showToast(djiError.getDescription());
                     }
                 }
             }); // Execute the startRecordVideo API
@@ -414,9 +399,9 @@ public class MobileActivity extends AppCompatActivity {
                 @Override
                 public void onResult(DJIError djiError) {
                     if (djiError == null) {
-                        showToast("Stop recording: success");
+                        ToastUtil.showToast("Stop recording: success");
                     } else {
-                        showToast(djiError.getDescription());
+                        ToastUtil.showToast(djiError.getDescription());
                     }
                 }
             }); // Execute the stopRecordVideo API
@@ -434,6 +419,46 @@ public class MobileActivity extends AppCompatActivity {
         newFragments.add(new CameraFragment());
         newFragments.add(new SettingFragment());
         return newFragments;
+    }
+
+    private void onProductConnectionChange() {
+        gMapUtil.initFlightController();
+        gMapUtilSmall.initFlightController();
+        refreshSDKRelativeUI();
+    }
+
+    private void refreshSDKRelativeUI() {
+        mProduct = DJIApplication.getProductInstance();
+        mTvState.setText(R.string.disconnected);
+        if (null != mProduct) {
+            if (mProduct.isConnected()) {
+                Log.d(TAG, "connect to aircraft");
+                mTvState.setText(R.string.connected);
+            } else if (mProduct instanceof Aircraft) {
+                Log.d(TAG, "only connect to remote controller");
+                mTvState.setText(R.string.connected_remote_control);
+            }
+        } else {
+            Log.d(TAG, "refreshSDK: False");
+            mTvState.setText(R.string.disconnected);
+        }
+    }
+
+    private void setFrameRatio() {
+        camera = DJIApplication.getCameraInstance();
+        if (null != camera) {
+            ResolutionAndFrameRate[] resolutionAndFrameRates =
+                    camera.getCapabilities().videoResolutionAndFrameRateRange();
+            String width = resolutionAndFrameRates[0].getResolution().toString().split("[_]")[1].split("[x]")[0];
+            String height = resolutionAndFrameRates[0].getResolution().toString().split("[_]")[1].split("[x]")[1];
+            ConstraintSet layoutMainSet = new ConstraintSet();
+            layoutMainSet.clone(mainLayout);
+            layoutMainSet.setDimensionRatio(R.id.droneView, width + ":" + height);
+            layoutMainSet.setDimensionRatio(mapView.getId(), width + ":" + height);
+            layoutMainSet.applyTo(mainLayout);
+            ToastUtil.showToast("" + resolutionAndFrameRates[0].getResolution());
+            ToastUtil.showToast(resolutionRatio);
+        }
     }
 }
 

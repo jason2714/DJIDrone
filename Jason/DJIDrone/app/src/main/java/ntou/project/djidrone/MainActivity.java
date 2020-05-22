@@ -46,7 +46,6 @@ public class MainActivity extends AppCompatActivity {
     private TextView mProductInformation,mProductState;
     //android integrate import
     private static final String TAG = MainActivity.class.getName();
-    public static final String FLAG_CONNECTION_CHANGE = "dji_sdk_connection_change";
     private static BaseProduct mProduct;
     private Handler mHandler;
     private List<String> missingPermission = new ArrayList<>();
@@ -149,7 +148,7 @@ public class MainActivity extends AppCompatActivity {
         super.onResume();
         //init receiver
         IntentFilter filter = new IntentFilter();
-        filter.addAction(FLAG_CONNECTION_CHANGE);
+        filter.addAction(DJIApplication.FLAG_CONNECTION_CHANGE);
         registerReceiver(mReceiver, filter);
     }
 
@@ -289,7 +288,7 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void run() {
-            Intent intent = new Intent(FLAG_CONNECTION_CHANGE);
+            Intent intent = new Intent(DJIApplication.FLAG_CONNECTION_CHANGE);
             sendBroadcast(intent);
         }
     };

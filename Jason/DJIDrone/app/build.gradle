@@ -66,7 +66,9 @@ dependencies {
     //DJI SDK
     implementation 'com.dji:dji-sdk:4.11.2'
     compileOnly 'com.dji:dji-sdk-provided:4.11.2'
-
+    //Google
+    implementation 'com.google.android.gms:play-services:12.0.1'
+    implementation 'com.android.support:multidex:1.0.3'
     //Glide
     implementation 'com.github.bumptech.glide:glide:4.11.0'
     annotationProcessor 'com.github.bumptech.glide:compiler:4.11.0'
