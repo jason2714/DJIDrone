@@ -19,6 +19,7 @@ import dji.common.error.DJIError;
 import dji.common.error.DJISDKError;
 import dji.sdk.base.BaseComponent;
 import dji.sdk.base.BaseProduct;
+import dji.sdk.battery.Battery;
 import dji.sdk.camera.Camera;
 import dji.sdk.products.Aircraft;
 import dji.sdk.products.HandHeld;
@@ -61,6 +62,22 @@ public class DJIApplication extends Application{
         }
 
         return camera;
+    }
+
+    public static synchronized Battery getBatteryInstance() {
+
+        if (getProductInstance() == null) return null;
+
+        Battery battery = null;
+
+        if (getProductInstance() instanceof Aircraft){
+            battery = ((Aircraft) getProductInstance()).getBattery();
+
+        } else if (getProductInstance() instanceof HandHeld) {
+            battery = ((HandHeld) getProductInstance()).getBattery();
+        }
+
+        return battery;
     }
 
     public static Application getInstance() {

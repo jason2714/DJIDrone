@@ -45,12 +45,14 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import java.util.ArrayList;
 import java.util.List;
 
+import dji.common.battery.BatteryState;
 import dji.common.camera.ResolutionAndFrameRate;
 import dji.common.camera.SettingsDefinitions;
 import dji.common.error.DJIError;
 import dji.common.product.Model;
 import dji.common.util.CommonCallbacks;
 import dji.sdk.base.BaseProduct;
+import dji.sdk.battery.Battery;
 import dji.sdk.camera.Camera;
 import dji.sdk.camera.VideoFeeder;
 import dji.sdk.codec.DJICodecManager;
@@ -90,6 +92,8 @@ public class MobileActivity extends AppCompatActivity {
     private SupportMapFragment gMapFragment,gMapFragmentSmall;
     private GoogleMapUtil gMapUtil,gMapUtilSmall;
     private boolean isMapView = false;
+    //battery
+    private Battery battery;
 
     protected BroadcastReceiver mReceiver = new BroadcastReceiver() {
 
@@ -176,6 +180,10 @@ public class MobileActivity extends AppCompatActivity {
                 .add(mapView.getId(), gMapFragmentSmall)
                 .hide(mVideoSurfaceFragmentSmall)
                 .commit();
+
+        battery = DJIApplication.getBatteryInstance();
+        if(null != battery){
+        }
     }
 
     @SuppressLint("ClickableViewAccessibility")
