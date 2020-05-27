@@ -179,7 +179,7 @@
 
     <FrameLayout
         android:id="@+id/mapView"
-        android:layout_width="183dp"
+        android:layout_width="0dp"
         android:layout_height="0dp"
         android:background="#000"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -236,8 +236,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
-                android:layout_marginLeft="5dp"
-                android:text="未連接"
+                android:layout_marginStart="5dp"
+                android:text="@string/disconnected"
                 android:textColor="#FFF"
                 android:textSize="15sp" />
 
@@ -246,8 +246,8 @@
                 android:layout_width="18dp"
                 android:layout_height="20dp"
                 android:layout_centerVertical="true"
-                android:layout_marginRight="10dp"
-                android:layout_toLeftOf="@id/signalIcon"
+                android:layout_marginEnd="10dp"
+                android:layout_toStartOf="@id/signalIcon"
                 android:src="@drawable/icon_controller" />
 
             <ImageView
@@ -255,8 +255,8 @@
                 android:layout_width="18dp"
                 android:layout_height="20dp"
                 android:layout_centerVertical="true"
-                android:layout_marginRight="10dp"
-                android:layout_toLeftOf="@id/sensorIcon"
+                android:layout_marginEnd="10dp"
+                android:layout_toStartOf="@id/sensorIcon"
                 android:src="@drawable/icon_signal_half" />
 
             <ImageView
@@ -264,8 +264,8 @@
                 android:layout_width="20dp"
                 android:layout_height="26dp"
                 android:layout_centerVertical="true"
-                android:layout_marginRight="10dp"
-                android:layout_toLeftOf="@id/batteryIcon"
+                android:layout_marginEnd="10dp"
+                android:layout_toStartOf="@id/batteryIcon"
                 android:src="@drawable/sensor_lateral" />
 
             <ImageView
@@ -273,16 +273,25 @@
                 android:layout_width="20dp"
                 android:layout_height="16dp"
                 android:layout_centerVertical="true"
-                android:layout_marginRight="15dp"
-                android:layout_toLeftOf="@id/btn_changeMode"
+                android:layout_toStartOf="@id/tv_battery_power"
                 android:scaleType="fitXY"
+                android:layout_marginEnd="5dp"
                 android:src="@drawable/icon_battery_charging" />
-
+            <TextView
+                android:id="@+id/tv_battery_power"
+                android:layout_width="wrap_content"
+                android:layout_height="20dp"
+                android:layout_centerVertical="true"
+                android:layout_marginEnd="20dp"
+                android:layout_toStartOf="@id/btn_changeMode"
+                android:textSize="15sp"
+                android:textColor="#FFF"
+                android:text="100%"/>
             <ToggleButton
                 android:id="@+id/btn_changeMode"
                 android:layout_width="23dp"
                 android:layout_height="match_parent"
-                android:layout_alignParentRight="true"
+                android:layout_alignParentEnd="true"
                 android:layout_centerVertical="true"
                 android:background="@drawable/mode_togglebutton"
                 android:textOff=""

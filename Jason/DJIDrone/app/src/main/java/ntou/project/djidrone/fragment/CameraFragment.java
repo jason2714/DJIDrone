@@ -33,13 +33,13 @@ import dji.sdk.camera.Camera;
 import ntou.project.djidrone.DJIApplication;
 import ntou.project.djidrone.MobileActivity;
 import ntou.project.djidrone.R;
+import ntou.project.djidrone.ToastUtil;
 
 public class CameraFragment extends Fragment {
     private static final String TAG = CameraFragment.class.getName();
     private ToggleButton mTbtnCameraMode;
     private TextView mTvCameraMode;
     private ImageView mBtnCamera;
-    private Handler mHandler;
     private static SettingsDefinitions.ShootPhotoMode photoMode;
 
     @Nullable
@@ -54,9 +54,8 @@ public class CameraFragment extends Fragment {
         mTbtnCameraMode = view.findViewById(R.id.tbtn_camera_mode);
         mTvCameraMode = view.findViewById(R.id.tv_camera_mode);
         mBtnCamera = getActivity().findViewById(R.id.btn_camera);
-        mHandler = new Handler(Looper.getMainLooper());
         mTbtnCameraMode.setOnCheckedChangeListener(toggle);
-        if(MobileActivity.isRecording)
+        if (MobileActivity.isRecording)
             mTbtnCameraMode.setEnabled(false);
         super.onViewCreated(view, savedInstanceState);
     }
@@ -68,18 +67,21 @@ public class CameraFragment extends Fragment {
             switch (buttonView.getId()) {
                 case R.id.tbtn_camera_mode:
                     Camera camera = DJIApplication.getCameraInstance();
-                    if (isChecked) {
-                        mTvCameraMode.setText(R.string.record_video);
-                        mBtnCamera.setImageResource(R.drawable.record_video);
-                        mBtnCamera.setTag(R.drawable.record_video);
-                        if (null != camera)
+                    if (null != camera) {//已連接
+                        if (isChecked) {
                             switchCameraMode(SettingsDefinitions.CameraMode.RECORD_VIDEO);
-                    } else {
-                        mTvCameraMode.setText(R.string.shoot_photo);
-                        mBtnCamera.setImageResource(R.drawable.shoot_photo);
-                        mBtnCamera.setTag(R.drawable.shoot_photo);
-                        if (null != camera) {
+                        } else {
                             switchCameraMode(SettingsDefinitions.CameraMode.SHOOT_PHOTO);
+                        }
+                    } else {//未連接
+                        if (isChecked) {
+                            mTvCameraMode.setText(R.string.record_video);
+                            mBtnCamera.setImageResource(R.drawable.record_video);
+                            mBtnCamera.setTag(R.drawable.record_video);
+                        } else {
+                            mTvCameraMode.setText(R.string.shoot_photo);
+                            mBtnCamera.setImageResource(R.drawable.shoot_photo);
+                            mBtnCamera.setTag(R.drawable.shoot_photo);
                         }
                     }
                     break;
@@ -94,26 +96,32 @@ public class CameraFragment extends Fragment {
         if (camera != null) {
             camera.setMode(cameraMode, new CommonCallbacks.CompletionCallback() {
                 @Override
-                public void onResult(DJIError error) {
-
-                    if (error == null) {
-                        showToast("Switch Camera Mode Succeeded");
+                public void onResult(DJIError djiError) {
+                    if (djiError == null) {
+                        Handler mHandler = new Handler(Looper.getMainLooper());
+                        mHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                ToastUtil.showToast("Switch Camera Mode Succeeded");
+                                if (cameraMode == SettingsDefinitions.CameraMode.SHOOT_PHOTO) {
+                                    mTvCameraMode.setText(R.string.shoot_photo);
+                                    mBtnCamera.setImageResource(R.drawable.shoot_photo);
+                                    mBtnCamera.setTag(R.drawable.shoot_photo);
+                                } else if (cameraMode == SettingsDefinitions.CameraMode.RECORD_VIDEO) {
+                                    mTvCameraMode.setText(R.string.record_video);
+                                    mBtnCamera.setImageResource(R.drawable.record_video);
+                                    mBtnCamera.setTag(R.drawable.record_video);
+                                } else {
+                                    ToastUtil.showToast("" + cameraMode);
+                                }
+                            }
+                        });
                     } else {
-                        showToast(error.getDescription());
+                        ToastUtil.showToast(djiError.getDescription());
                     }
                 }
             });
         }
-    }
-
-    private void showToast(final String toastMsg) {
-        mHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                Toast.makeText(getActivity(), toastMsg, Toast.LENGTH_LONG).show();
-                Log.d(TAG, toastMsg);
-            }
-        });
     }
 
     public static synchronized SettingsDefinitions.ShootPhotoMode getPhotoMode() {

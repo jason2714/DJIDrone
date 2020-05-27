@@ -316,7 +316,7 @@ public class MainActivity extends AppCompatActivity {
     };
 
     private void refreshSDKRelativeUI() {
-        mProduct = DJISDKManager.getInstance().getProduct();
+        mProduct = DJIApplication.getProductInstance();
         if (null != mProduct) {
             Log.d(TAG, "refreshSDK: True");
             if(mProduct.isConnected()){

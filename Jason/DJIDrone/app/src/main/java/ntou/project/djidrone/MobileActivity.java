@@ -49,6 +49,7 @@ import dji.common.battery.BatteryState;
 import dji.common.camera.ResolutionAndFrameRate;
 import dji.common.camera.SettingsDefinitions;
 import dji.common.error.DJIError;
+import dji.common.flightcontroller.FlightControllerState;
 import dji.common.product.Model;
 import dji.common.util.CommonCallbacks;
 import dji.sdk.base.BaseProduct;
@@ -56,6 +57,8 @@ import dji.sdk.battery.Battery;
 import dji.sdk.camera.Camera;
 import dji.sdk.camera.VideoFeeder;
 import dji.sdk.codec.DJICodecManager;
+import dji.sdk.flightcontroller.FlightAssistant;
+import dji.sdk.flightcontroller.FlightController;
 import dji.sdk.products.Aircraft;
 import dji.sdk.sdkmanager.DJISDKManager;
 import ntou.project.djidrone.fragment.BatteryFragment;
@@ -77,9 +80,9 @@ public class MobileActivity extends AppCompatActivity {
     private LinearLayout linearLeft, linearRight;
     private ImageView mBtnCamera;
     private ImageView stickLeft, stickRight;
-    private TextView mTvState;
+    private TextView mTvState, mTvBatteryPower;
     private List<Fragment> fragments;
-    private VideoSurfaceFragment mVideoSurfaceFragment,mVideoSurfaceFragmentSmall;
+    private VideoSurfaceFragment mVideoSurfaceFragment, mVideoSurfaceFragmentSmall;
     private Handler mHandler;
     //camera
     private Camera camera = null;
@@ -89,11 +92,14 @@ public class MobileActivity extends AppCompatActivity {
     private int fragmentPosition;
     public static boolean isRecording = false;
     //map
-    private SupportMapFragment gMapFragment,gMapFragmentSmall;
-    private GoogleMapUtil gMapUtil,gMapUtilSmall;
+    private SupportMapFragment gMapFragment, gMapFragmentSmall;
+    private GoogleMapUtil gMapUtil, gMapUtilSmall;
     private boolean isMapView = false;
     //battery
     private Battery battery;
+    private StringBuffer stringBuffer = new StringBuffer();
+    //flightController
+    private FlightController flightController;
 
     protected BroadcastReceiver mReceiver = new BroadcastReceiver() {
 
@@ -142,12 +148,15 @@ public class MobileActivity extends AppCompatActivity {
 //        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
         refreshSDKRelativeUI();
         setFrameRatio();
+        setBattery();
+        setSensor();
     }
 
     private void initViewId() {
         mHandler = new Handler(Looper.getMainLooper());
         mainLayout = findViewById(R.id.mainLayout);
         mTvState = findViewById(R.id.tv_state);
+        mTvBatteryPower = findViewById(R.id.tv_battery_power);
         btn_changeMode = findViewById(R.id.btn_changeMode);
         linearLeft = findViewById(R.id.linearLeft);
         linearRight = findViewById(R.id.linearRight);
@@ -160,12 +169,12 @@ public class MobileActivity extends AppCompatActivity {
         mBtnCamera.setTag(R.drawable.shoot_photo);
         droneView = findViewById(R.id.droneView);
         mFrameSetting = findViewById(R.id.container);
-        mVideoSurfaceFragment = new VideoSurfaceFragment();
-        mVideoSurfaceFragmentSmall = new VideoSurfaceFragment();
+        mVideoSurfaceFragment = new VideoSurfaceFragment(false);
+        mVideoSurfaceFragmentSmall = new VideoSurfaceFragment(true);
         gMapFragment = SupportMapFragment.newInstance();
         gMapFragmentSmall = SupportMapFragment.newInstance();
-        gMapUtil = new GoogleMapUtil(this,false);
-        gMapUtilSmall = new GoogleMapUtil(this,true);
+        gMapUtil = new GoogleMapUtil(this, false);
+        gMapUtilSmall = new GoogleMapUtil(this, true);
         gMapFragment.getMapAsync(gMapUtil);
         gMapFragmentSmall.getMapAsync(gMapUtilSmall);
         fragments = getFragments();
@@ -180,10 +189,6 @@ public class MobileActivity extends AppCompatActivity {
                 .add(mapView.getId(), gMapFragmentSmall)
                 .hide(mVideoSurfaceFragmentSmall)
                 .commit();
-
-        battery = DJIApplication.getBatteryInstance();
-        if(null != battery){
-        }
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -310,7 +315,7 @@ public class MobileActivity extends AppCompatActivity {
                     }
                     break;
                 case R.id.mapView:
-                    Log.d(TAG,"change fragment");
+                    Log.d(TAG, "change fragment");
                     changeMapFragment();
                     break;
                 default:
@@ -319,7 +324,7 @@ public class MobileActivity extends AppCompatActivity {
         }
     }
 
-    public void triggerOnMapClick(){
+    public void triggerOnMapClick() {
         mapView.performClick();
     }
 
@@ -430,42 +435,159 @@ public class MobileActivity extends AppCompatActivity {
     }
 
     private void onProductConnectionChange() {
-        gMapUtil.initFlightController();
-        gMapUtilSmall.initFlightController();
-        refreshSDKRelativeUI();
+        initUI();
     }
 
     private void refreshSDKRelativeUI() {
         mProduct = DJIApplication.getProductInstance();
-        mTvState.setText(R.string.disconnected);
         if (null != mProduct) {
             if (mProduct.isConnected()) {
                 Log.d(TAG, "connect to aircraft");
                 mTvState.setText(R.string.connected);
+                //google map
+                gMapUtil.initFlightController();
+                gMapUtilSmall.initFlightController();
             } else if (mProduct instanceof Aircraft) {
                 Log.d(TAG, "only connect to remote controller");
                 mTvState.setText(R.string.connected_remote_control);
+                //google map
+                gMapUtil.unInitFlightController();
+                gMapUtilSmall.unInitFlightController();
             }
         } else {
-            Log.d(TAG, "refreshSDK: False");
+            Log.d(TAG, "product disconnected");
             mTvState.setText(R.string.disconnected);
         }
     }
 
     private void setFrameRatio() {
         camera = DJIApplication.getCameraInstance();
+        ConstraintSet layoutMainSet = new ConstraintSet();
+        layoutMainSet.clone(mainLayout);
         if (null != camera) {
             ResolutionAndFrameRate[] resolutionAndFrameRates =
                     camera.getCapabilities().videoResolutionAndFrameRateRange();
             String width = resolutionAndFrameRates[0].getResolution().toString().split("[_]")[1].split("[x]")[0];
             String height = resolutionAndFrameRates[0].getResolution().toString().split("[_]")[1].split("[x]")[1];
-            ConstraintSet layoutMainSet = new ConstraintSet();
-            layoutMainSet.clone(mainLayout);
-            layoutMainSet.setDimensionRatio(R.id.droneView, width + ":" + height);
-            layoutMainSet.setDimensionRatio(mapView.getId(), width + ":" + height);
-            layoutMainSet.applyTo(mainLayout);
-            ToastUtil.showToast("" + resolutionAndFrameRates[0].getResolution());
-            ToastUtil.showToast(resolutionRatio);
+            resolutionRatio = width + ":" + height;
+            Log.d(TAG, "" + resolutionAndFrameRates[0].getResolution());
+        }
+        layoutMainSet.setDimensionRatio(R.id.droneView, resolutionRatio);
+        layoutMainSet.setDimensionRatio(mapView.getId(), resolutionRatio);
+        layoutMainSet.applyTo(mainLayout);
+    }
+
+    private void setBattery() {
+        battery = DJIApplication.getBatteryInstance();
+        if (null != battery) {
+            //TODO fail
+//            battery.getCellVoltages(new CommonCallbacks.CompletionCallbackWith<Integer[]>() {
+//                @Override
+//                public void onSuccess(Integer[] integers) {
+//                    ToastUtil.showToast("cell voltages" + integers);
+//                }
+//
+//                @Override
+//                public void onFailure(DJIError djiError) {
+//                    ToastUtil.showToast(djiError.getDescription());
+//                }
+//            });
+//            battery.setLevel1CellVoltageThreshold(3600, new CommonCallbacks.CompletionCallback() {
+//                @Override
+//                public void onResult(DJIError djiError) {
+//                    if (djiError == null) {
+//                        ToastUtil.showToast("set level1 threshold" + 3600);
+//                    } else {
+//                        ToastUtil.showToast(djiError.getDescription());
+//                    }
+//                }
+//            });
+//            battery.getLevel1CellVoltageThreshold(new CommonCallbacks.CompletionCallbackWith<Integer>() {
+//                @Override
+//                public void onSuccess(Integer integer) {
+//                    ToastUtil.showToast("level1 threshold" + integer);
+//                }
+//
+//                @Override
+//                public void onFailure(DJIError djiError) {
+//                    ToastUtil.showToast(djiError.getDescription());
+//                }
+//            });
+            battery.setStateCallback(new BatteryState.Callback() {
+                @Override
+                public void onUpdate(BatteryState batteryState) {
+//                    stringBuffer.append(batteryState.getChargeRemainingInPercent())
+//                            .append("%");
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+//                            mTvBatteryPower.setText(stringBuffer.toString());
+                            mTvBatteryPower.setText(batteryState.getChargeRemainingInPercent()+"%");
+                        }
+                    });
+//                    ToastUtil.showToast("ChargeRemainingInPercent:" + batteryState.getChargeRemainingInPercent());
+//                    ToastUtil.showToast("ChargeRemaining:" + batteryState.getChargeRemaining());
+//                    ToastUtil.showToast("FullChargeCapacity:" + batteryState.getFullChargeCapacity());
+//                    ToastUtil.showToast("Temperature:" + batteryState.getTemperature());
+//                    ToastUtil.showToast("isBeingCharged:" + batteryState.isBeingCharged());
+//                    ToastUtil.showToast("getCurrent:" + batteryState.getCurrent());
+//                    ToastUtil.showToast("getConnectionState:" + batteryState.getConnectionState());
+//                    ToastUtil.showToast("getVoltage:" + batteryState.getVoltage());
+//                    ToastUtil.showToast("getLifetimeRemaining:" + batteryState.getLifetimeRemaining());
+                }
+            });
+        } else {
+            Log.d(DJIApplication.TAG, "battery = null");
+        }
+    }
+
+    private void setSignal(){
+        flightController = DJIApplication.getFlightControllerInstance();
+        if(null != flightController){
+            flightController.setStateCallback(new FlightControllerState.Callback() {
+                @Override
+                public void onUpdate(FlightControllerState flightControllerState) {
+                    flightControllerState.getGPSSignalLevel();
+                }
+            });
+        }
+    }
+
+    private void setSensor(){
+        flightController = DJIApplication.getFlightControllerInstance();
+        if(null != flightController){
+            FlightAssistant flightAssistant = flightController.getFlightAssistant();
+            flightAssistant.setCollisionAvoidanceEnabled(true, new CommonCallbacks.CompletionCallback() {
+                @Override
+                public void onResult(DJIError djiError) {
+                    if(null == djiError){
+                        ToastUtil.showToast("start Collision Avoidance success");
+                    }else{
+                        ToastUtil.showToast("setCollisionAvoidance fail" + djiError.getDescription());
+                    }
+                }
+            });
+            flightAssistant.getCollisionAvoidanceEnabled(new CommonCallbacks.CompletionCallbackWith<Boolean>() {
+                @Override
+                public void onSuccess(Boolean aBoolean) {
+                    ToastUtil.showToast("get Collision Avoidance success : " + aBoolean);
+                }
+
+                @Override
+                public void onFailure(DJIError djiError) {
+                    ToastUtil.showToast("getCollisionAvoidanceEnabled fail "+ djiError.getDescription());
+                }
+            });
+            flightAssistant.setActiveObstacleAvoidanceEnabled(true, new CommonCallbacks.CompletionCallback() {
+                @Override
+                public void onResult(DJIError djiError) {
+                    if(null == djiError){
+                        ToastUtil.showToast("start Active Obstacle Avoidance success");
+                    }else{
+                        ToastUtil.showToast(djiError.getDescription());
+                    }
+                }
+            });
         }
     }
 }

@@ -21,6 +21,7 @@ import dji.sdk.base.BaseComponent;
 import dji.sdk.base.BaseProduct;
 import dji.sdk.battery.Battery;
 import dji.sdk.camera.Camera;
+import dji.sdk.flightcontroller.FlightController;
 import dji.sdk.products.Aircraft;
 import dji.sdk.products.HandHeld;
 import dji.sdk.sdkmanager.DJISDKInitEvent;
@@ -42,9 +43,7 @@ public class DJIApplication extends Application{
      * If no product is connected, it returns null.
      */
     public static synchronized BaseProduct getProductInstance() {
-        if (null == mProduct) {
-            mProduct = DJISDKManager.getInstance().getProduct();
-        }
+        mProduct = DJISDKManager.getInstance().getProduct();
         return mProduct;
     }
 
@@ -72,12 +71,24 @@ public class DJIApplication extends Application{
 
         if (getProductInstance() instanceof Aircraft){
             battery = ((Aircraft) getProductInstance()).getBattery();
-
         } else if (getProductInstance() instanceof HandHeld) {
             battery = ((HandHeld) getProductInstance()).getBattery();
         }
 
         return battery;
+    }
+
+    public static synchronized FlightController getFlightControllerInstance() {
+        if (getProductInstance() == null) return null;
+
+        FlightController flightController = null;
+        if (getProductInstance().isConnected()) {
+            if (getProductInstance() instanceof Aircraft) {
+                flightController = ((Aircraft) getProductInstance()).getFlightController();
+            }
+        }
+
+        return flightController;
     }
 
     public static Application getInstance() {

@@ -11,12 +11,14 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.os.Looper;
 import android.provider.Settings;
 import android.util.Log;
 
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.UiSettings;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
@@ -32,7 +34,7 @@ import dji.sdk.products.Aircraft;
 public class GoogleMapUtil implements GoogleMap.OnMapClickListener, OnMapReadyCallback {
 
     private GoogleMap gMap;
-    private double droneLocationLat = 181, droneLocationLng = 181;
+    private double droneLocationLat = 181d, droneLocationLng = 181d;
     private Marker droneMarker = null;
     private FlightController mFlightController;
     private static Activity activity;
@@ -45,6 +47,7 @@ public class GoogleMapUtil implements GoogleMap.OnMapClickListener, OnMapReadyCa
     public GoogleMapUtil(Activity activity, boolean isSmallMap) {
         GoogleMapUtil.activity = activity;
         this.isSmallMap = isSmallMap;
+        MapsInitializer.initialize(activity);
     }
 
     @Override
@@ -66,8 +69,8 @@ public class GoogleMapUtil implements GoogleMap.OnMapClickListener, OnMapReadyCa
         }
         gMap.setMyLocationEnabled(true);
         gMapUiSettings.setMyLocationButtonEnabled(true);//現在位置
-        if(isSmallMap){
-        }else{
+        if (isSmallMap) {
+        } else {
 //            gMapUiSettings.setCompassEnabled(true);//預設true
             gMapUiSettings.setZoomControlsEnabled(true);
             gMapUiSettings.setMapToolbarEnabled(true);//沒顯示
@@ -98,21 +101,28 @@ public class GoogleMapUtil implements GoogleMap.OnMapClickListener, OnMapReadyCa
         gMap.setOnMapClickListener(this);// add the listener for click for amap object
     }
 
-    public void initFlightController() {
-
-        BaseProduct product = DJIApplication.getProductInstance();
-        if (product != null && product.isConnected()) {
-            if (product instanceof Aircraft) {
-                mFlightController = ((Aircraft) product).getFlightController();
-            }
-        }
+    public void unInitFlightController() {
+        mFlightController = DJIApplication.getFlightControllerInstance();
 
         if (mFlightController != null) {
+            mFlightController.setStateCallback(null);
+        }
+    }
+
+    public void initFlightController() {
+
+        mFlightController = DJIApplication.getFlightControllerInstance();
+
+        if (mFlightController != null) {//TODO not a number
             mFlightController.setStateCallback(new FlightControllerState.Callback() {
                 @Override
                 public void onUpdate(FlightControllerState djiFlightControllerCurrentState) {
+//                    ToastUtil.showToast("GPSSignalLevel" + djiFlightControllerCurrentState.getGPSSignalLevel());
+//                    ToastUtil.showToast("AircraftLocation" + djiFlightControllerCurrentState.getAircraftLocation());
                     droneLocationLat = djiFlightControllerCurrentState.getAircraftLocation().getLatitude();
+                    Log.d(DJIApplication.TAG, "droneLocationLat" + djiFlightControllerCurrentState.getAircraftLocation().getLatitude());
                     droneLocationLng = djiFlightControllerCurrentState.getAircraftLocation().getLongitude();
+                    Log.d(DJIApplication.TAG, "droneLocationLng" + djiFlightControllerCurrentState.getAircraftLocation().getLongitude());
                     updateDroneLocation();
                 }
             });
@@ -130,14 +140,13 @@ public class GoogleMapUtil implements GoogleMap.OnMapClickListener, OnMapReadyCa
         final MarkerOptions markerOptions = new MarkerOptions();
         markerOptions.position(pos);
         markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.aircraft));
-
+//        ToastUtil.showToast("updateDroneLocation");
         activity.runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 if (droneMarker != null) {
                     droneMarker.remove();
                 }
-
                 if (checkGpsCoordinates(droneLocationLat, droneLocationLng)) {
                     droneMarker = gMap.addMarker(markerOptions);
                 }

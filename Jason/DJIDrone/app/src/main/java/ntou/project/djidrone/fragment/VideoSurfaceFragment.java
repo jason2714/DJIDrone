@@ -21,23 +21,39 @@ import ntou.project.djidrone.MobileActivity;
 import ntou.project.djidrone.R;
 import ntou.project.djidrone.ToastUtil;
 
-public class VideoSurfaceFragment extends Fragment implements VideoFeeder.VideoDataListener,TextureView.SurfaceTextureListener{
+public class VideoSurfaceFragment extends Fragment implements VideoFeeder.VideoDataListener, TextureView.SurfaceTextureListener {
     private static final String TAG = VideoSurfaceFragment.class.getName();
     protected TextureView mVideoSurface = null;
     protected DJICodecManager mCodecManager = null;
+    private boolean isSmallSurface;
+
+    public VideoSurfaceFragment(boolean isSmallSurface) {
+        this.isSmallSurface = isSmallSurface;
+    }
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_video_surface,container,false);
+        return inflater.inflate(R.layout.fragment_video_surface, container, false);
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         mVideoSurface = view.findViewById(R.id.video_surface);
-        if (mVideoSurface != null)
+        if (mVideoSurface != null) {
             mVideoSurface.setSurfaceTextureListener(this);
+            if (isSmallSurface) {
+                mVideoSurface.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        if (getContext() instanceof MobileActivity) {
+                            ((MobileActivity) getContext()).triggerOnMapClick();
+                        }
+                    }
+                });
+            }
+        }
         initListener();
     }
 
@@ -89,8 +105,10 @@ public class VideoSurfaceFragment extends Fragment implements VideoFeeder.VideoD
     @Override
     public void onSurfaceTextureUpdated(SurfaceTexture surface) {
     }
-    private void initListener(){
+
+    private void initListener() {
     }
+
     private void initPreviewer() {
         BaseProduct product = DJIApplication.getProductInstance();
 
