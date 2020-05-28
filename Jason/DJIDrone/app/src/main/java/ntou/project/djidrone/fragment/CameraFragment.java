@@ -50,17 +50,17 @@ public class CameraFragment extends Fragment {
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        Toggle toggle = new Toggle();
+        OnToggle onToggle = new OnToggle();
         mTbtnCameraMode = view.findViewById(R.id.tbtn_camera_mode);
         mTvCameraMode = view.findViewById(R.id.tv_camera_mode);
         mBtnCamera = getActivity().findViewById(R.id.btn_camera);
-        mTbtnCameraMode.setOnCheckedChangeListener(toggle);
+        mTbtnCameraMode.setOnCheckedChangeListener(onToggle);
         if (MobileActivity.isRecording)
             mTbtnCameraMode.setEnabled(false);
         super.onViewCreated(view, savedInstanceState);
     }
 
-    private class Toggle implements CompoundButton.OnCheckedChangeListener {
+    private class OnToggle implements CompoundButton.OnCheckedChangeListener {
         @RequiresApi(api = Build.VERSION_CODES.KITKAT)
         @Override
         public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -117,6 +117,7 @@ public class CameraFragment extends Fragment {
                             }
                         });
                     } else {
+                        mTbtnCameraMode.setChecked(!mTbtnCameraMode.isChecked());
                         ToastUtil.showToast(djiError.getDescription());
                     }
                 }

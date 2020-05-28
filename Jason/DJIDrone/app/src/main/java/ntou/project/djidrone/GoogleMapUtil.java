@@ -118,6 +118,7 @@ public class GoogleMapUtil implements GoogleMap.OnMapClickListener, OnMapReadyCa
                 @Override
                 public void onUpdate(FlightControllerState djiFlightControllerCurrentState) {
 //                    ToastUtil.showToast("GPSSignalLevel" + djiFlightControllerCurrentState.getGPSSignalLevel());
+                    Log.d(DJIApplication.TAG,"GPSSignalLevel" + djiFlightControllerCurrentState.getGPSSignalLevel());
 //                    ToastUtil.showToast("AircraftLocation" + djiFlightControllerCurrentState.getAircraftLocation());
                     droneLocationLat = djiFlightControllerCurrentState.getAircraftLocation().getLatitude();
                     Log.d(DJIApplication.TAG, "droneLocationLat" + djiFlightControllerCurrentState.getAircraftLocation().getLatitude());

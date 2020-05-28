@@ -4,22 +4,92 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CompoundButton;
+import android.widget.TextView;
+import android.widget.ToggleButton;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import dji.common.error.DJIError;
+import dji.common.flightcontroller.FlightControllerState;
+import dji.common.util.CommonCallbacks;
+import dji.sdk.flightcontroller.FlightAssistant;
+import dji.sdk.flightcontroller.FlightController;
+import ntou.project.djidrone.DJIApplication;
 import ntou.project.djidrone.R;
+import ntou.project.djidrone.ToastUtil;
 
 public class SensorFragment extends Fragment {
+    private ToggleButton mTbtnAvoidance;
+    private TextView mTvAvoidance;
+    private FlightController flightController;
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_sensor,container,false);
+        return inflater.inflate(R.layout.fragment_sensor, container, false);
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        OnToggle onToggle = new OnToggle();
+        mTbtnAvoidance = view.findViewById(R.id.tbtn_avoidance_mode);
+        mTvAvoidance = view.findViewById(R.id.tv_avoidance_mode);
+        mTbtnAvoidance.setOnCheckedChangeListener(onToggle);
+    }
+
+    private class OnToggle implements CompoundButton.OnCheckedChangeListener {
+
+        @Override
+        public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+            switch (buttonView.getId()) {
+                case R.id.tbtn_avoidance_mode:
+                    setCollisionAvoidance(isChecked);
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
+
+    private void setCollisionAvoidance(boolean isOn) {
+        flightController = DJIApplication.getFlightControllerInstance();
+        if (null != flightController) {
+//            mTbtnAvoidance.setEnabled(false);
+            FlightAssistant flightAssistant = flightController.getFlightAssistant();
+            if(null != flightAssistant){
+                CommonCallbacks.CompletionCallback completionCallback = new CommonCallbacks.CompletionCallback() {
+                    @Override
+                    public void onResult(DJIError djiError) {
+                        if (null == djiError) {
+//                        mTbtnAvoidance.setEnabled(true);
+                            getActivity().runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    if (isOn)
+                                        mTvAvoidance.setText(R.string.open);
+                                    else
+                                        mTvAvoidance.setText(R.string.close);
+                                }
+                            });
+                            ToastUtil.showToast("set avoidance " + isOn + " success");
+                        } else {
+                            ToastUtil.showToast(djiError.getDescription());
+                        }
+                    }
+                };
+                flightAssistant.setCollisionAvoidanceEnabled(isOn,completionCallback);
+                flightAssistant.setActiveObstacleAvoidanceEnabled(isOn,completionCallback);
+            }
+
+        }else{
+            if (isOn)
+                mTvAvoidance.setText(R.string.open);
+            else
+                mTvAvoidance.setText(R.string.close);
+        }
     }
 }

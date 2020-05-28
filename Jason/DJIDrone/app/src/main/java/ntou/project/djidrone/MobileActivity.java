@@ -80,6 +80,7 @@ public class MobileActivity extends AppCompatActivity {
     private LinearLayout linearLeft, linearRight;
     private ImageView mBtnCamera;
     private ImageView stickLeft, stickRight;
+    private ImageView mBtnTakeoff,mBtnLanding;
     private TextView mTvState, mTvBatteryPower;
     private List<Fragment> fragments;
     private VideoSurfaceFragment mVideoSurfaceFragment, mVideoSurfaceFragmentSmall;
@@ -169,6 +170,8 @@ public class MobileActivity extends AppCompatActivity {
         mBtnCamera.setTag(R.drawable.shoot_photo);
         droneView = findViewById(R.id.droneView);
         mFrameSetting = findViewById(R.id.container);
+        mBtnTakeoff = findViewById(R.id.btn_takeoff);
+        mBtnLanding = findViewById(R.id.btn_landing);
         mVideoSurfaceFragment = new VideoSurfaceFragment(false);
         mVideoSurfaceFragmentSmall = new VideoSurfaceFragment(true);
         gMapFragment = SupportMapFragment.newInstance();
@@ -201,6 +204,8 @@ public class MobileActivity extends AppCompatActivity {
         stickLeft.setOnClickListener(onclick);
         mBtnCamera.setOnClickListener(onclick);
         mapView.setOnClickListener(onclick);
+        mBtnTakeoff.setOnClickListener(onclick);
+        mBtnLanding.setOnClickListener(onclick);
 
         //滑動返回main fragment
         gestureDetector = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
@@ -317,6 +322,12 @@ public class MobileActivity extends AppCompatActivity {
                 case R.id.mapView:
                     Log.d(TAG, "change fragment");
                     changeMapFragment();
+                    break;
+                case R.id.btn_takeoff:
+                    startTakeoff();
+                    break;
+                case R.id.btn_landing:
+                    startLanding();
                     break;
                 default:
                     break;
@@ -554,37 +565,83 @@ public class MobileActivity extends AppCompatActivity {
     }
 
     private void setSensor(){
+//        flightController = DJIApplication.getFlightControllerInstance();
+//        if(null != flightController){
+//            FlightAssistant flightAssistant = flightController.getFlightAssistant();
+//            flightAssistant.setCollisionAvoidanceEnabled(true, new CommonCallbacks.CompletionCallback() {
+//                @Override
+//                public void onResult(DJIError djiError) {
+//                    if(null == djiError){
+//                        ToastUtil.showToast("start Collision Avoidance success");
+//                    }else{
+//                        ToastUtil.showToast("setCollisionAvoidance fail" + djiError.getDescription());
+//                    }
+//                }
+//            });
+//            flightAssistant.getCollisionAvoidanceEnabled(new CommonCallbacks.CompletionCallbackWith<Boolean>() {
+//                @Override
+//                public void onSuccess(Boolean aBoolean) {
+//                    ToastUtil.showToast("get Collision Avoidance success : " + aBoolean);
+//                }
+//
+//                @Override
+//                public void onFailure(DJIError djiError) {
+//                    ToastUtil.showToast("getCollisionAvoidanceEnabled fail "+ djiError.getDescription());
+//                }
+//            });
+//            flightAssistant.setActiveObstacleAvoidanceEnabled(true, new CommonCallbacks.CompletionCallback() {
+//                @Override
+//                public void onResult(DJIError djiError) {
+//                    if(null == djiError){
+//                        ToastUtil.showToast("start Active Obstacle Avoidance success");
+//                    }else{
+//                        ToastUtil.showToast(djiError.getDescription());
+//                    }
+//                }
+//            });
+//        }
+    }
+
+    private void startTakeoff(){
         flightController = DJIApplication.getFlightControllerInstance();
         if(null != flightController){
-            FlightAssistant flightAssistant = flightController.getFlightAssistant();
-            flightAssistant.setCollisionAvoidanceEnabled(true, new CommonCallbacks.CompletionCallback() {
+            flightController.setStateCallback(new FlightControllerState.Callback() {
                 @Override
-                public void onResult(DJIError djiError) {
-                    if(null == djiError){
-                        ToastUtil.showToast("start Collision Avoidance success");
-                    }else{
-                        ToastUtil.showToast("setCollisionAvoidance fail" + djiError.getDescription());
+                public void onUpdate(FlightControllerState flightControllerState) {
+                    if(!flightControllerState.isFlying()){
+                        flightController.startTakeoff(new CommonCallbacks.CompletionCallback() {
+                            @Override
+                            public void onResult(DJIError djiError) {
+                                if(null == djiError){
+                                    ToastUtil.showToast("takeoff success");
+                                }else{
+                                    ToastUtil.showToast(djiError.getDescription());
+                                }
+                            }
+                        });
                     }
                 }
             });
-            flightAssistant.getCollisionAvoidanceEnabled(new CommonCallbacks.CompletionCallbackWith<Boolean>() {
-                @Override
-                public void onSuccess(Boolean aBoolean) {
-                    ToastUtil.showToast("get Collision Avoidance success : " + aBoolean);
-                }
+        }
+    }
 
+    private void startLanding() {
+        flightController = DJIApplication.getFlightControllerInstance();
+        if (null != flightController) {
+            flightController.setStateCallback(new FlightControllerState.Callback() {
                 @Override
-                public void onFailure(DJIError djiError) {
-                    ToastUtil.showToast("getCollisionAvoidanceEnabled fail "+ djiError.getDescription());
-                }
-            });
-            flightAssistant.setActiveObstacleAvoidanceEnabled(true, new CommonCallbacks.CompletionCallback() {
-                @Override
-                public void onResult(DJIError djiError) {
-                    if(null == djiError){
-                        ToastUtil.showToast("start Active Obstacle Avoidance success");
-                    }else{
-                        ToastUtil.showToast(djiError.getDescription());
+                public void onUpdate(FlightControllerState flightControllerState) {
+                    if (flightControllerState.isFlying()) {
+                        flightController.startLanding(new CommonCallbacks.CompletionCallback() {
+                            @Override
+                            public void onResult(DJIError djiError) {
+                                if (null == djiError) {
+                                    ToastUtil.showToast("landing success");
+                                } else {
+                                    ToastUtil.showToast(djiError.getDescription());
+                                }
+                            }
+                        });
                     }
                 }
             });

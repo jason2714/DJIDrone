@@ -17,6 +17,7 @@
     <string name="account">DJIDrone</string>
     <string name="password">ntoucse</string>
     <string name="camera_mode_change">切換相機模式</string>
+    <string name="collision_avoidance_change">避障系統設定</string>
     <string name="shoot_photo">拍照</string>
     <string name="record_video">錄影</string>
     <string name="product_information">Product Information</string>
@@ -26,5 +27,7 @@
     <string name="connected">已連接</string>
     <string name="connected_remote_control">只連接到遙控器</string>
     <string name="disconnected">未連接</string>
+    <string name="open">開啟</string>
+    <string name="close">關閉</string>
     <string name="api_key">3afcbfbcba1e0e72936a8144</string>
 </resources>
