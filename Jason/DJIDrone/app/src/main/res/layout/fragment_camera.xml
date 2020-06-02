@@ -37,7 +37,6 @@
                 android:id="@+id/tbtn_camera_mode"
                 android:layout_width="45dp"
                 android:layout_height="match_parent"
-                android:layout_margin="7dp"
                 android:background="@drawable/toggle_selector"
                 android:gravity="center_vertical"
                 android:checked="false"

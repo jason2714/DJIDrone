@@ -78,21 +78,21 @@
             android:layout_height="match_parent"
             android:layout_margin="2dp"
             android:layout_weight="1"
-            android:src="@drawable/button_takeoff" />
+            android:src="@drawable/icon_takeoff" />
 
         <ImageView
             android:id="@+id/btn_landing"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_margin="4dp"
+            android:layout_margin="2dp"
             android:layout_weight="1"
-            android:src="@drawable/button_land" />
+            android:src="@drawable/icon_landing" />
         <ImageView
             android:id="@+id/btn_camera"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:src="@drawable/shoot_photo"/>
+            android:src="@drawable/icon_shoot_photo"/>
     </LinearLayout>
 
     <ToggleButton
@@ -257,7 +257,7 @@
                 android:layout_centerVertical="true"
                 android:layout_marginEnd="10dp"
                 android:layout_toStartOf="@id/sensorIcon"
-                android:src="@drawable/icon_signal_half" />
+                android:src="@drawable/icon_signal_level0" />
 
             <ImageView
                 android:id="@+id/sensorIcon"

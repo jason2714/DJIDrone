@@ -3,12 +3,12 @@
     <item android:state_enabled="false"
         android:state_checked="true">
         <bitmap android:alpha="0.5"
-            android:src="@drawable/toggle_on"/>
+            android:src="@drawable/icon_toggle_on"/>
     </item>
     <item android:state_enabled="true"
         android:state_checked="true"
-        android:drawable="@drawable/toggle_on"/>
+        android:drawable="@drawable/icon_toggle_on"/>
     <item
-        android:drawable="@drawable/toggle_off"
+        android:drawable="@drawable/icon_toggle_off"
         android:state_checked="false" />
 </selector>

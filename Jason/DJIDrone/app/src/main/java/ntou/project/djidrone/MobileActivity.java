@@ -14,7 +14,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.graphics.SurfaceTexture;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -24,7 +23,6 @@ import android.util.Log;
 import android.view.GestureDetector;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
-import android.view.TextureView;
 import android.view.View;
 import android.widget.CompoundButton;
 import android.widget.FrameLayout;
@@ -34,43 +32,29 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
-import com.google.android.gms.maps.CameraUpdateFactory;
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.MapFragment;
-import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import dji.common.battery.BatteryState;
 import dji.common.camera.ResolutionAndFrameRate;
-import dji.common.camera.SettingsDefinitions;
 import dji.common.error.DJIError;
 import dji.common.flightcontroller.FlightControllerState;
-import dji.common.product.Model;
 import dji.common.util.CommonCallbacks;
 import dji.sdk.base.BaseProduct;
 import dji.sdk.battery.Battery;
 import dji.sdk.camera.Camera;
-import dji.sdk.camera.VideoFeeder;
-import dji.sdk.codec.DJICodecManager;
-import dji.sdk.flightcontroller.FlightAssistant;
 import dji.sdk.flightcontroller.FlightController;
 import dji.sdk.products.Aircraft;
-import dji.sdk.sdkmanager.DJISDKManager;
 import ntou.project.djidrone.fragment.BatteryFragment;
 import ntou.project.djidrone.fragment.CameraFragment;
 import ntou.project.djidrone.fragment.ControllerFragment;
-import ntou.project.djidrone.fragment.GridItem;
 import ntou.project.djidrone.fragment.MainFragment;
 import ntou.project.djidrone.fragment.SensorFragment;
 import ntou.project.djidrone.fragment.SettingFragment;
 import ntou.project.djidrone.fragment.SignalFragment;
 import ntou.project.djidrone.fragment.VideoSurfaceFragment;
-import ntou.project.djidrone.listener.GestureListener;
 
 public class MobileActivity extends AppCompatActivity {
     private static final String TAG = MobileActivity.class.getName();
@@ -167,7 +151,7 @@ public class MobileActivity extends AppCompatActivity {
         stickLeft = findViewById(R.id.leftStick);
         stickRight = findViewById(R.id.rightStick);
         mBtnCamera = findViewById(R.id.btn_camera);
-        mBtnCamera.setTag(R.drawable.shoot_photo);
+        mBtnCamera.setTag(R.drawable.icon_shoot_photo);
         droneView = findViewById(R.id.droneView);
         mFrameSetting = findViewById(R.id.container);
         mBtnTakeoff = findViewById(R.id.btn_takeoff);
@@ -303,18 +287,16 @@ public class MobileActivity extends AppCompatActivity {
                     changeMapFragment();
                     break;
                 case R.id.btn_camera:
-                    if ((Integer) mBtnCamera.getTag() == R.drawable.shoot_photo) {
+                    if ((Integer) mBtnCamera.getTag() == R.drawable.icon_shoot_photo) {
                         captureAction();
-                    } else if ((Integer) mBtnCamera.getTag() == R.drawable.record_video) {
+                    } else if ((Integer) mBtnCamera.getTag() == R.drawable.icon_record_video) {
                         ToggleButton mTbtnCameraMode = findViewById(R.id.tbtn_camera_mode);
                         if (null != mTbtnCameraMode)
                             mTbtnCameraMode.setEnabled(isRecording);
                         isRecording = !isRecording;
                         if (isRecording) {
-                            mBtnCamera.setImageAlpha(128);
                             startRecord();
                         } else {
-                            mBtnCamera.setImageAlpha(255);
                             stopRecord();
                         }
                     }
@@ -405,12 +387,15 @@ public class MobileActivity extends AppCompatActivity {
                 @Override
                 public void onResult(DJIError djiError) {
                     if (djiError == null) {
+                        mBtnCamera.setImageResource(R.drawable.icon_recording);
                         ToastUtil.showToast("Record video: success");
                     } else {
                         ToastUtil.showToast(djiError.getDescription());
                     }
                 }
             }); // Execute the startRecordVideo API
+        }else{
+            mBtnCamera.setImageResource(R.drawable.icon_recording);
         }
     }
 
@@ -423,14 +408,16 @@ public class MobileActivity extends AppCompatActivity {
                 @Override
                 public void onResult(DJIError djiError) {
                     if (djiError == null) {
+                        mBtnCamera.setImageResource(R.drawable.icon_record_video);
                         ToastUtil.showToast("Stop recording: success");
                     } else {
                         ToastUtil.showToast(djiError.getDescription());
                     }
                 }
             }); // Execute the stopRecordVideo API
+        }else{
+            mBtnCamera.setImageResource(R.drawable.icon_record_video);
         }
-
     }
 
     private List<Fragment> getFragments() {

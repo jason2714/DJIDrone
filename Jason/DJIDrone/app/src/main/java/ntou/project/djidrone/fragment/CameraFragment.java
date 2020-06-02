@@ -1,15 +1,9 @@
 package ntou.project.djidrone.fragment;
 
-import android.app.Application;
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.transition.TransitionManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,13 +11,11 @@ import android.view.ViewGroup;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
-import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.fragment.app.Fragment;
 
 import dji.common.camera.SettingsDefinitions;
@@ -76,12 +68,12 @@ public class CameraFragment extends Fragment {
                     } else {//未連接
                         if (isChecked) {
                             mTvCameraMode.setText(R.string.record_video);
-                            mBtnCamera.setImageResource(R.drawable.record_video);
-                            mBtnCamera.setTag(R.drawable.record_video);
+                            mBtnCamera.setImageResource(R.drawable.icon_record_video);
+                            mBtnCamera.setTag(R.drawable.icon_record_video);
                         } else {
                             mTvCameraMode.setText(R.string.shoot_photo);
-                            mBtnCamera.setImageResource(R.drawable.shoot_photo);
-                            mBtnCamera.setTag(R.drawable.shoot_photo);
+                            mBtnCamera.setImageResource(R.drawable.icon_shoot_photo);
+                            mBtnCamera.setTag(R.drawable.icon_shoot_photo);
                         }
                     }
                     break;
@@ -105,12 +97,12 @@ public class CameraFragment extends Fragment {
                                 ToastUtil.showToast("Switch Camera Mode Succeeded");
                                 if (cameraMode == SettingsDefinitions.CameraMode.SHOOT_PHOTO) {
                                     mTvCameraMode.setText(R.string.shoot_photo);
-                                    mBtnCamera.setImageResource(R.drawable.shoot_photo);
-                                    mBtnCamera.setTag(R.drawable.shoot_photo);
+                                    mBtnCamera.setImageResource(R.drawable.icon_shoot_photo);
+                                    mBtnCamera.setTag(R.drawable.icon_shoot_photo);
                                 } else if (cameraMode == SettingsDefinitions.CameraMode.RECORD_VIDEO) {
                                     mTvCameraMode.setText(R.string.record_video);
-                                    mBtnCamera.setImageResource(R.drawable.record_video);
-                                    mBtnCamera.setTag(R.drawable.record_video);
+                                    mBtnCamera.setImageResource(R.drawable.icon_record_video);
+                                    mBtnCamera.setTag(R.drawable.icon_record_video);
                                 } else {
                                     ToastUtil.showToast("" + cameraMode);
                                 }
