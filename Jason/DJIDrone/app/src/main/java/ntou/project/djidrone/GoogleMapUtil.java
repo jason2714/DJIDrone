@@ -1,17 +1,12 @@
 package ntou.project.djidrone;
 
-import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.location.Criteria;
 import android.location.Location;
-import android.location.LocationListener;
 import android.location.LocationManager;
-import android.os.Bundle;
-import android.os.Looper;
 import android.provider.Settings;
 import android.util.Log;
 
@@ -27,9 +22,7 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import dji.common.flightcontroller.FlightControllerState;
-import dji.sdk.base.BaseProduct;
 import dji.sdk.flightcontroller.FlightController;
-import dji.sdk.products.Aircraft;
 
 public class GoogleMapUtil implements GoogleMap.OnMapClickListener, OnMapReadyCallback {
 
@@ -103,31 +96,22 @@ public class GoogleMapUtil implements GoogleMap.OnMapClickListener, OnMapReadyCa
 
     public void unInitFlightController() {
         mFlightController = DJIApplication.getFlightControllerInstance();
-
         if (mFlightController != null) {
             mFlightController.setStateCallback(null);
         }
     }
 
-    public void initFlightController() {
+    public void initFlightController(FlightControllerState mFlightControllerState) {
+        Log.d(DJIApplication.TAG, "GPSSignalLevel : " + mFlightControllerState.getGPSSignalLevel());
+//      ToastUtil.showToast("AircraftLocation" + djiFlightControllerCurrentState.getAircraftLocation());
+        droneLocationLat = mFlightControllerState.getAircraftLocation().getLatitude();
+        Log.d(DJIApplication.TAG, "droneLocationLat : " + mFlightControllerState.getAircraftLocation().getLatitude());
+        droneLocationLng = mFlightControllerState.getAircraftLocation().getLongitude();
+        Log.d(DJIApplication.TAG, "droneLocationLng : " + mFlightControllerState.getAircraftLocation().getLongitude());
+        Log.d(DJIApplication.TAG, "droneAltitude : " + mFlightControllerState.getAircraftLocation().getAltitude());
+        Log.d(DJIApplication.TAG, "isLandingConfirmationNeeded : " + mFlightControllerState.isLandingConfirmationNeeded());
 
-        mFlightController = DJIApplication.getFlightControllerInstance();
-
-        if (mFlightController != null) {//TODO not a number
-            mFlightController.setStateCallback(new FlightControllerState.Callback() {
-                @Override
-                public void onUpdate(FlightControllerState djiFlightControllerCurrentState) {
-//                    ToastUtil.showToast("GPSSignalLevel" + djiFlightControllerCurrentState.getGPSSignalLevel());
-                    Log.d(DJIApplication.TAG,"GPSSignalLevel" + djiFlightControllerCurrentState.getGPSSignalLevel());
-//                    ToastUtil.showToast("AircraftLocation" + djiFlightControllerCurrentState.getAircraftLocation());
-                    droneLocationLat = djiFlightControllerCurrentState.getAircraftLocation().getLatitude();
-                    Log.d(DJIApplication.TAG, "droneLocationLat" + djiFlightControllerCurrentState.getAircraftLocation().getLatitude());
-                    droneLocationLng = djiFlightControllerCurrentState.getAircraftLocation().getLongitude();
-                    Log.d(DJIApplication.TAG, "droneLocationLng" + djiFlightControllerCurrentState.getAircraftLocation().getLongitude());
-                    updateDroneLocation();
-                }
-            });
-        }
+        updateDroneLocation();
     }
 
     public static boolean checkGpsCoordinates(double latitude, double longitude) {
@@ -140,7 +124,7 @@ public class GoogleMapUtil implements GoogleMap.OnMapClickListener, OnMapReadyCa
         //Create MarkerOptions object
         final MarkerOptions markerOptions = new MarkerOptions();
         markerOptions.position(pos);
-        markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.aircraft));
+        markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.icon_aircraft));
 //        ToastUtil.showToast("updateDroneLocation");
         activity.runOnUiThread(new Runnable() {
             @Override

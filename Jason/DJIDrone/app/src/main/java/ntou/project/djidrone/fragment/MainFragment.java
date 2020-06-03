@@ -47,9 +47,9 @@ public class MainFragment extends Fragment {
 
     @Override
     public void onStart() {
-        Log.d(TAG, "onStart");
         //寫在onCreate會失敗
         super.onStart();
+        Log.d(TAG, "onStart");
         gridItemList = getList();
         gridViewMain.setAdapter(new GridViewAdapter(MainFragment.this, gridItemList));//setAdapter
         setListener();
@@ -59,11 +59,8 @@ public class MainFragment extends Fragment {
         gridViewMain.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Intent intent = new Intent("fragment." + gridItemList.get(position).getName());
                 ((MobileActivity) getActivity()).changeFragment(position + 1);
                 Log.d(define.LOG_TAG, gridItemList.get(position).getName());
-                Log.d(define.LOG_TAG, "activity:" + getActivity());
-                Log.d(define.LOG_TAG, "context:" + getContext());
                 setToast(position);
             }
         });

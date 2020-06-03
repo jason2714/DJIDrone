@@ -9,9 +9,11 @@ import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.fragment.app.Fragment;
 
 import android.annotation.SuppressLint;
+import android.app.AlertDialog;
 import android.app.Instrumentation;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Build;
@@ -34,7 +36,9 @@ import android.widget.ToggleButton;
 
 import com.google.android.gms.maps.SupportMapFragment;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 import dji.common.battery.BatteryState;
@@ -64,7 +68,7 @@ public class MobileActivity extends AppCompatActivity {
     private LinearLayout linearLeft, linearRight;
     private ImageView mBtnCamera;
     private ImageView stickLeft, stickRight;
-    private ImageView mBtnTakeoff,mBtnLanding;
+    private ImageView mBtnTakeoff, mBtnLanding;
     private TextView mTvState, mTvBatteryPower;
     private List<Fragment> fragments;
     private VideoSurfaceFragment mVideoSurfaceFragment, mVideoSurfaceFragmentSmall;
@@ -85,6 +89,8 @@ public class MobileActivity extends AppCompatActivity {
     private StringBuffer stringBuffer = new StringBuffer();
     //flightController
     private FlightController flightController;
+    private FlightControllerState.Callback flightStateCallback;
+    private AlertDialog.Builder alertBuilder;
 
     protected BroadcastReceiver mReceiver = new BroadcastReceiver() {
 
@@ -99,9 +105,9 @@ public class MobileActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         getWindow().getDecorView().setSystemUiVisibility(
-                View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION//隱藏狀態欄和標題欄
-                        | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION//全螢幕顯示
-                        | View.SYSTEM_UI_FLAG_FULLSCREEN | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);//隱藏手機虛擬按鍵HOME/BACK/LIST按鍵
+            View.SYSTEM_UI_FLAG_LAYOUT_STABLE //隱藏狀態欄和標題欄
+            | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION|View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN//全螢幕顯示
+            | View.SYSTEM_UI_FLAG_FULLSCREEN | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);//隱藏手機虛擬按鍵HOME/BACK/LIST按鍵
     }
 
     @Override
@@ -190,7 +196,7 @@ public class MobileActivity extends AppCompatActivity {
         mapView.setOnClickListener(onclick);
         mBtnTakeoff.setOnClickListener(onclick);
         mBtnLanding.setOnClickListener(onclick);
-
+        initFlightControllerCallback();
         //滑動返回main fragment
         gestureDetector = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
 
@@ -203,9 +209,10 @@ public class MobileActivity extends AppCompatActivity {
                 }
                 if (e1.getX() - e2.getX() < -FLING_MIN_DISTANCE
                         && Math.abs(velocityX) > FLING_MIN_VELOCITY) {
-                    fragmentPosition = 0;
                     new Thread(() -> {
                         try {
+//                            fragments.set(fragmentPosition,)
+                            fragmentPosition = 0;
                             new Instrumentation().sendKeyDownUpSync(KeyEvent.KEYCODE_BACK);
                         } catch (Exception e) {
                             Log.e(TAG, e.toString());
@@ -281,6 +288,11 @@ public class MobileActivity extends AppCompatActivity {
         public void onClick(View v) {
             switch (v.getId()) {
                 case R.id.leftStick:
+                    new AlertDialog.Builder(MobileActivity.this)
+                            .setTitle("Confirm landing")
+                            .setMessage("確定要降落嗎")
+                            .setPositiveButton(R.string.ok,null)
+                            .setNegativeButton(R.string.cancel,null).show();
                     break;
                 case R.id.rightStick:
                     //test
@@ -317,6 +329,52 @@ public class MobileActivity extends AppCompatActivity {
         }
     }
 
+    private void initFlightControllerCallback() {
+        flightController = DJIApplication.getFlightControllerInstance();
+        if (null == flightController)
+            return;
+        flightStateCallback = new FlightControllerState.Callback() {
+            @Override
+            public void onUpdate(FlightControllerState flightControllerState) {
+                gMapUtil.initFlightController(flightControllerState);
+                if(flightControllerState.isLandingConfirmationNeeded()){
+                    if(alertBuilder == null){
+                        alertBuilder = new AlertDialog.Builder(MobileActivity.this)
+                                .setTitle("Confirm landing")
+                                .setMessage("確定要降落嗎")
+                                .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        flightController.confirmLanding(new CommonCallbacks.CompletionCallback() {
+                                            @Override
+                                            public void onResult(DJIError djiError) {
+                                                alertBuilder = null;
+                                                ToastUtil.showErrorToast("降落成功",djiError);
+                                            }
+                                        });
+                                    }
+                                })
+                                .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        flightController.cancelLanding(new CommonCallbacks.CompletionCallback() {
+                                            @Override
+                                            public void onResult(DJIError djiError) {
+                                                alertBuilder = null;
+                                                ToastUtil.showErrorToast("取消降落成功",djiError);
+                                            }
+                                        });
+                                    }
+                                });
+                        alertBuilder.show();
+                    }
+
+                }
+            }
+        };
+
+    }
+
     public void triggerOnMapClick() {
         mapView.performClick();
     }
@@ -325,8 +383,8 @@ public class MobileActivity extends AppCompatActivity {
         fragmentPosition = position;
         getSupportFragmentManager()
                 .beginTransaction()
-                .addToBackStack(null)
                 .replace(mFrameSetting.getId(), fragments.get(position))
+                .addToBackStack(null)
                 .commit();
     }
 
@@ -387,14 +445,19 @@ public class MobileActivity extends AppCompatActivity {
                 @Override
                 public void onResult(DJIError djiError) {
                     if (djiError == null) {
-                        mBtnCamera.setImageResource(R.drawable.icon_recording);
-                        ToastUtil.showToast("Record video: success");
+                        mHandler.postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                mBtnCamera.setImageResource(R.drawable.icon_recording);
+                                ToastUtil.showToast("Record video: success");
+                            }
+                        }, 500);
                     } else {
                         ToastUtil.showToast(djiError.getDescription());
                     }
                 }
             }); // Execute the startRecordVideo API
-        }else{
+        } else {
             mBtnCamera.setImageResource(R.drawable.icon_recording);
         }
     }
@@ -404,18 +467,22 @@ public class MobileActivity extends AppCompatActivity {
         camera = DJIApplication.getCameraInstance();
         if (camera != null) {
             camera.stopRecordVideo(new CommonCallbacks.CompletionCallback() {
-
                 @Override
                 public void onResult(DJIError djiError) {
                     if (djiError == null) {
-                        mBtnCamera.setImageResource(R.drawable.icon_record_video);
-                        ToastUtil.showToast("Stop recording: success");
+                        mHandler.postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                mBtnCamera.setImageResource(R.drawable.icon_record_video);
+                                ToastUtil.showToast("Stop recording: success");
+                            }
+                        }, 500);
                     } else {
                         ToastUtil.showToast(djiError.getDescription());
                     }
                 }
             }); // Execute the stopRecordVideo API
-        }else{
+        } else {
             mBtnCamera.setImageResource(R.drawable.icon_record_video);
         }
     }
@@ -440,17 +507,17 @@ public class MobileActivity extends AppCompatActivity {
         mProduct = DJIApplication.getProductInstance();
         if (null != mProduct) {
             if (mProduct.isConnected()) {
-                Log.d(TAG, "connect to aircraft");
+                Log.d(TAG, "connect to icon_aircraft");
                 mTvState.setText(R.string.connected);
                 //google map
-                gMapUtil.initFlightController();
-                gMapUtilSmall.initFlightController();
+                flightController = DJIApplication.getFlightControllerInstance();
+                if (null != flightController)
+                    flightController.setStateCallback(flightStateCallback);
             } else if (mProduct instanceof Aircraft) {
                 Log.d(TAG, "only connect to remote controller");
                 mTvState.setText(R.string.connected_remote_control);
                 //google map
                 gMapUtil.unInitFlightController();
-                gMapUtilSmall.unInitFlightController();
             }
         } else {
             Log.d(TAG, "product disconnected");
@@ -520,7 +587,7 @@ public class MobileActivity extends AppCompatActivity {
                         @Override
                         public void run() {
 //                            mTvBatteryPower.setText(stringBuffer.toString());
-                            mTvBatteryPower.setText(batteryState.getChargeRemainingInPercent()+"%");
+                            mTvBatteryPower.setText(batteryState.getChargeRemainingInPercent() + "%");
                         }
                     });
 //                    ToastUtil.showToast("ChargeRemainingInPercent:" + batteryState.getChargeRemainingInPercent());
@@ -539,73 +606,34 @@ public class MobileActivity extends AppCompatActivity {
         }
     }
 
-    private void setSignal(){
+    private void setSignal() {
         flightController = DJIApplication.getFlightControllerInstance();
-        if(null != flightController){
-            flightController.setStateCallback(new FlightControllerState.Callback() {
-                @Override
-                public void onUpdate(FlightControllerState flightControllerState) {
-                    flightControllerState.getGPSSignalLevel();
-                }
-            });
-        }
-    }
-
-    private void setSensor(){
-//        flightController = DJIApplication.getFlightControllerInstance();
-//        if(null != flightController){
-//            FlightAssistant flightAssistant = flightController.getFlightAssistant();
-//            flightAssistant.setCollisionAvoidanceEnabled(true, new CommonCallbacks.CompletionCallback() {
+//        if (null != flightController) {
+//            flightController.setStateCallback(new FlightControllerState.Callback() {
 //                @Override
-//                public void onResult(DJIError djiError) {
-//                    if(null == djiError){
-//                        ToastUtil.showToast("start Collision Avoidance success");
-//                    }else{
-//                        ToastUtil.showToast("setCollisionAvoidance fail" + djiError.getDescription());
-//                    }
-//                }
-//            });
-//            flightAssistant.getCollisionAvoidanceEnabled(new CommonCallbacks.CompletionCallbackWith<Boolean>() {
-//                @Override
-//                public void onSuccess(Boolean aBoolean) {
-//                    ToastUtil.showToast("get Collision Avoidance success : " + aBoolean);
-//                }
-//
-//                @Override
-//                public void onFailure(DJIError djiError) {
-//                    ToastUtil.showToast("getCollisionAvoidanceEnabled fail "+ djiError.getDescription());
-//                }
-//            });
-//            flightAssistant.setActiveObstacleAvoidanceEnabled(true, new CommonCallbacks.CompletionCallback() {
-//                @Override
-//                public void onResult(DJIError djiError) {
-//                    if(null == djiError){
-//                        ToastUtil.showToast("start Active Obstacle Avoidance success");
-//                    }else{
-//                        ToastUtil.showToast(djiError.getDescription());
-//                    }
+//                public void onUpdate(FlightControllerState flightControllerState) {
+//                    flightControllerState.getGPSSignalLevel();
 //                }
 //            });
 //        }
     }
 
-    private void startTakeoff(){
+    private void setSensor() {
+    }
+
+    private void startTakeoff() {
         flightController = DJIApplication.getFlightControllerInstance();
-        if(null != flightController){
-            flightController.setStateCallback(new FlightControllerState.Callback() {
+        if (null == flightController)
+            return;
+        if (!flightController.getState().isFlying()) {
+            flightController.startTakeoff(new CommonCallbacks.CompletionCallback() {
                 @Override
-                public void onUpdate(FlightControllerState flightControllerState) {
-                    if(!flightControllerState.isFlying()){
-                        flightController.startTakeoff(new CommonCallbacks.CompletionCallback() {
-                            @Override
-                            public void onResult(DJIError djiError) {
-                                if(null == djiError){
-                                    ToastUtil.showToast("takeoff success");
-                                }else{
-                                    ToastUtil.showToast(djiError.getDescription());
-                                }
-                            }
-                        });
+                public void onResult(DJIError djiError) {
+//                    DialogUtil.showDialogBasedOnError(MobileActivity.this,djiError);
+                    if (null == djiError) {
+                        ToastUtil.showToast("takeoff success");
+                    } else {
+                        ToastUtil.showToast(djiError.getDescription());
                     }
                 }
             });
@@ -614,25 +642,22 @@ public class MobileActivity extends AppCompatActivity {
 
     private void startLanding() {
         flightController = DJIApplication.getFlightControllerInstance();
-        if (null != flightController) {
-            flightController.setStateCallback(new FlightControllerState.Callback() {
+        if (null == flightController)
+            return;
+        if (flightController.getState().isFlying()) {
+            flightController.startLanding(new CommonCallbacks.CompletionCallback() {
                 @Override
-                public void onUpdate(FlightControllerState flightControllerState) {
-                    if (flightControllerState.isFlying()) {
-                        flightController.startLanding(new CommonCallbacks.CompletionCallback() {
-                            @Override
-                            public void onResult(DJIError djiError) {
-                                if (null == djiError) {
-                                    ToastUtil.showToast("landing success");
-                                } else {
-                                    ToastUtil.showToast(djiError.getDescription());
-                                }
-                            }
-                        });
+                public void onResult(DJIError djiError) {
+//                    DialogUtil.showDialogBasedOnError(MobileActivity.this,djiError);
+                    if (null == djiError) {
+                        ToastUtil.showToast("landing success");
+                    } else {
+                        ToastUtil.showToast(djiError.getDescription());
                     }
                 }
             });
         }
     }
+
 }
 

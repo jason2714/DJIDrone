@@ -45,10 +45,12 @@ public class CameraFragment extends Fragment {
         OnToggle onToggle = new OnToggle();
         mTbtnCameraMode = view.findViewById(R.id.tbtn_camera_mode);
         mTvCameraMode = view.findViewById(R.id.tv_camera_mode);
-        mBtnCamera = getActivity().findViewById(R.id.btn_camera);
+         mBtnCamera = getActivity().findViewById(R.id.btn_camera);
         mTbtnCameraMode.setOnCheckedChangeListener(onToggle);
-        if (MobileActivity.isRecording)
+        if (MobileActivity.isRecording){
+            ToastUtil.showToast("isRecording");
             mTbtnCameraMode.setEnabled(false);
+        }
         super.onViewCreated(view, savedInstanceState);
     }
 

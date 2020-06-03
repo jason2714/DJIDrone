@@ -320,7 +320,7 @@ public class MainActivity extends AppCompatActivity {
         if (null != mProduct) {
             Log.d(TAG, "refreshSDK: True");
             if(mProduct.isConnected()){
-                Log.d(TAG, "connect to aircraft");
+                Log.d(TAG, "connect to icon_aircraft");
                 mProductState.setText(R.string.connection_success);
                 mProductInformation.setText(mProduct.getModel().getDisplayName());
                 submit.setEnabled(true);

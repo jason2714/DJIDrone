@@ -34,8 +34,8 @@
                 android:layout_marginEnd="20dp"/>
             <ToggleButton
                 android:id="@+id/tbtn_avoidance_mode"
-                android:layout_width="45dp"
-                android:layout_height="match_parent"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
                 android:background="@drawable/toggle_selector"
                 android:gravity="center_vertical"
                 android:checked="false"
