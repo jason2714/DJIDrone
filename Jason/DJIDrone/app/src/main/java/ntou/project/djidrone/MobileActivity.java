@@ -175,6 +175,18 @@ public class MobileActivity extends AppCompatActivity {
         getSupportFragmentManager()//getFragmentManager
                 .beginTransaction()//要求 FragmentManager 回傳一個 FragmentTransaction 物件，用以進行 Fragment 的切換。
                 .add(mFrameSetting.getId(), fragments.get(0))
+                .add(mFrameSetting.getId(), fragments.get(1))
+                .add(mFrameSetting.getId(), fragments.get(2))
+                .add(mFrameSetting.getId(), fragments.get(3))
+                .add(mFrameSetting.getId(), fragments.get(4))
+                .add(mFrameSetting.getId(), fragments.get(5))
+                .add(mFrameSetting.getId(), fragments.get(6))
+                .hide(fragments.get(1))
+                .hide(fragments.get(2))
+                .hide(fragments.get(3))
+                .hide(fragments.get(4))
+                .hide(fragments.get(5))
+                .hide(fragments.get(6))
                 .add(droneView.getId(), mVideoSurfaceFragment)
                 .add(droneView.getId(), gMapFragment)
                 .hide(gMapFragment)
@@ -190,6 +202,9 @@ public class MobileActivity extends AppCompatActivity {
         Toggle toggle = new Toggle();
         btn_changeMode.setOnCheckedChangeListener(toggle);
         relativeLeftToggle.setOnCheckedChangeListener(toggle);
+        //test
+        relativeLeftToggle.setVisibility(View.GONE);
+        //test
         stickRight.setOnClickListener(onclick);
         stickLeft.setOnClickListener(onclick);
         mBtnCamera.setOnClickListener(onclick);
@@ -202,28 +217,24 @@ public class MobileActivity extends AppCompatActivity {
 
             @Override
             public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
-                final int FLING_MIN_DISTANCE = mFrameSetting.getWidth() / 2, FLING_MIN_VELOCITY = 100;
+                final int FLING_MIN_DISTANCE = mFrameSetting.getWidth() / 2, FLING_MIN_VELOCITY = 100;//長度一半
                 if (fragmentPosition == 0) {
                     Log.d(TAG, "on main fragment");
                     return super.onFling(e1, e2, velocityX, velocityY);
                 }
                 if (e1.getX() - e2.getX() < -FLING_MIN_DISTANCE
                         && Math.abs(velocityX) > FLING_MIN_VELOCITY) {
-                    new Thread(() -> {
-                        try {
-//                            fragments.set(fragmentPosition,)
-                            fragmentPosition = 0;
-                            new Instrumentation().sendKeyDownUpSync(KeyEvent.KEYCODE_BACK);
-                        } catch (Exception e) {
-                            Log.e(TAG, e.toString());
-                        }
-                    }).start();
+//                    new Thread(() -> {
+//                        try {
+//                            fragmentPosition = 0;
+//                            new Instrumentation().sendKeyDownUpSync(KeyEvent.KEYCODE_BACK);
+//                        } catch (Exception e) {
+//                            Log.e(TAG, e.toString());
+//                        }
+//                    }).start();
+                    changeFragment(0);
                     Log.d(TAG, "back to main");
                 }
-//                Log.d(TAG,""+mFrameSetting.getWidth()+"\t"+mFrameSetting.getHeight());
-//                Log.d(TAG, "" + (e1.getX() - e2.getX()));
-//                Log.d(TAG, "" + FLING_MIN_DISTANCE);
-//                Log.d(TAG, "" + velocityX +"\t"+ velocityY);
                 Log.d(TAG, "onFling");
                 return super.onFling(e1, e2, velocityX, velocityY);
             }
@@ -380,12 +391,18 @@ public class MobileActivity extends AppCompatActivity {
     }
 
     public void changeFragment(int position) {
-        fragmentPosition = position;
+//        fragmentPosition = position;
+//        getSupportFragmentManager()
+//                .beginTransaction()
+//                .replace(mFrameSetting.getId(), fragments.get(position))
+//                .addToBackStack(null)
+//                .commit();
         getSupportFragmentManager()
                 .beginTransaction()
-                .replace(mFrameSetting.getId(), fragments.get(position))
-                .addToBackStack(null)
+                .hide(fragments.get(fragmentPosition))
+                .show(fragments.get(position))
                 .commit();
+        fragmentPosition = position;
     }
 
     private void changeMapFragment() {

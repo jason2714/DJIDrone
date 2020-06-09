@@ -61,7 +61,7 @@ public class MainFragment extends Fragment {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 ((MobileActivity) getActivity()).changeFragment(position + 1);
                 Log.d(define.LOG_TAG, gridItemList.get(position).getName());
-                setToast(position);
+//                setToast(position);
             }
         });
         gridViewMain.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {

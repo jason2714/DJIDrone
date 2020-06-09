@@ -58,20 +58,20 @@
         app:layout_constraintBottom_toTopOf="@id/gdlnhzBottom"
         app:layout_constraintLeft_toLeftOf="@id/gdlnvtLeft"
         app:layout_constraintRight_toLeftOf="@id/gdlnvtRight"
-        app:layout_constraintTop_toTopOf="@id/gdlnhzTop"/>
+        app:layout_constraintTop_toTopOf="@id/gdlnhzTop" />
 
     <LinearLayout
         android:id="@+id/linearLeft"
         android:layout_width="0dp"
         android:layout_height="0dp"
+        android:background="@color/colorFragment"
         android:orientation="vertical"
         android:padding="15dp"
-        android:background="@color/colorFragment"
         app:layout_constraintBottom_toBottomOf="@id/gdlnhzMiddle"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="@id/gdlnvtLeft"
         app:layout_constraintTop_toTopOf="@id/gdlnhzTop">
-<!--        android:background="@color/colorBackground"-->
+        <!--        android:background="@color/colorBackground"-->
         <ImageView
             android:id="@+id/btn_takeoff"
             android:layout_width="match_parent"
@@ -87,13 +87,14 @@
             android:layout_margin="2dp"
             android:layout_weight="1"
             android:src="@drawable/icon_landing" />
+
         <ImageView
             android:id="@+id/btn_camera"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_margin="2dp"
             android:layout_weight="1"
-            android:src="@drawable/icon_shoot_photo"/>
+            android:src="@drawable/icon_shoot_photo" />
     </LinearLayout>
 
     <ToggleButton
@@ -185,33 +186,32 @@
         android:background="#000"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintRight_toLeftOf="@id/gdlnvtMap"
-        app:layout_constraintTop_toBottomOf="@id/gdlnhzBottom"/>
+        app:layout_constraintTop_toBottomOf="@id/gdlnhzBottom" />
 
 
     <!--    <fragment-->
-<!--        android:id="@+id/map"-->
-<!--        android:layout_width="match_parent"-->
-<!--        android:layout_height="match_parent"-->
-<!--        class="com.google.android.gms.maps.SupportMapFragment" />-->
+    <!--        android:id="@+id/map"-->
+    <!--        android:layout_width="match_parent"-->
+    <!--        android:layout_height="match_parent"-->
+    <!--        class="com.google.android.gms.maps.SupportMapFragment" />-->
 
 
-<!--    <ImageView-->
-<!--        android:id="@+id/mapView"-->
-<!--        android:layout_width="182dp"-->
-<!--        android:layout_height="0dp"-->
-<!--        android:scaleType="fitCenter"-->
-<!--        android:src="@drawable/map"-->
-<!--        app:layout_constraintBottom_toBottomOf="parent"-->
-<!--        app:layout_constraintRight_toLeftOf="@id/gdlnvtMap"-->
-<!--        app:layout_constraintTop_toBottomOf="@id/gdlnhzBottom" />-->
+    <!--    <ImageView-->
+    <!--        android:id="@+id/mapView"-->
+    <!--        android:layout_width="182dp"-->
+    <!--        android:layout_height="0dp"-->
+    <!--        android:scaleType="fitCenter"-->
+    <!--        android:src="@drawable/map"-->
+    <!--        app:layout_constraintBottom_toBottomOf="parent"-->
+    <!--        app:layout_constraintRight_toLeftOf="@id/gdlnvtMap"-->
+    <!--        app:layout_constraintTop_toBottomOf="@id/gdlnhzBottom" />-->
 
 
-    <LinearLayout
-        android:id="@+id/linearTop"
+    <RelativeLayout
+        android:id="@+id/relativeTop"
         android:layout_width="match_parent"
         android:layout_height="30dp"
         android:background="@color/colorBackground"
-        android:orientation="horizontal"
         app:layout_constraintBottom_toTopOf="@id/gdlnhzTop"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
@@ -223,13 +223,17 @@
             android:layout_height="match_parent"
             android:padding="5dp"
             android:scaleType="fitXY"
+            android:layout_alignParentStart="true"
             android:src="@drawable/logo_drone" />
 
         <RelativeLayout
             android:id="@+id/titleBar"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="30dp"
             android:gravity="center_vertical"
+            android:layout_toEndOf="@id/logo"
+            android:layout_marginEnd="10dp"
+            android:layout_toStartOf="@id/linear_changeMode_Bg"
             android:padding="4dp">
 
             <TextView
@@ -274,30 +278,39 @@
                 android:layout_width="20dp"
                 android:layout_height="16dp"
                 android:layout_centerVertical="true"
+                android:layout_marginEnd="5dp"
                 android:layout_toStartOf="@id/tv_battery_power"
                 android:scaleType="fitXY"
-                android:layout_marginEnd="5dp"
                 android:src="@drawable/icon_battery_charging" />
+
             <TextView
                 android:id="@+id/tv_battery_power"
                 android:layout_width="wrap_content"
                 android:layout_height="20dp"
                 android:layout_centerVertical="true"
-                android:layout_marginEnd="20dp"
-                android:layout_toStartOf="@id/btn_changeMode"
-                android:textSize="15sp"
+                android:layout_alignParentEnd="true"
+                android:text="100%"
                 android:textColor="#FFF"
-                android:text="100%"/>
+                android:textSize="15sp" />
+
+<!--            android:layout_alignParentEnd="true"-->
+<!--            android:layout_centerVertical="true"-->
+        </RelativeLayout>
+        <LinearLayout
+            android:id="@+id/linear_changeMode_Bg"
+            android:layout_width="35dp"
+            android:layout_height="match_parent"
+            android:layout_alignParentEnd="true"
+            android:background="@color/colorBackgroundPressed">
             <ToggleButton
                 android:id="@+id/btn_changeMode"
-                android:layout_width="23dp"
-                android:layout_height="match_parent"
-                android:layout_alignParentEnd="true"
-                android:layout_centerVertical="true"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="6dp"
                 android:background="@drawable/mode_togglebutton"
                 android:textOff=""
                 android:textOn="" />
-        </RelativeLayout>
-    </LinearLayout>
+        </LinearLayout>
+    </RelativeLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
