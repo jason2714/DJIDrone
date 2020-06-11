@@ -19,7 +19,7 @@ import dji.sdk.codec.DJICodecManager;
 import ntou.project.djidrone.DJIApplication;
 import ntou.project.djidrone.MobileActivity;
 import ntou.project.djidrone.R;
-import ntou.project.djidrone.ToastUtil;
+import ntou.project.djidrone.utils.ToastUtil;
 
 public class VideoSurfaceFragment extends Fragment implements VideoFeeder.VideoDataListener, TextureView.SurfaceTextureListener {
     private static final String TAG = VideoSurfaceFragment.class.getName();

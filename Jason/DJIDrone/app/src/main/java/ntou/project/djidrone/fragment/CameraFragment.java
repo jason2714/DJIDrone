@@ -23,9 +23,8 @@ import dji.common.error.DJIError;
 import dji.common.util.CommonCallbacks;
 import dji.sdk.camera.Camera;
 import ntou.project.djidrone.DJIApplication;
-import ntou.project.djidrone.MobileActivity;
 import ntou.project.djidrone.R;
-import ntou.project.djidrone.ToastUtil;
+import ntou.project.djidrone.utils.ToastUtil;
 
 public class CameraFragment extends Fragment {
     private static final String TAG = CameraFragment.class.getName();

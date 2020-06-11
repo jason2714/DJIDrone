@@ -23,6 +23,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 import dji.common.flightcontroller.FlightControllerState;
 import dji.sdk.flightcontroller.FlightController;
+import ntou.project.djidrone.utils.ToastUtil;
 
 public class GoogleMapUtil implements GoogleMap.OnMapClickListener, OnMapReadyCallback {
 

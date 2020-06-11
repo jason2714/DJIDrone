@@ -13,13 +13,12 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import dji.common.error.DJIError;
-import dji.common.flightcontroller.FlightControllerState;
 import dji.common.util.CommonCallbacks;
 import dji.sdk.flightcontroller.FlightAssistant;
 import dji.sdk.flightcontroller.FlightController;
 import ntou.project.djidrone.DJIApplication;
 import ntou.project.djidrone.R;
-import ntou.project.djidrone.ToastUtil;
+import ntou.project.djidrone.utils.ToastUtil;
 
 public class SensorFragment extends Fragment {
     private ToggleButton mTbtnAvoidance;

@@ -9,8 +9,8 @@ import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.fragment.app.Fragment;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.Instrumentation;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -23,7 +23,6 @@ import android.os.Looper;
 import android.transition.TransitionManager;
 import android.util.Log;
 import android.view.GestureDetector;
-import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.CompoundButton;
@@ -36,9 +35,7 @@ import android.widget.ToggleButton;
 
 import com.google.android.gms.maps.SupportMapFragment;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
 
 import dji.common.battery.BatteryState;
@@ -59,6 +56,9 @@ import ntou.project.djidrone.fragment.SensorFragment;
 import ntou.project.djidrone.fragment.SettingFragment;
 import ntou.project.djidrone.fragment.SignalFragment;
 import ntou.project.djidrone.fragment.VideoSurfaceFragment;
+import ntou.project.djidrone.utils.DialogUtil;
+import ntou.project.djidrone.utils.OnScreenJoystick;
+import ntou.project.djidrone.utils.ToastUtil;
 
 public class MobileActivity extends AppCompatActivity {
     private static final String TAG = MobileActivity.class.getName();
@@ -67,7 +67,8 @@ public class MobileActivity extends AppCompatActivity {
     private ToggleButton btn_changeMode, relativeLeftToggle;
     private LinearLayout linearLeft, linearRight;
     private ImageView mBtnCamera;
-    private ImageView stickLeft, stickRight;
+    private ImageView stickLeft;
+    private OnScreenJoystick stickRight;
     private ImageView mBtnTakeoff, mBtnLanding;
     private TextView mTvState, mTvBatteryPower;
     private List<Fragment> fragments;
@@ -104,10 +105,12 @@ public class MobileActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        getWindow().getDecorView().setSystemUiVisibility(
-            View.SYSTEM_UI_FLAG_LAYOUT_STABLE //隱藏狀態欄和標題欄
-            | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION|View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN//全螢幕顯示
-            | View.SYSTEM_UI_FLAG_FULLSCREEN | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);//隱藏手機虛擬按鍵HOME/BACK/LIST按鍵
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            getWindow().getDecorView().setSystemUiVisibility(
+                    View.SYSTEM_UI_FLAG_LAYOUT_STABLE //隱藏狀態欄和標題欄
+                            | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN//全螢幕顯示
+                            | View.SYSTEM_UI_FLAG_FULLSCREEN | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);//隱藏手機虛擬按鍵HOME/BACK/LIST按鍵
+        }
     }
 
     @Override
@@ -205,7 +208,7 @@ public class MobileActivity extends AppCompatActivity {
         //test
         relativeLeftToggle.setVisibility(View.GONE);
         //test
-        stickRight.setOnClickListener(onclick);
+//        stickRight.setOnClickListener(onclick);
         stickLeft.setOnClickListener(onclick);
         mBtnCamera.setOnClickListener(onclick);
         mapView.setOnClickListener(onclick);
@@ -299,15 +302,12 @@ public class MobileActivity extends AppCompatActivity {
         public void onClick(View v) {
             switch (v.getId()) {
                 case R.id.leftStick:
-                    new AlertDialog.Builder(MobileActivity.this)
-                            .setTitle("Confirm landing")
-                            .setMessage("確定要降落嗎")
-                            .setPositiveButton(R.string.ok,null)
-                            .setNegativeButton(R.string.cancel,null).show();
-                    break;
-                case R.id.rightStick:
-                    //test
-                    changeMapFragment();
+                    DialogUtil.showDialog(MobileActivity.this,"嘎喔");
+//                    new AlertDialog.Builder(MobileActivity.this)
+//                            .setTitle("Confirm landing")
+//                            .setMessage("確定要降落嗎")
+//                            .setPositiveButton(R.string.ok, null)
+//                            .setNegativeButton(R.string.cancel, null).show();
                     break;
                 case R.id.btn_camera:
                     if ((Integer) mBtnCamera.getTag() == R.drawable.icon_shoot_photo) {
@@ -348,8 +348,8 @@ public class MobileActivity extends AppCompatActivity {
             @Override
             public void onUpdate(FlightControllerState flightControllerState) {
                 gMapUtil.initFlightController(flightControllerState);
-                if(flightControllerState.isLandingConfirmationNeeded()){
-                    if(alertBuilder == null){
+                if (flightControllerState.isLandingConfirmationNeeded()) {
+                    if (alertBuilder == null) {
                         alertBuilder = new AlertDialog.Builder(MobileActivity.this)
                                 .setTitle("Confirm landing")
                                 .setMessage("確定要降落嗎")
@@ -360,7 +360,7 @@ public class MobileActivity extends AppCompatActivity {
                                             @Override
                                             public void onResult(DJIError djiError) {
                                                 alertBuilder = null;
-                                                ToastUtil.showErrorToast("降落成功",djiError);
+                                                ToastUtil.showErrorToast("降落成功", djiError);
                                             }
                                         });
                                     }
@@ -372,7 +372,7 @@ public class MobileActivity extends AppCompatActivity {
                                             @Override
                                             public void onResult(DJIError djiError) {
                                                 alertBuilder = null;
-                                                ToastUtil.showErrorToast("取消降落成功",djiError);
+                                                ToastUtil.showErrorToast("取消降落成功", djiError);
                                             }
                                         });
                                     }
