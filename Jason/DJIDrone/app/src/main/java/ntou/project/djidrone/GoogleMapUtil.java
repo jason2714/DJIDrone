@@ -82,11 +82,11 @@ public class GoogleMapUtil implements GoogleMap.OnMapClickListener, OnMapReadyCa
         if (null != location) {
             Log.d("MobileActivity", "get location success");
             userLocation = new LatLng(location.getLatitude(), location.getLongitude());
-            gMap.addMarker(new MarkerOptions().position(userLocation).title("Marker User Location"));
+//            gMap.addMarker(new MarkerOptions().position(userLocation).title("Marker User Location"));
         } else {
             Log.d("MobileActivity", "can't get location");
             userLocation = NTOUCSE;
-            gMap.addMarker(new MarkerOptions().position(userLocation).title("Marker in NTOUCSE"));
+//            gMap.addMarker(new MarkerOptions().position(userLocation).title("Marker in NTOUCSE"));
         }
         gMap.moveCamera(CameraUpdateFactory.newLatLngZoom(userLocation, 15f));
     }

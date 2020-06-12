@@ -149,6 +149,7 @@
             android:orientation="vertical"
             app:layout_constraintGuide_percent="0.87" />
         <LinearLayout
+            android:id="@+id/rightStick_bg"
             android:layout_width="0dp"
             android:layout_height="0dp"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -190,19 +191,33 @@
 <!--                android:layout_width="match_parent"-->
 <!--                android:layout_height="match_parent"/>-->
 <!--        </LinearLayout>-->
-        <ImageView
-            android:id="@+id/leftStick"
+        <LinearLayout
+            android:id="@+id/leftStick_bg"
             android:layout_width="0dp"
             android:layout_height="0dp"
-            android:layout_margin="5dp"
-            android:background="@drawable/stick_base"
-            android:padding="5dp"
-            android:scaleType="fitCenter"
-            android:src="@drawable/stick_state"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toLeftOf="@id/gdlnvtStickLeft"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            android:background="@drawable/stick_base">
+            <ntou.project.djidrone.utils.OnScreenJoystick
+                android:id="@+id/leftStick"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"/>
+        </LinearLayout>
+<!--        <ImageView-->
+<!--            android:id="@+id/leftStick"-->
+<!--            android:layout_width="0dp"-->
+<!--            android:layout_height="0dp"-->
+<!--            android:layout_margin="5dp"-->
+<!--            android:background="@drawable/stick_base"-->
+<!--            android:padding="5dp"-->
+<!--            android:scaleType="fitCenter"-->
+<!--            android:src="@drawable/stick_state"-->
+<!--            app:layout_constraintBottom_toBottomOf="parent"-->
+<!--            app:layout_constraintLeft_toLeftOf="parent"-->
+<!--            app:layout_constraintRight_toLeftOf="@id/gdlnvtStickLeft"-->
+<!--            app:layout_constraintTop_toTopOf="parent" />-->
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <FrameLayout
@@ -324,7 +339,7 @@
         </RelativeLayout>
         <LinearLayout
             android:id="@+id/linear_changeMode_Bg"
-            android:layout_width="35dp"
+            android:layout_width="30dp"
             android:layout_height="match_parent"
             android:layout_alignParentEnd="true"
             android:background="@color/colorBackgroundPressed">

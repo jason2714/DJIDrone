@@ -70,7 +70,7 @@
         <!--  google -->
         <!-- DJI SDK -->
         <activity android:name=".MobileActivity"
-            android:screenOrientation="landscape"
+            android:screenOrientation="sensorLandscape"
             tools:ignore="LockedOrientationActivity" />
         <activity android:name=".define" />
         <activity android:name=".MainActivity"

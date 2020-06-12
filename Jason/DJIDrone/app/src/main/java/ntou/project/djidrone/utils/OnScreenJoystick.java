@@ -22,6 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
  */
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -31,12 +32,15 @@ import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.View.OnTouchListener;
+import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 
@@ -69,11 +73,25 @@ public class OnScreenJoystick extends SurfaceView implements
         init();
     }
 
+    @SuppressLint("NewApi")
     private void initGraphics(AttributeSet attrs) {
         Resources res = getContext().getResources();
-        mJoystick = BitmapFactory
-                .decodeResource(res, R.drawable.stick_normal);
+        mJoystick = BitmapFactory.decodeResource(res,R.drawable.stick_normal);
+//        mJoystick = drawableToBitmap(getResources().getDrawable(R.drawable.stick_state,null));
+    }
 
+    public static Bitmap drawableToBitmap (Drawable drawable) {
+
+        if (drawable instanceof BitmapDrawable) {
+            return ((BitmapDrawable)drawable).getBitmap();
+        }
+
+        Bitmap bitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+        drawable.draw(canvas);
+
+        return bitmap;
     }
 
     private void initBounds(final Canvas pCanvas) {
@@ -91,12 +109,17 @@ public class OnScreenJoystick extends SurfaceView implements
     private void init() {
         mHolder = getHolder();
         mHolder.addCallback(this);
-
         mThread = new JoystickThread();
 
         setZOrderOnTop(true);
         mHolder.setFormat(PixelFormat.TRANSPARENT);
         setOnTouchListener(this);
+        setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ToastUtil.showToast("sdsadsad");
+            }
+        });
         setEnabled(true);
         setAutoCentering(true);
     }
@@ -116,24 +139,27 @@ public class OnScreenJoystick extends SurfaceView implements
     @Override
     public void surfaceChanged(final SurfaceHolder arg0, final int arg1,
                                final int arg2, final int arg3) {
-
+        ToastUtil.showToast("surface change");
 //		mThread.setRunning(false);
     }
 
     @Override
     public void surfaceCreated(final SurfaceHolder arg0) {
+        ToastUtil.showToast("create surface");
+        init();
         mThread.start();
-
     }
 
     @Override
     public void surfaceDestroyed(final SurfaceHolder arg0) {
         boolean retry = true;
         mThread.setRunning(false);
-
+        ToastUtil.showToast("destroy surface");
         while (retry) {
             try {
                 // code to kill Thread
+//                mThread.currentThread().interrupt();
+//                mThread=null;
                 mThread.join();
                 retry = false;
             } catch (InterruptedException e) {
@@ -157,19 +183,16 @@ public class OnScreenJoystick extends SurfaceView implements
     public boolean onTouch(final View arg0, final MotionEvent pEvent) {
         final float x = pEvent.getX();
         final float y = pEvent.getY();
-        Resources res = getContext().getResources();
         switch (pEvent.getAction()) {
             case MotionEvent.ACTION_UP:
-                mJoystick = BitmapFactory
-                        .decodeResource(res, R.drawable.stick_normal);
+                mJoystick = BitmapFactory.decodeResource(getResources(), R.drawable.stick_normal);
                 if (isAutoCentering()) {
                     mKnobX = Math.round((mBackgroundSize - mKnobSize) * 0.5f);
                     mKnobY = Math.round((mBackgroundSize - mKnobSize) * 0.5f);
                 }
                 break;
             default:
-                mJoystick = BitmapFactory
-                        .decodeResource(res, R.drawable.stick_hold);
+                mJoystick = BitmapFactory.decodeResource(getResources(), R.drawable.stick_hold);
                 // Check if coordinates are in bounds. If they aren't move the knob
                 // to the closest coordinate inbounds.
                 if (checkBounds(x, y)) {
