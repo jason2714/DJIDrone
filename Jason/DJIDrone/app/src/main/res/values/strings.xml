@@ -8,6 +8,16 @@
         <item>@string/camera</item>
         <item>@string/setting</item>
     </string-array>
+    <string-array name="shooting_mode">
+        <item>SINGLE</item>
+        <item>HDR</item>
+        <item>BURST</item>
+        <item>AEB</item>
+        <item>INTERVAL</item>
+        <item>PANORAMA</item>
+        <item>EHDR</item>
+        <item>HYPER_LIGHT</item>
+    </string-array>
     <string name="battery">Battery</string>
     <string name="sensor">Sensor</string>
     <string name="signal">Signal</string>
@@ -16,7 +26,8 @@
     <string name="setting">Setting</string>
     <string name="account">DJIDrone</string>
     <string name="password">ntoucse</string>
-    <string name="camera_mode_change">切換相機模式</string>
+    <string name="camera_mode_info">切換相機模式</string>
+    <string name="shooting_mode_info">切換拍照模式</string>
     <string name="collision_avoidance_change">避障系統設定</string>
     <string name="shoot_photo">拍照</string>
     <string name="record_video">錄影</string>
@@ -32,5 +43,7 @@
     <string name="success">成功</string>
     <string name="ok">確認</string>
     <string name="cancel">取消</string>
+    <string name="RTMP_url">140.121.198.99</string>
+    <string name="live_stream_info">LiveStream</string>
     <string name="api_key">3afcbfbcba1e0e72936a8144</string>
 </resources>

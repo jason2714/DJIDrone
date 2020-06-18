@@ -6,4 +6,4 @@
     android:layout_margin="10dp"
     android:horizontalSpacing="10dp"
     android:numColumns="2"
-    android:verticalSpacing="10dp" />
+    android:verticalSpacing="10dp"/>

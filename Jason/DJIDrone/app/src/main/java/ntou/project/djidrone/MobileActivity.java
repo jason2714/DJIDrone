@@ -25,6 +25,7 @@ import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.CompoundButton;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -48,6 +49,7 @@ import dji.sdk.battery.Battery;
 import dji.sdk.camera.Camera;
 import dji.sdk.flightcontroller.FlightController;
 import dji.sdk.products.Aircraft;
+import dji.sdk.sdkmanager.DJISDKManager;
 import ntou.project.djidrone.fragment.BatteryFragment;
 import ntou.project.djidrone.fragment.CameraFragment;
 import ntou.project.djidrone.fragment.ControllerFragment;
@@ -532,6 +534,7 @@ public class MobileActivity extends AppCompatActivity {
             if (mProduct.isConnected()) {
                 Log.d(TAG, "connect to icon_aircraft");
                 mTvState.setText(R.string.connected);
+                SettingFragment.setLiveStreamUrl(getResources().getString(R.string.RTMP_url));
                 //google map
                 flightController = DJIApplication.getFlightControllerInstance();
                 if (null != flightController)
@@ -539,11 +542,13 @@ public class MobileActivity extends AppCompatActivity {
             } else if (mProduct instanceof Aircraft) {
                 Log.d(TAG, "only connect to remote controller");
                 mTvState.setText(R.string.connected_remote_control);
+                SettingFragment.setLiveStreamUrl(null);
                 //google map
                 gMapUtil.unInitFlightController();
             }
         } else {
             Log.d(TAG, "product disconnected");
+            SettingFragment.setLiveStreamUrl(null);
             mTvState.setText(R.string.disconnected);
         }
     }

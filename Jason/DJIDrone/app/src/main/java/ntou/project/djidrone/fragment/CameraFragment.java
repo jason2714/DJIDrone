@@ -1,5 +1,6 @@
 package ntou.project.djidrone.fragment;
 
+import android.content.Context;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -8,8 +9,14 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
+import android.widget.ListPopupWindow;
+import android.widget.PopupWindow;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
@@ -17,6 +24,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.fragment.app.Fragment;
+
+import java.lang.reflect.Field;
 
 import dji.common.camera.SettingsDefinitions;
 import dji.common.error.DJIError;
@@ -31,6 +40,7 @@ public class CameraFragment extends Fragment {
     private ToggleButton mTbtnCameraMode;
     private TextView mTvCameraMode;
     private ImageView mBtnCamera;
+    private Spinner mSpnShootingMode;
     private static SettingsDefinitions.ShootPhotoMode photoMode;
 
     @Nullable
@@ -44,8 +54,25 @@ public class CameraFragment extends Fragment {
         OnToggle onToggle = new OnToggle();
         mTbtnCameraMode = view.findViewById(R.id.tbtn_camera_mode);
         mTvCameraMode = view.findViewById(R.id.tv_camera_mode);
-         mBtnCamera = getActivity().findViewById(R.id.btn_camera);
+        mBtnCamera = getActivity().findViewById(R.id.btn_camera);
+        mSpnShootingMode = view.findViewById(R.id.spn_shooting_mode);
         mTbtnCameraMode.setOnCheckedChangeListener(onToggle);
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(getContext(),
+                R.array.shooting_mode, android.R.layout.simple_spinner_item);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        mSpnShootingMode.setAdapter(adapter);
+        mSpnShootingMode.setDropDownVerticalOffset(20);
+        mSpnShootingMode.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
         super.onViewCreated(view, savedInstanceState);
     }
 
