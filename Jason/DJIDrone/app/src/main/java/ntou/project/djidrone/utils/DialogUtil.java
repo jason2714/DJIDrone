@@ -25,12 +25,6 @@ public class DialogUtil{
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 dialog.dismiss();
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-                    ((Activity)ctx).getWindow().getDecorView().setSystemUiVisibility(
-                            View.SYSTEM_UI_FLAG_LAYOUT_STABLE //隱藏狀態欄和標題欄
-                                    | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN//全螢幕顯示
-                                    | View.SYSTEM_UI_FLAG_FULLSCREEN | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);//隱藏手機虛擬按鍵HOME/BACK/LIST按鍵
-                }
             }
         });
         showDialogExceptActionBar(builder.create());

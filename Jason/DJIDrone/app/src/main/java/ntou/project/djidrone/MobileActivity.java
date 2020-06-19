@@ -7,6 +7,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -62,7 +63,7 @@ import ntou.project.djidrone.utils.DialogUtil;
 import ntou.project.djidrone.utils.OnScreenJoystick;
 import ntou.project.djidrone.utils.ToastUtil;
 
-public class MobileActivity extends AppCompatActivity {
+public class MobileActivity extends FragmentActivity {
     private static final String TAG = MobileActivity.class.getName();
     private static BaseProduct mProduct = null;
     private ConstraintLayout mainLayout, constraintBottom;
@@ -108,7 +109,7 @@ public class MobileActivity extends AppCompatActivity {
         super.onResume();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             getWindow().getDecorView().setSystemUiVisibility(
-                    View.SYSTEM_UI_FLAG_LAYOUT_STABLE //隱藏狀態欄和標題欄
+                    View.SYSTEM_UI_FLAG_IMMERSIVE|View.SYSTEM_UI_FLAG_LAYOUT_STABLE //隱藏狀態欄和標題欄
                             | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN//全螢幕顯示
                             | View.SYSTEM_UI_FLAG_FULLSCREEN | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);//隱藏手機虛擬按鍵HOME/BACK/LIST按鍵
         }
