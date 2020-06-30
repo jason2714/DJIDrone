@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="30dp"
+    tools:context=".MainActivity">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <ImageView
+                android:id="@+id/logo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:src="@drawable/logo" />
+            <TextView
+                android:id="@+id/tv_product_information"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_toRightOf="@id/logo"
+                android:layout_margin="10dp"
+                android:textSize="20sp"
+                android:text="@string/product_information"/>
+            <TextView
+                android:id="@+id/tv_product_state"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_toRightOf="@id/logo"
+                android:layout_below="@id/tv_product_information"
+                android:layout_margin="10dp"
+                android:textSize="20sp"
+                android:text="@string/connection_loose"/>
+        </RelativeLayout>
+        <EditText
+            android:id="@+id/userId"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_marginTop="30dp"
+            android:background="@drawable/edittext_frame"
+            android:drawableLeft="@drawable/icon_account"
+            android:drawablePadding="10dp"
+            android:hint="帳號(DJIDrone)"
+            android:paddingLeft="10dp"
+            android:singleLine="true"
+            android:textSize="30dp" />
+
+        <EditText
+            android:id="@+id/password"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_marginTop="20dp"
+            android:background="@drawable/edittext_frame"
+            android:drawableLeft="@drawable/icon_password"
+            android:drawablePadding="10dp"
+            android:hint="密碼(ntoucse)"
+            android:inputType="textPassword"
+            android:paddingLeft="10dp"
+            android:singleLine="true"
+            android:textSize="30dp" />
+
+        <Button
+            android:id="@+id/submit"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_marginTop="30dp"
+            android:background="@drawable/submit_button"
+            android:enabled="false"
+            android:text="送出"
+            android:textColor="#FFF"
+            android:textSize="30sp" />
+
+        <Button
+            android:id="@+id/btn_skip"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="30dp"
+            android:background="@drawable/submit_button"
+            android:text="skip"
+            android:textColor="#FFF"
+            android:textSize="30sp" />
+
+    </LinearLayout>
+</LinearLayout>

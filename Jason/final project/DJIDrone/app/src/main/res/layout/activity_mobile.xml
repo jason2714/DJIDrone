@@ -1,0 +1,357 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mainLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/colorBackground"
+    tools:context=".MainActivity">
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/gdlnvtLeft"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.1" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/gdlnvtRight"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.75" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/gdlnvtMap"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.87" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/gdlnhzTop"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_begin="29dp" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/gdlnhzMiddle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.6" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/gdlnhzBottom"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.75" />
+
+    <FrameLayout
+        android:id="@+id/droneView"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="#000"
+        app:layout_constraintBottom_toTopOf="@id/gdlnhzBottom"
+        app:layout_constraintLeft_toLeftOf="@id/gdlnvtLeft"
+        app:layout_constraintRight_toLeftOf="@id/gdlnvtRight"
+        app:layout_constraintTop_toTopOf="@id/gdlnhzTop" />
+
+    <LinearLayout
+        android:id="@+id/linearLeft"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@color/colorFragment"
+        android:orientation="vertical"
+        android:padding="15dp"
+        app:layout_constraintBottom_toBottomOf="@id/gdlnhzMiddle"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="@id/gdlnvtLeft"
+        app:layout_constraintTop_toTopOf="@id/gdlnhzTop">
+        <!--        android:background="@color/colorBackground"-->
+        <ImageView
+            android:id="@+id/btn_takeoff"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_margin="2dp"
+            android:layout_weight="1"
+            android:src="@drawable/icon_takeoff" />
+
+        <ImageView
+            android:id="@+id/btn_landing"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_margin="2dp"
+            android:layout_weight="1"
+            android:src="@drawable/icon_landing" />
+
+        <ImageView
+            android:id="@+id/btn_camera"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_margin="2dp"
+            android:layout_weight="1"
+            android:src="@drawable/icon_shoot_photo" />
+    </LinearLayout>
+
+    <ToggleButton
+        android:id="@+id/relativeLeftToggle"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:layout_marginBottom="3dp"
+        android:background="@drawable/leftlayout_togglebutton"
+        android:padding="0dp"
+        android:scaleType="fitXY"
+        android:textOff=""
+        android:textOn=""
+        app:layout_constraintBottom_toBottomOf="@id/gdlnhzMiddle"
+        app:layout_constraintRight_toRightOf="@id/gdlnvtLeft" />
+
+    <LinearLayout
+        android:id="@+id/linearRight"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@color/colorFragment"
+        android:orientation="vertical"
+        app:layout_constraintBottom_toBottomOf="@id/gdlnhzBottom"
+        app:layout_constraintLeft_toLeftOf="@id/gdlnvtRight"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="@id/gdlnhzTop">
+
+        <FrameLayout
+            android:id="@+id/container"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+    </LinearLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/constraintBottomBottom"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:background="@color/colorBackground"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toTopOf="@id/gdlnhzBottom">
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/gdlnvtStickLeft"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent="0.13" />
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/gdlnvtStickRight"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent="0.87" />
+        <LinearLayout
+            android:id="@+id/rightStick_bg"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toLeftOf="@id/gdlnvtStickRight"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:background="@drawable/stick_base">
+            <ntou.project.djidrone.utils.OnScreenJoystick
+                android:id="@+id/rightStick"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"/>
+        </LinearLayout>
+
+<!--        <ImageView-->
+<!--            android:id="@+id/rightStick"-->
+<!--            android:layout_width="0dp"-->
+<!--            android:layout_height="0dp"-->
+<!--            android:layout_margin="5dp"-->
+<!--            android:background="@drawable/stick_base"-->
+<!--            android:padding="5dp"-->
+<!--            android:scaleType="fitCenter"-->
+<!--            android:src="@drawable/stick_state"-->
+<!--            app:layout_constraintBottom_toBottomOf="parent"-->
+<!--            app:layout_constraintHorizontal_bias="0.777"-->
+<!--            app:layout_constraintLeft_toLeftOf="@id/gdlnvtStickRight"-->
+<!--            app:layout_constraintRight_toRightOf="parent"-->
+<!--            app:layout_constraintTop_toTopOf="parent" />-->
+
+<!--        <LinearLayout-->
+<!--            android:layout_width="0dp"-->
+<!--            android:layout_height="0dp"-->
+<!--            app:layout_constraintBottom_toBottomOf="parent"-->
+<!--            app:layout_constraintLeft_toLeftOf="parent"-->
+<!--            app:layout_constraintRight_toLeftOf="@id/gdlnvtStickLeft"-->
+<!--            app:layout_constraintTop_toTopOf="parent"-->
+<!--            android:background="@drawable/stick_base">-->
+<!--            <ntou.project.djidrone.utils.OnScreenJoystick-->
+<!--                android:id="@+id/leftStick"-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="match_parent"/>-->
+<!--        </LinearLayout>-->
+        <LinearLayout
+            android:id="@+id/leftStick_bg"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toLeftOf="@id/gdlnvtStickLeft"
+            app:layout_constraintTop_toTopOf="parent"
+            android:background="@drawable/stick_base">
+            <ntou.project.djidrone.utils.OnScreenJoystick
+                android:id="@+id/leftStick"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"/>
+        </LinearLayout>
+<!--        <ImageView-->
+<!--            android:id="@+id/leftStick"-->
+<!--            android:layout_width="0dp"-->
+<!--            android:layout_height="0dp"-->
+<!--            android:layout_margin="5dp"-->
+<!--            android:background="@drawable/stick_base"-->
+<!--            android:padding="5dp"-->
+<!--            android:scaleType="fitCenter"-->
+<!--            android:src="@drawable/stick_state"-->
+<!--            app:layout_constraintBottom_toBottomOf="parent"-->
+<!--            app:layout_constraintLeft_toLeftOf="parent"-->
+<!--            app:layout_constraintRight_toLeftOf="@id/gdlnvtStickLeft"-->
+<!--            app:layout_constraintTop_toTopOf="parent" />-->
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <FrameLayout
+        android:id="@+id/mapView"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="#000"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintRight_toLeftOf="@id/gdlnvtMap"
+        app:layout_constraintTop_toBottomOf="@id/gdlnhzBottom" />
+
+
+    <!--    <fragment-->
+    <!--        android:id="@+id/map"-->
+    <!--        android:layout_width="match_parent"-->
+    <!--        android:layout_height="match_parent"-->
+    <!--        class="com.google.android.gms.maps.SupportMapFragment" />-->
+
+
+    <!--    <ImageView-->
+    <!--        android:id="@+id/mapView"-->
+    <!--        android:layout_width="182dp"-->
+    <!--        android:layout_height="0dp"-->
+    <!--        android:scaleType="fitCenter"-->
+    <!--        android:src="@drawable/map"-->
+    <!--        app:layout_constraintBottom_toBottomOf="parent"-->
+    <!--        app:layout_constraintRight_toLeftOf="@id/gdlnvtMap"-->
+    <!--        app:layout_constraintTop_toBottomOf="@id/gdlnhzBottom" />-->
+
+
+    <RelativeLayout
+        android:id="@+id/relativeTop"
+        android:layout_width="match_parent"
+        android:layout_height="30dp"
+        android:background="@color/colorBackground"
+        app:layout_constraintBottom_toTopOf="@id/gdlnhzTop"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageView
+            android:id="@+id/logo"
+            android:layout_width="40dp"
+            android:layout_height="match_parent"
+            android:padding="5dp"
+            android:scaleType="fitXY"
+            android:layout_alignParentStart="true"
+            android:src="@drawable/logo_drone" />
+
+        <RelativeLayout
+            android:id="@+id/titleBar"
+            android:layout_width="0dp"
+            android:layout_height="30dp"
+            android:gravity="center_vertical"
+            android:layout_toEndOf="@id/logo"
+            android:layout_marginEnd="10dp"
+            android:layout_toStartOf="@id/linear_changeMode_Bg"
+            android:padding="4dp">
+
+            <TextView
+                android:id="@+id/tv_state"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_marginStart="5dp"
+                android:text="@string/disconnected"
+                android:textColor="#FFF"
+                android:textSize="15sp" />
+
+            <ImageView
+                android:id="@+id/controllerIcon"
+                android:layout_width="18dp"
+                android:layout_height="20dp"
+                android:layout_centerVertical="true"
+                android:layout_marginEnd="10dp"
+                android:layout_toStartOf="@id/signalIcon"
+                android:src="@drawable/icon_controller" />
+
+            <ImageView
+                android:id="@+id/signalIcon"
+                android:layout_width="18dp"
+                android:layout_height="20dp"
+                android:layout_centerVertical="true"
+                android:layout_marginEnd="10dp"
+                android:layout_toStartOf="@id/sensorIcon"
+                android:src="@drawable/icon_signal_level0" />
+
+            <ImageView
+                android:id="@+id/sensorIcon"
+                android:layout_width="20dp"
+                android:layout_height="26dp"
+                android:layout_centerVertical="true"
+                android:layout_marginEnd="10dp"
+                android:layout_toStartOf="@id/batteryIcon"
+                android:src="@drawable/sensor_lateral" />
+
+            <ImageView
+                android:id="@+id/batteryIcon"
+                android:layout_width="20dp"
+                android:layout_height="16dp"
+                android:layout_centerVertical="true"
+                android:layout_marginEnd="5dp"
+                android:layout_toStartOf="@id/tv_battery_power"
+                android:scaleType="fitXY"
+                android:src="@drawable/icon_battery_charging" />
+
+            <TextView
+                android:id="@+id/tv_battery_power"
+                android:layout_width="wrap_content"
+                android:layout_height="20dp"
+                android:layout_centerVertical="true"
+                android:layout_alignParentEnd="true"
+                android:text="100%"
+                android:textColor="#FFF"
+                android:textSize="15sp" />
+
+<!--            android:layout_alignParentEnd="true"-->
+<!--            android:layout_centerVertical="true"-->
+        </RelativeLayout>
+        <LinearLayout
+            android:id="@+id/linear_changeMode_Bg"
+            android:layout_width="30dp"
+            android:layout_height="match_parent"
+            android:layout_alignParentEnd="true"
+            android:background="@color/colorBackgroundPressed">
+            <ToggleButton
+                android:id="@+id/btn_changeMode"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="6dp"
+                android:background="@drawable/mode_togglebutton"
+                android:textOff=""
+                android:textOn="" />
+        </LinearLayout>
+    </RelativeLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

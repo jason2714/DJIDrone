@@ -170,4 +170,6 @@ public class GoogleMapUtil implements GoogleMap.OnMapClickListener, OnMapReadyCa
         location = locationManager.getLastKnownLocation(bestProvider);//取得上次定位位置
     }
 
+
+
 }
