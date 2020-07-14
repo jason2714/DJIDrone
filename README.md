@@ -10,3 +10,6 @@ Grotion is 123132132132
 帳號|密碼|
 --------- | --------|
 ntoucomputerprojectdrone@gmail.com  | djidrone123 |
+
+問題
+api版本>23
