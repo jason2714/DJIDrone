@@ -79,8 +79,10 @@ public class VideoSurfaceFragment extends Fragment implements VideoFeeder.VideoD
     @Override
     public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height) {
         Log.d(TAG, "onSurfaceTextureAvailable");
+        if(null == DJIApplication.getProductInstance())
+            return;
         if (mCodecManager == null) {
-            mCodecManager = new DJICodecManager(getActivity(), surface, width, height);
+            mCodecManager = new DJICodecManager(getContext(), surface, width, height);
 //            mCodecManager = new DJICodecManager(MobileActivity.this, surface, width, height);
         }
     }

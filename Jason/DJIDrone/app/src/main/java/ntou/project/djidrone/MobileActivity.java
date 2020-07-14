@@ -142,6 +142,7 @@ public class MobileActivity extends FragmentActivity {
 
     private void initUI() {
 //        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+        initFlightControllerCallback();
         refreshSDKRelativeUI();
         setFrameRatio();
         setBattery();
@@ -216,7 +217,6 @@ public class MobileActivity extends FragmentActivity {
         mapView.setOnClickListener(onclick);
         mBtnTakeoff.setOnClickListener(onclick);
         mBtnLanding.setOnClickListener(onclick);
-        initFlightControllerCallback();
         //滑動返回main fragment
         gestureDetector = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
 
@@ -351,8 +351,11 @@ public class MobileActivity extends FragmentActivity {
 
     private void initFlightControllerCallback() {
         flightController = DJIApplication.getFlightControllerInstance();
-        if (null == flightController)
+        if (null == flightController){
+            flightStateCallback = null;
             return;
+        }
+
         flightStateCallback = new FlightControllerState.Callback() {
             @Override
             public void onUpdate(FlightControllerState flightControllerState) {
