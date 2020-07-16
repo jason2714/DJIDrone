@@ -1,15 +1,20 @@
 package ntou.project.djidrone;
 
 
+import android.Manifest;
 import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.multidex.MultiDex;
 
@@ -19,6 +24,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.websocket.OnClose;
 import javax.websocket.OnError;
@@ -40,6 +48,7 @@ import dji.sdk.products.HandHeld;
 import dji.sdk.sdkmanager.DJISDKInitEvent;
 import dji.sdk.sdkmanager.DJISDKManager;
 import dji.sdk.sdkmanager.LiveStreamManager;
+import ntou.project.djidrone.utils.ToastUtil;
 
 public class DJIApplication extends Application{
 
@@ -48,6 +57,9 @@ public class DJIApplication extends Application{
     private static BaseProduct mProduct;
     public Handler mHandler;
     private static Application instance = null;
+
+
+
 
     public void setContext(Application application) {
         instance = application;
@@ -259,4 +271,5 @@ public class DJIApplication extends Application{
         Helper.install(this);
         setContext(this);
     }
+
 }

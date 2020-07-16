@@ -43,7 +43,8 @@
     <string name="success">成功</string>
     <string name="ok">確認</string>
     <string name="cancel">取消</string>
-    <string name="RTMP_url">140.121.198.99</string>
+    <string name="RTMP_url">rtmp://140.121.198.99/show</string>
     <string name="live_stream_info">LiveStream</string>
+    <string name="virtual_stick_enable">Virtual Stick</string>
     <string name="api_key">3afcbfbcba1e0e72936a8144</string>
 </resources>

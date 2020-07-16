@@ -3,14 +3,12 @@
 package ntou.project.djidrone;
 
 import androidx.annotation.RequiresApi;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -26,7 +24,6 @@ import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.WindowManager;
 import android.widget.CompoundButton;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -50,7 +47,6 @@ import dji.sdk.battery.Battery;
 import dji.sdk.camera.Camera;
 import dji.sdk.flightcontroller.FlightController;
 import dji.sdk.products.Aircraft;
-import dji.sdk.sdkmanager.DJISDKManager;
 import ntou.project.djidrone.fragment.BatteryFragment;
 import ntou.project.djidrone.fragment.CameraFragment;
 import ntou.project.djidrone.fragment.ControllerFragment;
@@ -60,6 +56,7 @@ import ntou.project.djidrone.fragment.SettingFragment;
 import ntou.project.djidrone.fragment.SignalFragment;
 import ntou.project.djidrone.fragment.VideoSurfaceFragment;
 import ntou.project.djidrone.utils.DialogUtil;
+import ntou.project.djidrone.utils.GoogleMapUtil;
 import ntou.project.djidrone.utils.OnScreenJoystick;
 import ntou.project.djidrone.utils.ToastUtil;
 
@@ -70,11 +67,10 @@ public class MobileActivity extends FragmentActivity {
     private ToggleButton btn_changeMode, relativeLeftToggle;
     private LinearLayout linearLeft, linearRight;
     private ImageView mBtnCamera;
-    private OnScreenJoystick stickLeft, stickRight;
     private ImageView mBtnTakeoff, mBtnLanding;
     private TextView mTvState, mTvBatteryPower;
     private List<Fragment> fragments;
-    private VideoSurfaceFragment mVideoSurfaceFragment, mVideoSurfaceFragmentSmall;
+    private VideoSurfaceFragment mVideoSurfaceFragment,mVideoSurfaceFragmentSmall;
     private Handler mHandler;
     //camera
     private Camera camera = null;
@@ -94,6 +90,8 @@ public class MobileActivity extends FragmentActivity {
     private FlightController flightController;
     private FlightControllerState.Callback flightStateCallback;
     private AlertDialog comfirmLandingDialog;
+    //virtual stick
+    private OnScreenJoystick mStickLeft,mStickRight;
 
     protected BroadcastReceiver mReceiver = new BroadcastReceiver() {
 
@@ -160,16 +158,17 @@ public class MobileActivity extends FragmentActivity {
         constraintBottom = findViewById(R.id.constraintBottomBottom);
         relativeLeftToggle = findViewById(R.id.relativeLeftToggle);
         mapView = findViewById(R.id.mapView);
-        stickLeft = findViewById(R.id.leftStick);
-        stickRight = findViewById(R.id.rightStick);
         mBtnCamera = findViewById(R.id.btn_camera);
         mBtnCamera.setTag(R.drawable.icon_shoot_photo);
         droneView = findViewById(R.id.droneView);
         mFrameSetting = findViewById(R.id.container);
         mBtnTakeoff = findViewById(R.id.btn_takeoff);
         mBtnLanding = findViewById(R.id.btn_landing);
-        mVideoSurfaceFragment = new VideoSurfaceFragment(false);
+        //Virtual Stick
+        mStickLeft = findViewById(R.id.leftStick);
+        mStickRight = findViewById(R.id.rightStick);
         mVideoSurfaceFragmentSmall = new VideoSurfaceFragment(true);
+        mVideoSurfaceFragment = new VideoSurfaceFragment(false);
         gMapFragment = SupportMapFragment.newInstance();
         gMapFragmentSmall = SupportMapFragment.newInstance();
         gMapUtil = new GoogleMapUtil(this, false);
@@ -219,7 +218,6 @@ public class MobileActivity extends FragmentActivity {
         mBtnLanding.setOnClickListener(onclick);
         //滑動返回main fragment
         gestureDetector = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
-
             @Override
             public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
                 final int FLING_MIN_DISTANCE = mFrameSetting.getWidth() / 2, FLING_MIN_VELOCITY = 100;//長度一半
@@ -268,8 +266,8 @@ public class MobileActivity extends FragmentActivity {
                         layoutMainSet.connect(mapView.getId(), ConstraintSet.LEFT, ConstraintSet.PARENT_ID, ConstraintSet.LEFT);
                         layoutMainSet.clear(mapView.getId(), ConstraintSet.RIGHT);
                         layoutMainSet.applyTo(mainLayout);
-                        stickLeft.setVisibility(View.GONE);
-                        stickRight.setVisibility(View.GONE);
+                        mStickLeft.setVisibility(View.GONE);
+                        mStickRight.setVisibility(View.GONE);
                         constraintBottom.setVisibility(View.GONE);
                         linearRight.setVisibility(View.GONE);
                     } else {
@@ -280,8 +278,8 @@ public class MobileActivity extends FragmentActivity {
                         layoutMainSet.applyTo(mainLayout);
                         linearRight.setVisibility(View.VISIBLE);
                         constraintBottom.setVisibility(View.VISIBLE);
-                        stickLeft.setVisibility(View.VISIBLE);
-                        stickRight.setVisibility(View.VISIBLE);
+                        mStickLeft.setVisibility(View.VISIBLE);
+                        mStickRight.setVisibility(View.VISIBLE);
                     }
                     break;
                 case R.id.relativeLeftToggle:
