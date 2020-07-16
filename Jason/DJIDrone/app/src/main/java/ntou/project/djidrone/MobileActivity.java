@@ -2,15 +2,14 @@
 
 package ntou.project.djidrone;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -26,31 +25,39 @@ import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import com.google.android.gms.maps.SupportMapFragment;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import dji.common.battery.BatteryState;
 import dji.common.camera.ResolutionAndFrameRate;
 import dji.common.error.DJIError;
 import dji.common.flightcontroller.FlightControllerState;
+import dji.common.flightcontroller.simulator.SimulatorState;
+import dji.common.flightcontroller.virtualstick.FlightControlData;
+import dji.common.flightcontroller.virtualstick.FlightCoordinateSystem;
+import dji.common.flightcontroller.virtualstick.RollPitchControlMode;
+import dji.common.flightcontroller.virtualstick.VerticalControlMode;
+import dji.common.flightcontroller.virtualstick.YawControlMode;
 import dji.common.util.CommonCallbacks;
+import dji.keysdk.FlightControllerKey;
 import dji.sdk.base.BaseProduct;
 import dji.sdk.battery.Battery;
 import dji.sdk.camera.Camera;
 import dji.sdk.flightcontroller.FlightController;
+import dji.sdk.flightcontroller.Simulator;
 import dji.sdk.products.Aircraft;
-import dji.sdk.sdkmanager.DJISDKManager;
 import ntou.project.djidrone.fragment.BatteryFragment;
 import ntou.project.djidrone.fragment.CameraFragment;
 import ntou.project.djidrone.fragment.ControllerFragment;
@@ -59,9 +66,13 @@ import ntou.project.djidrone.fragment.SensorFragment;
 import ntou.project.djidrone.fragment.SettingFragment;
 import ntou.project.djidrone.fragment.SignalFragment;
 import ntou.project.djidrone.fragment.VideoSurfaceFragment;
+import ntou.project.djidrone.listener.OnScreenJoystickListener;
 import ntou.project.djidrone.utils.DialogUtil;
+import ntou.project.djidrone.utils.GoogleMapUtil;
+import ntou.project.djidrone.utils.ModuleVerificationUtil;
 import ntou.project.djidrone.utils.OnScreenJoystick;
 import ntou.project.djidrone.utils.ToastUtil;
+import ntou.project.djidrone.utils.ToastUtils;
 
 public class MobileActivity extends FragmentActivity {
     private static final String TAG = MobileActivity.class.getName();
@@ -93,7 +104,7 @@ public class MobileActivity extends FragmentActivity {
     //flightController
     private FlightController flightController;
     private FlightControllerState.Callback flightStateCallback;
-    private AlertDialog comfirmLandingDialog;
+    private AlertDialog comfirmLandingDialog = null;
 
     protected BroadcastReceiver mReceiver = new BroadcastReceiver() {
 
@@ -102,6 +113,34 @@ public class MobileActivity extends FragmentActivity {
             onProductConnectionChange();
         }
     };
+
+    private boolean yawControlModeFlag = true;
+    private boolean rollPitchControlModeFlag = true;
+    private boolean verticalControlModeFlag = true;
+    private boolean horizontalCoordinateFlag = true;
+
+    private Button btnEnableVirtualStick;
+    /*private Button btnDisableVirtualStick;
+    private Button btnHorizontalCoordinate;
+    private Button btnSetYawControlMode;
+    private Button btnSetVerticalControlMode;
+    private Button btnSetRollPitchControlMode;
+    private ToggleButton btnSimulator;
+    private Button btnTakeOff;*/
+
+    private TextView tv_debug;
+
+    private OnScreenJoystick screenJoystickRight;
+    private OnScreenJoystick screenJoystickLeft;
+
+    private Timer sendVirtualStickDataTimer;
+    private SendVirtualStickDataTask sendVirtualStickDataTask;
+
+    private float pitch;
+    private float roll;
+    private float yaw;
+    private float throttle;
+    private FlightControllerKey isSimulatorActived;
 
     //camera
     @Override
@@ -134,15 +173,15 @@ public class MobileActivity extends FragmentActivity {
         IntentFilter filter = new IntentFilter(DJIApplication.FLAG_CONNECTION_CHANGE);
         registerReceiver(mReceiver, filter);
 
-        Toast.makeText(MobileActivity.this, "登入成功", Toast.LENGTH_SHORT).show();
+//        Toast.makeText(MobileActivity.this, "登入成功", Toast.LENGTH_SHORT).show();
         initViewId();
         initLinstener();
         initUI();
+        initVrStick();
     }
 
     private void initUI() {
 //        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
-        initFlightControllerCallback();
         refreshSDKRelativeUI();
         setFrameRatio();
         setBattery();
@@ -200,6 +239,8 @@ public class MobileActivity extends FragmentActivity {
                 .add(mapView.getId(), gMapFragmentSmall)
                 .hide(mVideoSurfaceFragmentSmall)
                 .commit();
+
+        tv_debug = findViewById(R.id.tv_debug);
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -210,13 +251,11 @@ public class MobileActivity extends FragmentActivity {
         relativeLeftToggle.setOnCheckedChangeListener(toggle);
         //test
         relativeLeftToggle.setVisibility(View.GONE);
-        //test
-//        stickRight.setOnClickListener(onclick);
-//        stickLeft.setOnClickListener(onclick);
         mBtnCamera.setOnClickListener(onclick);
         mapView.setOnClickListener(onclick);
         mBtnTakeoff.setOnClickListener(onclick);
         mBtnLanding.setOnClickListener(onclick);
+        initFlightControllerCallback();
         //滑動返回main fragment
         gestureDetector = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
 
@@ -351,11 +390,8 @@ public class MobileActivity extends FragmentActivity {
 
     private void initFlightControllerCallback() {
         flightController = DJIApplication.getFlightControllerInstance();
-        if (null == flightController){
-            flightStateCallback = null;
+        if (null == flightController)
             return;
-        }
-
         flightStateCallback = new FlightControllerState.Callback() {
             @Override
             public void onUpdate(FlightControllerState flightControllerState) {
@@ -691,5 +727,357 @@ public class MobileActivity extends FragmentActivity {
         }
     }
 
-}
+    @Override
+    public void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        setUpListeners();
+    }
 
+    @Override
+    public void onDetachedFromWindow() {
+        if (null != sendVirtualStickDataTimer) {
+            if (sendVirtualStickDataTask != null) {
+                sendVirtualStickDataTask.cancel();
+
+            }
+            sendVirtualStickDataTimer.cancel();
+            sendVirtualStickDataTimer.purge();
+            sendVirtualStickDataTimer = null;
+            sendVirtualStickDataTask = null;
+        }
+        tearDownListeners();
+        super.onDetachedFromWindow();
+    }
+    private void initVrStick()
+    {
+        initAllKeys();
+        initVrStickUI();
+    }
+
+    private void initAllKeys() {
+        isSimulatorActived = FlightControllerKey.create(FlightControllerKey.IS_SIMULATOR_ACTIVE);
+    }
+
+    private void initVrStickUI() {
+        /*btnEnableVirtualStick = (Button) findViewById(R.id.btn_enable_virtual_stick);
+        btnDisableVirtualStick = (Button) findViewById(R.id.btn_disable_virtual_stick);
+        btnHorizontalCoordinate = (Button) findViewById(R.id.btn_horizontal_coordinate);
+        btnSetYawControlMode = (Button) findViewById(R.id.btn_yaw_control_mode);
+        btnSetVerticalControlMode = (Button) findViewById(R.id.btn_vertical_control_mode);
+        btnSetRollPitchControlMode = (Button) findViewById(R.id.btn_roll_pitch_control_mode);
+        btnTakeOff = (Button) findViewById(R.id.btn_take_off);
+
+        btnSimulator = (ToggleButton) findViewById(R.id.btn_start_simulator);
+
+        textView = (TextView) findViewById(R.id.textview_simulator);*/
+
+        screenJoystickRight = (OnScreenJoystick) findViewById(R.id.rightStick);
+        screenJoystickLeft = (OnScreenJoystick) findViewById(R.id.leftStick);
+        flightController = DJIApplication.getFlightControllerInstance();
+        if (flightController != null) {
+            flightController.setRollPitchControlMode(RollPitchControlMode.ANGLE);
+            flightController.setYawControlMode(YawControlMode.ANGLE);
+            flightController.setVerticalControlMode(VerticalControlMode.VELOCITY);
+            flightController.setRollPitchCoordinateSystem(FlightCoordinateSystem.BODY);
+            flightController.setVirtualStickModeEnabled(true, new CommonCallbacks.CompletionCallback() {
+                @Override
+                public void onResult(DJIError djiError) {
+                    DialogUtil.showDialogBasedOnError(MobileActivity.this, djiError);
+                }
+            });
+        }
+        /*btnEnableVirtualStick.setOnClickListener(this);
+        btnDisableVirtualStick.setOnClickListener(this);
+        btnHorizontalCoordinate.setOnClickListener(this);
+        btnSetYawControlMode.setOnClickListener(this);
+        btnSetVerticalControlMode.setOnClickListener(this);
+        btnSetRollPitchControlMode.setOnClickListener(this);
+        btnTakeOff.setOnClickListener(this);
+        btnSimulator.setOnCheckedChangeListener(VirtualStickView.this);
+
+        Boolean isSimulatorOn = (Boolean) KeyManager.getInstance().getValue(isSimulatorActived);
+        if (isSimulatorOn != null && isSimulatorOn) {
+            btnSimulator.setChecked(true);
+            textView.setText("Simulator is On.");
+        }*/
+    }
+
+    private void setUpListeners() {
+        Simulator simulator = ModuleVerificationUtil.getSimulator();
+        if (simulator != null) {
+            simulator.setStateCallback(new SimulatorState.Callback() {
+                @Override
+                public void onUpdate(@NonNull final SimulatorState simulatorState) {
+                    /*ToastUtils.setResultToText(textView,
+                            "Yaw : "
+                                    + simulatorState.getYaw()
+                                    + ","
+                                    + "X : "
+                                    + simulatorState.getPositionX()
+                                    + "\n"
+                                    + "Y : "
+                                    + simulatorState.getPositionY()
+                                    + ","
+                                    + "Z : "
+                                    + simulatorState.getPositionZ());*/
+                }
+            });
+        } else {
+            ToastUtils.setResultToToast("Disconnected!");
+        }
+
+        screenJoystickLeft.setJoystickListener(new OnScreenJoystickListener() {
+
+            @Override
+            public void onTouch(OnScreenJoystick joystick, float pX, float pY) {
+                if (Math.abs(pX) < 0.02) {
+                    pX = 0;
+                }
+
+                if (Math.abs(pY) < 0.02) {
+                    pY = 0;
+                }
+                float verticalJoyControlMaxSpeed = 2;
+                float yawJoyControlMaxSpeed = 3;
+
+                yaw = yawJoyControlMaxSpeed * pX;
+                throttle = verticalJoyControlMaxSpeed * pY;
+
+                if (null == sendVirtualStickDataTimer) {
+                    sendVirtualStickDataTask = new SendVirtualStickDataTask();
+                    sendVirtualStickDataTimer = new Timer();
+                    sendVirtualStickDataTimer.schedule(sendVirtualStickDataTask, 0, 200);
+                }
+                Log.d("Task", "Right On touch => Pitch:"+pitch+", Roll:"+roll+", Yaw:"+yaw+", Throttle:"+throttle);
+            }
+        });
+
+        screenJoystickRight.setJoystickListener(new OnScreenJoystickListener() {
+
+            @Override
+            public void onTouch(OnScreenJoystick joystick, float pX, float pY) {
+                if (Math.abs(pX) < 0.02) {
+                    pX = 0;
+                }
+
+                if (Math.abs(pY) < 0.02) {
+                    pY = 0;
+                }
+                float pitchJoyControlMaxSpeed = 10;
+                float rollJoyControlMaxSpeed = 10;
+
+                if (horizontalCoordinateFlag) {
+                    if (rollPitchControlModeFlag) {
+                        pitch = (float) (pitchJoyControlMaxSpeed * pX);
+
+                        roll = (float) (rollJoyControlMaxSpeed * pY);
+                    } else {
+                        pitch = -(float) (pitchJoyControlMaxSpeed * pY);
+
+                        roll = (float) (rollJoyControlMaxSpeed * pX);
+                    }
+                }
+
+                if (null == sendVirtualStickDataTimer) {
+                    sendVirtualStickDataTask = new SendVirtualStickDataTask();
+                    sendVirtualStickDataTimer = new Timer();
+                    sendVirtualStickDataTimer.schedule(sendVirtualStickDataTask, 100, 200);
+                }
+                Log.d("Task", "Left On touch => Pitch:"+pitch+", Roll:"+roll+", Yaw:"+yaw+", Throttle:"+throttle);
+            }
+        });
+    }
+
+    private void tearDownListeners() {
+        Simulator simulator = ModuleVerificationUtil.getSimulator();
+        if (simulator != null) {
+            simulator.setStateCallback(null);
+        }
+        screenJoystickLeft.setJoystickListener(null);
+        screenJoystickRight.setJoystickListener(null);
+    }
+
+    /*@Override
+    public void onClick(View v) {
+        FlightController flightController = ModuleVerificationUtil.getFlightController();
+        if (flightController == null) {
+            return;
+        }
+        switch (v.getId()) {
+            case R.id.btn_enable_virtual_stick:
+                flightController.setVirtualStickModeEnabled(true, new CommonCallbacks.CompletionCallback() {
+                    @Override
+                    public void onResult(DJIError djiError) {
+                        DialogUtils.showDialogBasedOnError(getContext(), djiError);
+                    }
+                });
+                break;
+
+            case R.id.btn_disable_virtual_stick:
+                flightController.setVirtualStickModeEnabled(false, new CommonCallbacks.CompletionCallback() {
+                    @Override
+                    public void onResult(DJIError djiError) {
+                        DialogUtils.showDialogBasedOnError(getContext(), djiError);
+                    }
+                });
+                break;
+
+            case R.id.btn_roll_pitch_control_mode:
+                if (rollPitchControlModeFlag) {
+                    flightController.setRollPitchControlMode(RollPitchControlMode.ANGLE);
+                    rollPitchControlModeFlag = false;
+                } else {
+                    flightController.setRollPitchControlMode(RollPitchControlMode.VELOCITY);
+                    rollPitchControlModeFlag = true;
+                }
+                try {
+                    ToastUtils.setResultToToast(flightController.getRollPitchControlMode().name());
+                } catch (Exception ex) {
+                }
+                break;
+
+            case R.id.btn_yaw_control_mode:
+                if (yawControlModeFlag) {
+                    flightController.setYawControlMode(YawControlMode.ANGLE);
+                    yawControlModeFlag = false;
+                } else {
+                    flightController.setYawControlMode(YawControlMode.ANGULAR_VELOCITY);
+                    yawControlModeFlag = true;
+                }
+                try {
+                    ToastUtils.setResultToToast(flightController.getYawControlMode().name());
+                } catch (Exception ex) {
+                }
+                break;
+
+            case R.id.btn_vertical_control_mode:
+                if (verticalControlModeFlag) {
+                    flightController.setVerticalControlMode(VerticalControlMode.POSITION);
+                    verticalControlModeFlag = false;
+                } else {
+                    flightController.setVerticalControlMode(VerticalControlMode.VELOCITY);
+                    verticalControlModeFlag = true;
+                }
+                try {
+                    ToastUtils.setResultToToast(flightController.getVerticalControlMode().name());
+                } catch (Exception ex) {
+                }
+                break;
+
+            case R.id.btn_horizontal_coordinate:
+                if (horizontalCoordinateFlag) {
+                    flightController.setRollPitchCoordinateSystem(FlightCoordinateSystem.GROUND);
+                    horizontalCoordinateFlag = false;
+                } else {
+                    flightController.setRollPitchCoordinateSystem(FlightCoordinateSystem.BODY);
+                    horizontalCoordinateFlag = true;
+                }
+                try {
+                    ToastUtils.setResultToToast(flightController.getRollPitchCoordinateSystem().name());
+                } catch (Exception ex) {
+                }
+                break;
+
+            case R.id.btn_take_off:
+
+                flightController.startTakeoff(new CommonCallbacks.CompletionCallback() {
+                    @Override
+                    public void onResult(DJIError djiError) {
+                        DialogUtils.showDialogBasedOnError(getContext(), djiError);
+                    }
+                });
+
+                break;
+
+            default:
+                break;
+        }
+    }*/
+
+    /*@Override
+    public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+        if (compoundButton == btnSimulator) {
+            onClickSimulator(b);
+        }
+    }*/
+
+   /*private void onClickSimulator(boolean isChecked) {
+        Simulator simulator = ModuleVerificationUtil.getSimulator();
+        if (simulator == null) {
+            return;
+        }
+        if (isChecked) {
+
+            textView.setVisibility(VISIBLE);
+
+            simulator.start(InitializationData.createInstance(new LocationCoordinate2D(23, 113), 10, 10),
+                    new CommonCallbacks.CompletionCallback() {
+                        @Override
+                        public void onResult(DJIError djiError) {
+
+                        }
+                    });
+        } else {
+
+            textView.setVisibility(INVISIBLE);
+
+            simulator.stop(new CommonCallbacks.CompletionCallback() {
+                @Override
+                public void onResult(DJIError djiError) {
+
+                }
+            });
+        }
+    }*/
+
+    /*@Override
+    public int getDescription() {
+        return R.string.flight_controller_listview_virtual_stick;
+    }*/
+
+    private class SendVirtualStickDataTask extends TimerTask {
+
+        @Override
+        public void run() {
+            if (ModuleVerificationUtil.isFlightControllerAvailable()) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        tv_debug.setText("Flight available => Pitch:"+pitch+", Roll:"+roll+", Yaw:"+yaw+", Throttle:"+throttle);
+                        DJIApplication.getAircraftInstance()
+                                .getFlightController()
+                                .sendVirtualStickFlightControlData(new FlightControlData(pitch,
+                                                roll,
+                                                yaw,
+                                                throttle),
+
+                                        new CommonCallbacks.CompletionCallback() {
+                                            @Override
+                                            public void onResult(DJIError djiError) {
+                                                if (djiError == null) {
+                                                    //ToastUtil.showToast("set data: success");
+                                                } else {
+                                                    //ToastUtil.showToast(djiError.getDescription());
+                                                }
+
+                                            }
+                                        });
+                    }
+                });
+
+
+            }
+            else
+            {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        tv_debug.setText("Flight UNAVAILABLE => Pitch:"+pitch+", Roll:"+roll+", Yaw:"+yaw+", Throttle:"+throttle);
+                    }
+                });
+
+            }
+
+        }
+    }
+}

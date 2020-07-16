@@ -163,34 +163,34 @@
                 android:layout_height="match_parent"/>
         </LinearLayout>
 
-<!--        <ImageView-->
-<!--            android:id="@+id/rightStick"-->
-<!--            android:layout_width="0dp"-->
-<!--            android:layout_height="0dp"-->
-<!--            android:layout_margin="5dp"-->
-<!--            android:background="@drawable/stick_base"-->
-<!--            android:padding="5dp"-->
-<!--            android:scaleType="fitCenter"-->
-<!--            android:src="@drawable/stick_state"-->
-<!--            app:layout_constraintBottom_toBottomOf="parent"-->
-<!--            app:layout_constraintHorizontal_bias="0.777"-->
-<!--            app:layout_constraintLeft_toLeftOf="@id/gdlnvtStickRight"-->
-<!--            app:layout_constraintRight_toRightOf="parent"-->
-<!--            app:layout_constraintTop_toTopOf="parent" />-->
+        <!--        <ImageView-->
+        <!--            android:id="@+id/rightStick"-->
+        <!--            android:layout_width="0dp"-->
+        <!--            android:layout_height="0dp"-->
+        <!--            android:layout_margin="5dp"-->
+        <!--            android:background="@drawable/stick_base"-->
+        <!--            android:padding="5dp"-->
+        <!--            android:scaleType="fitCenter"-->
+        <!--            android:src="@drawable/stick_state"-->
+        <!--            app:layout_constraintBottom_toBottomOf="parent"-->
+        <!--            app:layout_constraintHorizontal_bias="0.777"-->
+        <!--            app:layout_constraintLeft_toLeftOf="@id/gdlnvtStickRight"-->
+        <!--            app:layout_constraintRight_toRightOf="parent"-->
+        <!--            app:layout_constraintTop_toTopOf="parent" />-->
 
-<!--        <LinearLayout-->
-<!--            android:layout_width="0dp"-->
-<!--            android:layout_height="0dp"-->
-<!--            app:layout_constraintBottom_toBottomOf="parent"-->
-<!--            app:layout_constraintLeft_toLeftOf="parent"-->
-<!--            app:layout_constraintRight_toLeftOf="@id/gdlnvtStickLeft"-->
-<!--            app:layout_constraintTop_toTopOf="parent"-->
-<!--            android:background="@drawable/stick_base">-->
-<!--            <ntou.project.djidrone.utils.OnScreenJoystick-->
-<!--                android:id="@+id/leftStick"-->
-<!--                android:layout_width="match_parent"-->
-<!--                android:layout_height="match_parent"/>-->
-<!--        </LinearLayout>-->
+        <!--        <LinearLayout-->
+        <!--            android:layout_width="0dp"-->
+        <!--            android:layout_height="0dp"-->
+        <!--            app:layout_constraintBottom_toBottomOf="parent"-->
+        <!--            app:layout_constraintLeft_toLeftOf="parent"-->
+        <!--            app:layout_constraintRight_toLeftOf="@id/gdlnvtStickLeft"-->
+        <!--            app:layout_constraintTop_toTopOf="parent"-->
+        <!--            android:background="@drawable/stick_base">-->
+        <!--            <ntou.project.djidrone.utils.OnScreenJoystick-->
+        <!--                android:id="@+id/leftStick"-->
+        <!--                android:layout_width="match_parent"-->
+        <!--                android:layout_height="match_parent"/>-->
+        <!--        </LinearLayout>-->
         <LinearLayout
             android:id="@+id/leftStick_bg"
             android:layout_width="0dp"
@@ -205,19 +205,19 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"/>
         </LinearLayout>
-<!--        <ImageView-->
-<!--            android:id="@+id/leftStick"-->
-<!--            android:layout_width="0dp"-->
-<!--            android:layout_height="0dp"-->
-<!--            android:layout_margin="5dp"-->
-<!--            android:background="@drawable/stick_base"-->
-<!--            android:padding="5dp"-->
-<!--            android:scaleType="fitCenter"-->
-<!--            android:src="@drawable/stick_state"-->
-<!--            app:layout_constraintBottom_toBottomOf="parent"-->
-<!--            app:layout_constraintLeft_toLeftOf="parent"-->
-<!--            app:layout_constraintRight_toLeftOf="@id/gdlnvtStickLeft"-->
-<!--            app:layout_constraintTop_toTopOf="parent" />-->
+        <!--        <ImageView-->
+        <!--            android:id="@+id/leftStick"-->
+        <!--            android:layout_width="0dp"-->
+        <!--            android:layout_height="0dp"-->
+        <!--            android:layout_margin="5dp"-->
+        <!--            android:background="@drawable/stick_base"-->
+        <!--            android:padding="5dp"-->
+        <!--            android:scaleType="fitCenter"-->
+        <!--            android:src="@drawable/stick_state"-->
+        <!--            app:layout_constraintBottom_toBottomOf="parent"-->
+        <!--            app:layout_constraintLeft_toLeftOf="parent"-->
+        <!--            app:layout_constraintRight_toLeftOf="@id/gdlnvtStickLeft"-->
+        <!--            app:layout_constraintTop_toTopOf="parent" />-->
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <FrameLayout
@@ -286,6 +286,16 @@
                 android:text="@string/disconnected"
                 android:textColor="#FFF"
                 android:textSize="15sp" />
+            <TextView
+                android:id="@+id/tv_debug"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_marginEnd="15dp"
+                android:layout_toStartOf="@id/controllerIcon"
+                android:text="Debug"
+                android:textColor="#FFF"
+                android:textSize="10sp" />
 
             <ImageView
                 android:id="@+id/controllerIcon"
@@ -334,8 +344,8 @@
                 android:textColor="#FFF"
                 android:textSize="15sp" />
 
-<!--            android:layout_alignParentEnd="true"-->
-<!--            android:layout_centerVertical="true"-->
+            <!--            android:layout_alignParentEnd="true"-->
+            <!--            android:layout_centerVertical="true"-->
         </RelativeLayout>
         <LinearLayout
             android:id="@+id/linear_changeMode_Bg"
