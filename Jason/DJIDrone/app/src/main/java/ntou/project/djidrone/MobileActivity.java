@@ -195,9 +195,9 @@ public class MobileActivity extends FragmentActivity {
                 .add(droneView.getId(), mVideoSurfaceFragment)
                 .add(droneView.getId(), gMapFragment)
                 .hide(gMapFragment)
-                .add(mapView.getId(), mVideoSurfaceFragmentSmall)
+//                .add(mapView.getId(), mVideoSurfaceFragmentSmall)
                 .add(mapView.getId(), gMapFragmentSmall)
-                .hide(mVideoSurfaceFragmentSmall)
+//                .hide(mVideoSurfaceFragmentSmall)
                 .commit();
     }
 
@@ -421,17 +421,19 @@ public class MobileActivity extends FragmentActivity {
             getSupportFragmentManager()//getFragmentManager
                     .beginTransaction()//要求 FragmentManager 回傳一個 FragmentTransaction 物件，用以進行 Fragment 的切換。
                     .hide(gMapFragmentSmall)
-                    .hide(mVideoSurfaceFragment)
+//                    .hide(mVideoSurfaceFragment)
+                    .remove(mVideoSurfaceFragment)
                     .show(gMapFragment)
-                    .show(mVideoSurfaceFragmentSmall)
+//                    .show(mVideoSurfaceFragmentSmall)
+                    .add(mapView.getId(), mVideoSurfaceFragmentSmall)
                     .commit();
         } else {
             getSupportFragmentManager()//getFragmentManager
                     .beginTransaction()//要求 FragmentManager 回傳一個 FragmentTransaction 物件，用以進行 Fragment 的切換。
                     .hide(gMapFragment)
-                    .hide(mVideoSurfaceFragmentSmall)
+                    .remove(mVideoSurfaceFragmentSmall)
                     .show(gMapFragmentSmall)
-                    .show(mVideoSurfaceFragment)
+                    .add(droneView.getId(),mVideoSurfaceFragment)
                     .commit();
         }
     }
