@@ -23,7 +23,7 @@ THE SOFTWARE.
  */
 
 
-import ntou.project.djidrone.utils.OnScreenJoystick;
+import ntou.project.djidrone.OnScreenJoystick;
 
 public interface OnScreenJoystickListener {
 

@@ -28,27 +28,21 @@ public class VideoSurfaceFragment extends Fragment implements VideoFeeder.VideoD
     private boolean isSmallSurface;
 
     public VideoSurfaceFragment(boolean isSmallSurface) {
-        Log.d(TAG,"constructor");
         this.isSmallSurface = isSmallSurface;
-
     }
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        Log.d(TAG,"onCreateView");
-        if (isSmallSurface)
-            return inflater.inflate(R.layout.texture_video_surface_small, container, false);
-        else
-            return inflater.inflate(R.layout.texture_video_surface, container, false);
+        return inflater.inflate(R.layout.texture_video_surface, container, false);
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        Log.d(TAG,"onViewCreated");
+        mVideoSurface = view.findViewById(R.id.video_surface);
+
         if (isSmallSurface) {
-            mVideoSurface = view.findViewById(R.id.video_surface_small);
             mVideoSurface.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -57,8 +51,6 @@ public class VideoSurfaceFragment extends Fragment implements VideoFeeder.VideoD
                     }
                 }
             });
-        }else{
-            mVideoSurface = view.findViewById(R.id.video_surface);
         }
         initListener();
     }
@@ -67,12 +59,14 @@ public class VideoSurfaceFragment extends Fragment implements VideoFeeder.VideoD
     public void onResume() {
         super.onResume();
         Log.d(TAG,"onResume");
+        initPreviewer();
     }
 
     @Override
     public void onPause() {
         super.onPause();
         Log.d(TAG,"onPause");
+        uninitPreviewer();
     }
 
     @Override
@@ -85,10 +79,8 @@ public class VideoSurfaceFragment extends Fragment implements VideoFeeder.VideoD
     @Override
     public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height) {
         Log.d(TAG, "onSurfaceTextureAvailable");
-        if (null == DJIApplication.getProductInstance())
-            return;
         if (mCodecManager == null) {
-            mCodecManager = new DJICodecManager(getContext(), surface, width, height);
+            mCodecManager = new DJICodecManager(getActivity(), surface, width, height);
 //            mCodecManager = new DJICodecManager(MobileActivity.this, surface, width, height);
         }
     }
@@ -118,15 +110,11 @@ public class VideoSurfaceFragment extends Fragment implements VideoFeeder.VideoD
         mVideoSurface.setSurfaceTextureListener(this);
     }
 
-    private void uninitListener() {
-        mVideoSurface.setSurfaceTextureListener(null);
-    }
-
     private void initPreviewer() {
         BaseProduct product = DJIApplication.getProductInstance();
 
         if (product == null || !product.isConnected()) {
-//            ToastUtil.showToast(getString(R.string.disconnected));
+            ToastUtil.showToast(getString(R.string.disconnected));
         } else {
             if (null != mVideoSurface) {
                 mVideoSurface.setSurfaceTextureListener(this);
@@ -141,20 +129,6 @@ public class VideoSurfaceFragment extends Fragment implements VideoFeeder.VideoD
         if (null != DJIApplication.getCameraInstance()) {
             // Reset the callback
             VideoFeeder.getInstance().getPrimaryVideoFeed().addVideoDataListener(null);
-        }
-    }
-
-    @Override
-    public void onHiddenChanged(boolean hidden) {
-        super.onHiddenChanged(hidden);
-        if(hidden){
-            Log.d(TAG,"hidden");
-            uninitListener();
-            uninitPreviewer();
-        }else {
-            Log.d(TAG,"show");
-            initListener();
-            initPreviewer();
         }
     }
 }

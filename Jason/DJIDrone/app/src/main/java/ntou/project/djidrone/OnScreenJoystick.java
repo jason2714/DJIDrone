@@ -1,4 +1,4 @@
-package ntou.project.djidrone.utils;
+package ntou.project.djidrone;
 
 /*
  * Copyright (c) 2014 Ville Saarinen
@@ -46,6 +46,7 @@ import androidx.annotation.Nullable;
 
 import ntou.project.djidrone.R;
 import ntou.project.djidrone.listener.OnScreenJoystickListener;
+import ntou.project.djidrone.utils.ToastUtil;
 
 
 public class OnScreenJoystick extends SurfaceView implements

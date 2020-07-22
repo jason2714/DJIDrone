@@ -57,7 +57,6 @@ import ntou.project.djidrone.fragment.SignalFragment;
 import ntou.project.djidrone.fragment.VideoSurfaceFragment;
 import ntou.project.djidrone.utils.DialogUtil;
 import ntou.project.djidrone.utils.GoogleMapUtil;
-import ntou.project.djidrone.utils.OnScreenJoystick;
 import ntou.project.djidrone.utils.ToastUtil;
 
 public class MobileActivity extends FragmentActivity {
@@ -69,6 +68,9 @@ public class MobileActivity extends FragmentActivity {
     private ImageView mBtnCamera;
     private ImageView mBtnTakeoff, mBtnLanding;
     private TextView mTvState, mTvBatteryPower;
+    //test data
+    private TextView mTvTest;
+    //test data
     private List<Fragment> fragments;
     private VideoSurfaceFragment mVideoSurfaceFragment,mVideoSurfaceFragmentSmall;
     private Handler mHandler;
@@ -140,7 +142,6 @@ public class MobileActivity extends FragmentActivity {
 
     private void initUI() {
 //        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
-        initFlightControllerCallback();
         refreshSDKRelativeUI();
         setFrameRatio();
         setBattery();
@@ -164,6 +165,8 @@ public class MobileActivity extends FragmentActivity {
         mFrameSetting = findViewById(R.id.container);
         mBtnTakeoff = findViewById(R.id.btn_takeoff);
         mBtnLanding = findViewById(R.id.btn_landing);
+        //test
+        mTvTest = findViewById(R.id.tv_test);
         //Virtual Stick
         mStickLeft = findViewById(R.id.leftStick);
         mStickRight = findViewById(R.id.rightStick);
@@ -266,8 +269,8 @@ public class MobileActivity extends FragmentActivity {
                         layoutMainSet.connect(mapView.getId(), ConstraintSet.LEFT, ConstraintSet.PARENT_ID, ConstraintSet.LEFT);
                         layoutMainSet.clear(mapView.getId(), ConstraintSet.RIGHT);
                         layoutMainSet.applyTo(mainLayout);
-                        mStickLeft.setVisibility(View.GONE);
-                        mStickRight.setVisibility(View.GONE);
+                        mStickLeft.setVisibility(View.INVISIBLE);
+                        mStickRight.setVisibility(View.INVISIBLE);
                         constraintBottom.setVisibility(View.GONE);
                         linearRight.setVisibility(View.GONE);
                     } else {
@@ -357,6 +360,8 @@ public class MobileActivity extends FragmentActivity {
         flightStateCallback = new FlightControllerState.Callback() {
             @Override
             public void onUpdate(FlightControllerState flightControllerState) {
+                //test flightMode
+                mTvTest.setText(flightControllerState.getFlightMode().toString());
                 gMapUtil.initFlightController(flightControllerState);
                 if (flightControllerState.isLandingConfirmationNeeded()) {
                     if (comfirmLandingDialog == null) {
@@ -529,6 +534,7 @@ public class MobileActivity extends FragmentActivity {
     }
 
     private void onProductConnectionChange() {
+        initFlightControllerCallback();
         initUI();
     }
 
