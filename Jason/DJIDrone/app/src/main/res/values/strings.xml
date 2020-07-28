@@ -18,6 +18,11 @@
         <item>EHDR</item>
         <item>HYPER_LIGHT</item>
     </string-array>
+    <string-array name="mavic_pro2_mode">
+        <item>GPS_SPORT</item>
+        <item>GPS_ATTI</item>
+        <item>TRIPOD</item>
+    </string-array>
     <string name="battery">Battery</string>
     <string name="sensor">Sensor</string>
     <string name="signal">Signal</string>

@@ -104,6 +104,17 @@ public class DJIApplication extends Application{
         return battery;
     }
 
+    public static boolean isAircraftConnected() {
+        return getProductInstance() != null && getProductInstance() instanceof Aircraft;
+    }
+
+    public static synchronized Aircraft getAircraftInstance() {
+        if (!isAircraftConnected()) {
+            return null;
+        }
+        return (Aircraft) getProductInstance();
+    }
+
     public static synchronized FlightController getFlightControllerInstance() {
         if (getProductInstance() == null) return null;
 

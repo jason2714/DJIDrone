@@ -18,6 +18,7 @@ import dji.common.camera.SettingsDefinitions;
 import dji.sdk.base.BaseProduct;
 import dji.sdk.camera.Camera;
 import ntou.project.djidrone.DJIApplication;
+import ntou.project.djidrone.MobileActivity;
 import ntou.project.djidrone.R;
 
 public class ControllerFragment extends Fragment {
@@ -48,7 +49,8 @@ public class ControllerFragment extends Fragment {
                 case R.id.tbtn_virtual_stick_state:
                     mProduct = DJIApplication.getProductInstance();
                     if (null != mProduct) {//已連接
-
+                        if(getActivity() instanceof MobileActivity)
+                            ((MobileActivity)getActivity()).mVirtualStick.virtualStickEnable(isChecked);
                         if (isChecked) {
                             mTvVirtualStickState.setText(R.string.open);
                         } else {

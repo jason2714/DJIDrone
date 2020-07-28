@@ -81,15 +81,21 @@ public class GoogleMapUtil implements GoogleMap.OnMapClickListener, OnMapReadyCa
         }
         LatLng NTOUCSE = new LatLng(25.150985, 121.779992);
         LatLng userLocation;
+        final MarkerOptions markerOptions = new MarkerOptions();
         if (null != location) {
             Log.d("MobileActivity", "get location success");
             userLocation = new LatLng(location.getLatitude(), location.getLongitude());
 //            gMap.addMarker(new MarkerOptions().position(userLocation).title("Marker User Location"));
+
         } else {
             Log.d("MobileActivity", "can't get location");
             userLocation = NTOUCSE;
 //            gMap.addMarker(new MarkerOptions().position(userLocation).title("Marker in NTOUCSE"));
         }
+//        test
+//        markerOptions.position(userLocation);
+//        markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.icon_aircraft));
+//        gMap.addMarker(markerOptions);
         gMap.moveCamera(CameraUpdateFactory.newLatLngZoom(userLocation, 15f));
     }
 
@@ -112,8 +118,6 @@ public class GoogleMapUtil implements GoogleMap.OnMapClickListener, OnMapReadyCa
         droneLocationLng = mFlightControllerState.getAircraftLocation().getLongitude();
         Log.d(DJIApplication.TAG, "droneLocationLng : " + mFlightControllerState.getAircraftLocation().getLongitude());
         Log.d(DJIApplication.TAG, "droneAltitude : " + mFlightControllerState.getAircraftLocation().getAltitude());
-        Log.d(DJIApplication.TAG, "isLandingConfirmationNeeded : " + mFlightControllerState.isLandingConfirmationNeeded());
-
         updateDroneLocation();
     }
 

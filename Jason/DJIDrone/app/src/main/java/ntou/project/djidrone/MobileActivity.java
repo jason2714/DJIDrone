@@ -1,5 +1,3 @@
-
-
 package ntou.project.djidrone;
 
 import androidx.annotation.RequiresApi;
@@ -59,12 +57,13 @@ import ntou.project.djidrone.utils.DialogUtil;
 import ntou.project.djidrone.utils.GoogleMapUtil;
 import ntou.project.djidrone.utils.ToastUtil;
 
-public class MobileActivity extends FragmentActivity {
+public class MobileActivity extends FragmentActivity{
     private static final String TAG = MobileActivity.class.getName();
     private static BaseProduct mProduct = null;
     private ConstraintLayout mainLayout, constraintBottom;
     private ToggleButton btn_changeMode, relativeLeftToggle;
     private LinearLayout linearLeft, linearRight;
+    private ImageView mImgSensor;
     private ImageView mBtnCamera;
     private ImageView mBtnTakeoff, mBtnLanding;
     private TextView mTvState, mTvBatteryPower;
@@ -92,9 +91,8 @@ public class MobileActivity extends FragmentActivity {
     private FlightController flightController;
     private FlightControllerState.Callback flightStateCallback;
     private AlertDialog comfirmLandingDialog;
-    //virtual stick
-    private OnScreenJoystick mStickLeft,mStickRight;
-
+    public VirtualStick mVirtualStick;
+    private String [] flightModes;
     protected BroadcastReceiver mReceiver = new BroadcastReceiver() {
 
         @Override
@@ -137,6 +135,7 @@ public class MobileActivity extends FragmentActivity {
         Toast.makeText(MobileActivity.this, "登入成功", Toast.LENGTH_SHORT).show();
         initViewId();
         initLinstener();
+        initFlightControllerCallback();
         initUI();
     }
 
@@ -145,10 +144,10 @@ public class MobileActivity extends FragmentActivity {
         refreshSDKRelativeUI();
         setFrameRatio();
         setBattery();
-        setSensor();
     }
 
     private void initViewId() {
+        flightModes = getResources().getStringArray(R.array.mavic_pro2_mode);
         mHandler = new Handler(Looper.getMainLooper());
         mainLayout = findViewById(R.id.mainLayout);
         mTvState = findViewById(R.id.tv_state);
@@ -165,11 +164,11 @@ public class MobileActivity extends FragmentActivity {
         mFrameSetting = findViewById(R.id.container);
         mBtnTakeoff = findViewById(R.id.btn_takeoff);
         mBtnLanding = findViewById(R.id.btn_landing);
+        mImgSensor = findViewById(R.id.sensorIcon);
         //test
         mTvTest = findViewById(R.id.tv_test);
         //Virtual Stick
-        mStickLeft = findViewById(R.id.leftStick);
-        mStickRight = findViewById(R.id.rightStick);
+        mVirtualStick = new VirtualStick(this);
         mVideoSurfaceFragmentSmall = new VideoSurfaceFragment(true);
         mVideoSurfaceFragment = new VideoSurfaceFragment(false);
         gMapFragment = SupportMapFragment.newInstance();
@@ -269,10 +268,9 @@ public class MobileActivity extends FragmentActivity {
                         layoutMainSet.connect(mapView.getId(), ConstraintSet.LEFT, ConstraintSet.PARENT_ID, ConstraintSet.LEFT);
                         layoutMainSet.clear(mapView.getId(), ConstraintSet.RIGHT);
                         layoutMainSet.applyTo(mainLayout);
-                        mStickLeft.setVisibility(View.INVISIBLE);
-                        mStickRight.setVisibility(View.INVISIBLE);
                         constraintBottom.setVisibility(View.GONE);
                         linearRight.setVisibility(View.GONE);
+                        mVirtualStick.setStickVisible(false);
                     } else {
                         layoutMainSet.connect(droneView.getId(), ConstraintSet.RIGHT, R.id.gdlnvtRight, ConstraintSet.LEFT);
                         layoutMainSet.connect(droneView.getId(), ConstraintSet.BOTTOM, R.id.gdlnhzBottom, ConstraintSet.TOP);
@@ -281,8 +279,7 @@ public class MobileActivity extends FragmentActivity {
                         layoutMainSet.applyTo(mainLayout);
                         linearRight.setVisibility(View.VISIBLE);
                         constraintBottom.setVisibility(View.VISIBLE);
-                        mStickLeft.setVisibility(View.VISIBLE);
-                        mStickRight.setVisibility(View.VISIBLE);
+                        mVirtualStick.setStickVisible(true);
                     }
                     break;
                 case R.id.relativeLeftToggle:
@@ -361,7 +358,19 @@ public class MobileActivity extends FragmentActivity {
             @Override
             public void onUpdate(FlightControllerState flightControllerState) {
                 //test flightMode
-                mTvTest.setText(flightControllerState.getFlightMode().toString());
+                Log.d(DJIApplication.TAG, "isLandingConfirmationNeeded : " + flightControllerState.isLandingConfirmationNeeded());
+                Log.d(DJIApplication.TAG, "flightModeToString : " + flightControllerState.getFlightMode().toString());
+                mHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        mTvTest.setText(flightControllerState.getGPSSignalLevel()
+                                +" "+ flightControllerState.getAircraftLocation().getLatitude()
+                                +" "+ flightControllerState.getAircraftLocation().getLongitude());
+                        setSensor(flightControllerState.getFlightMode().toString());
+                    }
+                });
+
+//                ToastUtil.showToast(flightControllerState.getFlightMode().toString());
                 gMapUtil.initFlightController(flightControllerState);
                 if (flightControllerState.isLandingConfirmationNeeded()) {
                     if (comfirmLandingDialog == null) {
@@ -656,7 +665,17 @@ public class MobileActivity extends FragmentActivity {
 //        }
     }
 
-    private void setSensor() {
+    private void setSensor(String flightMode) {
+        if(flightMode.equals(flightModes[0])){//s禁用避障
+            mImgSensor.setImageResource(R.drawable.sensor_none);
+        }else if(flightMode.equals(flightModes[1])){//p無法左右
+
+            mImgSensor.setImageResource(R.drawable.sensor_frontandrear);
+        }else if(flightMode.equals(flightModes[2])){
+            mImgSensor.setImageResource(R.drawable.sensor_surround);//t都可
+        }else{//never use
+            mImgSensor.setImageResource(R.drawable.sensor_lateral);
+        }
     }
 
     private void startTakeoff() {
@@ -697,5 +716,8 @@ public class MobileActivity extends FragmentActivity {
         }
     }
 
+//    public void virtualStickEnable(boolean enable){
+//        mVirtualStick.virtualStickEnable(enable);
+//    }
 }
 
