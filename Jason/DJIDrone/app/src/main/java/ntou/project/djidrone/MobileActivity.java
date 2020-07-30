@@ -365,7 +365,10 @@ public class MobileActivity extends FragmentActivity{
                     public void run() {
                         mTvTest.setText(flightControllerState.getGPSSignalLevel()
                                 +" "+ flightControllerState.getAircraftLocation().getLatitude()
-                                +" "+ flightControllerState.getAircraftLocation().getLongitude());
+                                +" "+ flightControllerState.getAircraftLocation().getLongitude()
+                                +" "+GoogleMapUtil.checkGpsCoordinates(flightControllerState.getAircraftLocation().getLatitude(),
+                                flightControllerState.getAircraftLocation().getLongitude()));
+
                         setSensor(flightControllerState.getFlightMode().toString());
                     }
                 });
@@ -549,15 +552,17 @@ public class MobileActivity extends FragmentActivity{
 
     private void refreshSDKRelativeUI() {
         mProduct = DJIApplication.getProductInstance();
+        flightController = DJIApplication.getFlightControllerInstance();
+        //virtual stick
+        mVirtualStick.flightControllerChange(flightController);
         if (null != mProduct) {
             if (mProduct.isConnected()) {
                 Log.d(TAG, "connect to icon_aircraft");
                 mTvState.setText(R.string.connected);
+                //rtmp server
                 SettingFragment.setLiveStreamUrl(getResources().getString(R.string.RTMP_url));
-                //google map
-                flightController = DJIApplication.getFlightControllerInstance();
-                if (null != flightController)
-                    flightController.setStateCallback(flightStateCallback);
+                //flight controller state callback
+                flightController.setStateCallback(flightStateCallback);
             } else if (mProduct instanceof Aircraft) {
                 Log.d(TAG, "only connect to remote controller");
                 mTvState.setText(R.string.connected_remote_control);
