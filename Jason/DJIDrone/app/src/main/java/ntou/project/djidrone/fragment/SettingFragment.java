@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CompoundButton;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
@@ -26,7 +27,7 @@ public class SettingFragment extends Fragment {
 
     private static LiveStreamManager liveStreamManager;
     private TextView mTvLiveStream;
-    private ToggleButton mTbtnLiveStream;
+    private Switch mSwLiveStream;
 
     @Nullable
     @Override
@@ -37,7 +38,7 @@ public class SettingFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        mTbtnLiveStream = getActivity().findViewById(R.id.tbtn_live_stream);
+        mSwLiveStream = getActivity().findViewById(R.id.sw_live_stream);
         mTvLiveStream = getActivity().findViewById(R.id.tv_live_stream);
         initListener();
         liveStreamManager = DJISDKManager.getInstance().getLiveStreamManager();
@@ -45,7 +46,7 @@ public class SettingFragment extends Fragment {
 
     private void initListener() {
         OnToggle onToggle = new OnToggle();
-        mTbtnLiveStream.setOnCheckedChangeListener(onToggle);
+        mSwLiveStream.setOnCheckedChangeListener(onToggle);
     }
 
     private class OnToggle implements CompoundButton.OnCheckedChangeListener {
@@ -53,7 +54,7 @@ public class SettingFragment extends Fragment {
         @Override
         public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
             switch (buttonView.getId()) {
-                case R.id.tbtn_live_stream:
+                case R.id.sw_live_stream:
                     liveStreamManager = DJISDKManager.getInstance().getLiveStreamManager();
                     if (isChecked) {
                         mTvLiveStream.setText(R.string.open);

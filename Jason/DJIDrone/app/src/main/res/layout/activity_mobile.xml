@@ -73,7 +73,7 @@
         app:layout_constraintTop_toTopOf="@id/gdlnhzTop">
         <!--        android:background="@color/colorBackground"-->
         <ImageView
-            android:id="@+id/btn_takeoff"
+            android:id="@+id/btn_takeoff_landing"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_margin="2dp"
@@ -81,12 +81,12 @@
             android:src="@drawable/icon_takeoff" />
 
         <ImageView
-            android:id="@+id/btn_landing"
+            android:id="@+id/btn_rth"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_margin="2dp"
             android:layout_weight="1"
-            android:src="@drawable/icon_landing" />
+            android:src="@drawable/icon_rth" />
 
         <ImageView
             android:id="@+id/btn_camera"

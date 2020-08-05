@@ -33,12 +33,13 @@
                 android:textSize="25sp"
                 android:gravity="center_vertical"
                 android:layout_marginEnd="20dp"/>
-            <ToggleButton
-                android:id="@+id/tbtn_virtual_stick_state"
+            <Switch
+                android:id="@+id/sw_virtual_stick_state"
                 android:layout_width="50dp"
                 android:layout_height="50dp"
-                android:background="@drawable/toggle_selector"
                 android:gravity="center_vertical"
+                android:switchMinWidth="50dp"
+                android:track="@drawable/switch_selector"
                 android:checked="false"
                 android:textOff=""
                 android:textOn="" />
