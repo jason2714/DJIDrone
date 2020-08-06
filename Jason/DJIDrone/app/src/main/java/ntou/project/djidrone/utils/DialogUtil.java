@@ -5,6 +5,8 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
 import android.view.View;
 import android.view.WindowManager;
@@ -55,6 +57,7 @@ public class DialogUtil{
         alertDialog.getWindow().setFlags(
                 WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
                 WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE);
+        alertDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.BLACK));
         alertDialog.show();
     }
 }
