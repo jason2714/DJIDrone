@@ -140,13 +140,13 @@ public class OnScreenJoystick extends SurfaceView implements
     @Override
     public void surfaceChanged(final SurfaceHolder arg0, final int arg1,
                                final int arg2, final int arg3) {
-        ToastUtil.showToast("surface change");
+//        ToastUtil.showToast("surface change");
 //		mThread.setRunning(false);
     }
 
     @Override
     public void surfaceCreated(final SurfaceHolder arg0) {
-        ToastUtil.showToast("create surface");
+//        ToastUtil.showToast("create surface");
         init();
         mThread.start();
     }
@@ -155,7 +155,7 @@ public class OnScreenJoystick extends SurfaceView implements
     public void surfaceDestroyed(final SurfaceHolder arg0) {
         boolean retry = true;
         mThread.setRunning(false);
-        ToastUtil.showToast("destroy surface");
+//        ToastUtil.showToast("destroy surface");
         while (retry) {
             try {
                 // code to kill Thread

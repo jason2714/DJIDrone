@@ -140,7 +140,7 @@ public class MobileActivity extends FragmentActivity {
                             | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);//讓navigation bar 過一段時間自動隱藏
             decorView.setOnSystemUiVisibilityChangeListener(visibility -> {
 //                ToastUtil.showToast("change" + visibility);
-                if(visibility == 0){//當navigation bar顯示時會=0
+                if (visibility == 0) {//當navigation bar顯示時會=0
                     decorView.setSystemUiVisibility(
                             View.SYSTEM_UI_FLAG_HIDE_NAVIGATION//隱藏手機虛擬按鍵HOME/BACK/LIST按鍵
                                     | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);//讓navigation bar 過一段時間自動隱藏
@@ -305,8 +305,8 @@ public class MobileActivity extends FragmentActivity {
                         layoutMainSet.connect(mapView.getId(), ConstraintSet.LEFT, ConstraintSet.PARENT_ID, ConstraintSet.LEFT);
                         layoutMainSet.clear(mapView.getId(), ConstraintSet.RIGHT);
                         layoutMainSet.applyTo(mainLayout);
-                        constraintBottom.setVisibility(View.GONE);
-                        linearRight.setVisibility(View.GONE);
+                        constraintBottom.setVisibility(View.INVISIBLE);
+                        linearRight.setVisibility(View.INVISIBLE);
                         mVirtualStick.setStickVisible(false);
                     } else {
                         layoutMainSet.connect(droneView.getId(), ConstraintSet.RIGHT, R.id.gdlnvtRight, ConstraintSet.LEFT);
@@ -324,7 +324,7 @@ public class MobileActivity extends FragmentActivity {
                         layoutMainSet.connect(relativeLeftToggle.getId(), ConstraintSet.LEFT, ConstraintSet.PARENT_ID, ConstraintSet.LEFT);
                         layoutMainSet.clear(relativeLeftToggle.getId(), ConstraintSet.RIGHT);
                         layoutMainSet.applyTo(mainLayout);
-                        linearLeft.setVisibility(View.GONE);
+                        linearLeft.setVisibility(View.INVISIBLE);
                     } else {
                         layoutMainSet.connect(relativeLeftToggle.getId(), ConstraintSet.RIGHT, R.id.gdlnvtLeft, ConstraintSet.RIGHT);
                         layoutMainSet.clear(relativeLeftToggle.getId(), ConstraintSet.LEFT);
@@ -381,9 +381,14 @@ public class MobileActivity extends FragmentActivity {
                             .create());
                     break;
                 case R.id.btn_rth:
+                    flightController = DJIApplication.getFlightControllerInstance();
                     if (isRTH) {
                         isRTH = false;
                         mBtnRTH.setImageResource(R.drawable.icon_rth);
+                        if (flightController != null)
+                            flightController.cancelGoHome(djiError -> {
+                                ToastUtil.showErrorToast("cancel go home", djiError);
+                            });
                         DialogUtil.showDialog(MobileActivity.this, "Cancel RTH success");
                     } else {
                         DialogUtil.showDialogExceptActionBar(new AlertDialog.Builder(MobileActivity.this, R.style.set_dialog)
@@ -392,7 +397,6 @@ public class MobileActivity extends FragmentActivity {
                                 .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
                                     @Override
                                     public void onClick(DialogInterface dialog, int which) {
-                                        flightController = DJIApplication.getFlightControllerInstance();
                                         if (null != flightController)
                                             startRTH();
                                         else {
@@ -424,8 +428,11 @@ public class MobileActivity extends FragmentActivity {
                 //test flightMode
                 Log.d(DJIApplication.TAG, "isLandingConfirmationNeeded : " + flightControllerState.isLandingConfirmationNeeded());
                 Log.d(DJIApplication.TAG, "flightModeToString : " + flightControllerState.getFlightMode().toString());
-                isFlying = flightController.getState().isFlying();
-                refreshTakeoffLandingIcon();
+                if (isFlying != flightController.getState().isFlying()) {
+                    isFlying = !isFlying;
+                    refreshTakeoffLandingIcon();
+                }
+
                 mHandler.post(new Runnable() {
                     @Override
                     public void run() {
@@ -434,16 +441,6 @@ public class MobileActivity extends FragmentActivity {
                                 .append(flightControllerState.getAircraftLocation().getLongitude() + " ")
                                 .append(GoogleMapUtil.checkGpsCoordinates(flightControllerState.getAircraftLocation().getLatitude(),
                                         flightControllerState.getAircraftLocation().getLongitude()) + " ");
-//                        flightController.getGoHomeHeightInMeters(new CommonCallbacks.CompletionCallbackWith<Integer>() {
-//                            @Override
-//                            public void onSuccess(Integer integer) {
-//                                stringBuffer.append(integer);
-//                            }
-//                            @Override
-//                            public void onFailure(DJIError djiError) {
-//
-//                            }
-//                        });
                         mTvTest.setText(stringBuffer);
                         setSensor(flightControllerState.getFlightMode().toString());
                     }
@@ -534,30 +531,14 @@ public class MobileActivity extends FragmentActivity {
 
     private void captureAction() {
         camera = DJIApplication.getCameraInstance();
-        if (camera != null) {
-            camera.setShootPhotoMode(CameraFragment.getPhotoMode(), new CommonCallbacks.CompletionCallback() {
-                @Override
-                public void onResult(DJIError djiError) {
-                    if (null == djiError) {
-                        mHandler.postDelayed(new Runnable() {
-                            @Override
-                            public void run() {
-                                camera.startShootPhoto(new CommonCallbacks.CompletionCallback() {
-                                    @Override
-                                    public void onResult(DJIError djiError) {
-                                        if (djiError == null) {
-                                            ToastUtil.showToast("take photo: success");
-                                        } else {
-                                            ToastUtil.showToast(djiError.getDescription());
-                                        }
-                                    }
-                                });
-                            }
-                        }, 1000);
-                    }
-                }
-            });
-        }
+        if (null == camera)
+            return;
+        camera.setShootPhotoMode(CameraFragment.getPhotoMode(), djiError -> {
+            if (null == djiError) {
+                mHandler.postDelayed(() -> camera.startShootPhoto(djiError1 ->
+                        ToastUtil.showErrorToast("take photo: success", djiError1)), 300);
+            }
+        });
     }
 
     // Method for starting recording
@@ -574,7 +555,7 @@ public class MobileActivity extends FragmentActivity {
                                 mBtnCamera.setImageResource(R.drawable.icon_recording);
                                 ToastUtil.showToast("Record video: success");
                             }
-                        }, 500);
+                        }, 300);
                     } else {
                         ToastUtil.showToast(djiError.getDescription());
                     }
@@ -599,7 +580,7 @@ public class MobileActivity extends FragmentActivity {
                                 mBtnCamera.setImageResource(R.drawable.icon_record_video);
                                 ToastUtil.showToast("Stop recording: success");
                             }
-                        }, 500);
+                        }, 300);
                     } else {
                         ToastUtil.showToast(djiError.getDescription());
                     }
@@ -712,12 +693,8 @@ public class MobileActivity extends FragmentActivity {
                 public void onUpdate(BatteryState batteryState) {
 //                    stringBuffer.append(batteryState.getChargeRemainingInPercent())
 //                            .append("%");
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-//                            mTvBatteryPower.setText(stringBuffer.toString());
-                            mTvBatteryPower.setText(batteryState.getChargeRemainingInPercent() + "%");
-                        }
+                    mHandler.post(() -> {
+                        mTvBatteryPower.setText(batteryState.getChargeRemainingInPercent() + "%");
                     });
 //                    ToastUtil.showToast("ChargeRemainingInPercent:" + batteryState.getChargeRemainingInPercent());
 //                    ToastUtil.showToast("ChargeRemaining:" + batteryState.getChargeRemaining());
@@ -750,7 +727,7 @@ public class MobileActivity extends FragmentActivity {
     private void setSensor(String flightMode) {
         if (flightMode.equals(flightModes[0])) {//s禁用避障
             mImgSensor.setImageResource(R.drawable.sensor_none);
-        }else if(flightMode.equals(flightModes[1])){//p無法左右
+        } else if (flightMode.equals(flightModes[1])) {//p無法左右
             mImgSensor.setImageResource(R.drawable.sensor_frontandrear);
         } else if (flightMode.equals(flightModes[2])) {
             mImgSensor.setImageResource(R.drawable.sensor_surround);//t都可
@@ -764,12 +741,7 @@ public class MobileActivity extends FragmentActivity {
             flightController.startLanding(new CommonCallbacks.CompletionCallback() {
                 @Override
                 public void onResult(DJIError djiError) {
-//                    DialogUtil.showDialogBasedOnError(MobileActivity.this,djiError);
-                    if (null == djiError) {
-                        ToastUtil.showToast("start landing");
-                    } else {
-                        ToastUtil.showToast(djiError.getDescription());
-                    }
+                    ToastUtil.showErrorToast("start landing", djiError);
                 }
             });
         } else {
@@ -777,11 +749,7 @@ public class MobileActivity extends FragmentActivity {
                 @Override
                 public void onResult(DJIError djiError) {
 //                    DialogUtil.showDialogBasedOnError(MobileActivity.this,djiError);
-                    if (null == djiError) {
-                        ToastUtil.showToast("takeoff success");
-                    } else {
-                        ToastUtil.showToast(djiError.getDescription());
-                    }
+                    ToastUtil.showErrorToast("takeoff success", djiError);
                 }
             });
         }
@@ -789,7 +757,15 @@ public class MobileActivity extends FragmentActivity {
     }
 
     private void startRTH() {
-        //TODO 記得加setImageResource to cancel
+        flightController.startGoHome(djiError -> {
+            mHandler.post(() -> {
+                if (null == djiError) {
+                    isRTH = true;
+                    mBtnRTH.setImageResource(R.drawable.icon_cancel);
+                }
+                ToastUtil.showErrorToast("start going home", djiError);
+            });
+        });
     }
 
     private void refreshTakeoffLandingIcon() {
@@ -798,8 +774,10 @@ public class MobileActivity extends FragmentActivity {
             public void run() {
                 if (isFlying)
                     mBtnTakeoffLanding.setImageResource(R.drawable.icon_landing);
-                else
+                else {
                     mBtnTakeoffLanding.setImageResource(R.drawable.icon_takeoff);
+                    mBtnRTH.setImageResource(R.drawable.icon_rth);
+                }
             }
         });
 
