@@ -18,6 +18,7 @@ import android.widget.ImageView;
 import android.widget.ListPopupWindow;
 import android.widget.PopupWindow;
 import android.widget.Spinner;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
@@ -38,7 +39,7 @@ import ntou.project.djidrone.utils.ToastUtil;
 
 public class CameraFragment extends Fragment {
     private static final String TAG = CameraFragment.class.getName();
-    private ToggleButton mTbtnCameraMode;
+    private Switch mSwCameraMode;
     private TextView mTvCameraMode;
     private ImageView mBtnCamera;
     private Spinner mSpnShootingMode;
@@ -53,11 +54,11 @@ public class CameraFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         OnToggle onToggle = new OnToggle();
-        mTbtnCameraMode = view.findViewById(R.id.tbtn_camera_mode);
+        mSwCameraMode = view.findViewById(R.id.sw_camera_mode);
         mTvCameraMode = view.findViewById(R.id.tv_camera_mode);
         mBtnCamera = getActivity().findViewById(R.id.btn_camera);
         mSpnShootingMode = view.findViewById(R.id.spn_shooting_mode);
-        mTbtnCameraMode.setOnCheckedChangeListener(onToggle);
+        mSwCameraMode.setOnCheckedChangeListener(onToggle);
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(getContext(),
                 R.array.shooting_mode, android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -90,7 +91,7 @@ public class CameraFragment extends Fragment {
         @Override
         public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
             switch (buttonView.getId()) {
-                case R.id.tbtn_camera_mode:
+                case R.id.sw_camera_mode:
                     Camera camera = DJIApplication.getCameraInstance();
                     if (null != camera) {//已連接
                         if (isChecked) {
@@ -142,7 +143,7 @@ public class CameraFragment extends Fragment {
                             }
                         });
                     } else {
-                        mTbtnCameraMode.setChecked(!mTbtnCameraMode.isChecked());
+                        mSwCameraMode.setChecked(!mSwCameraMode.isChecked());
                         ToastUtil.showToast(djiError.getDescription());
                     }
                 }

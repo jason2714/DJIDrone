@@ -81,7 +81,6 @@ public class GoogleMapUtil implements GoogleMap.OnMapClickListener, OnMapReadyCa
         }
         LatLng NTOUCSE = new LatLng(25.150985, 121.779992);
         LatLng userLocation;
-        final MarkerOptions markerOptions = new MarkerOptions();
         if (null != location) {
             Log.d("MobileActivity", "get location success");
             userLocation = new LatLng(location.getLatitude(), location.getLongitude());
@@ -93,6 +92,7 @@ public class GoogleMapUtil implements GoogleMap.OnMapClickListener, OnMapReadyCa
 //            gMap.addMarker(new MarkerOptions().position(userLocation).title("Marker in NTOUCSE"));
         }
 //        test
+//        final MarkerOptions markerOptions = new MarkerOptions();
 //        markerOptions.position(userLocation);
 //        markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.icon_aircraft));
 //        gMap.addMarker(markerOptions);
@@ -111,14 +111,11 @@ public class GoogleMapUtil implements GoogleMap.OnMapClickListener, OnMapReadyCa
     }
 
     public void initFlightController(FlightControllerState mFlightControllerState) {
-        Log.d(DJIApplication.TAG, "GPSSignalLevel : " + mFlightControllerState.getGPSSignalLevel());
 //      ToastUtil.showToast("AircraftLocation" + djiFlightControllerCurrentState.getAircraftLocation());
         droneLocationLat = mFlightControllerState.getAircraftLocation().getLatitude();
-        Log.d(DJIApplication.TAG, "droneLocationLat : " + mFlightControllerState.getAircraftLocation().getLatitude());
         droneLocationLng = mFlightControllerState.getAircraftLocation().getLongitude();
-        Log.d(DJIApplication.TAG, "droneLocationLng : " + mFlightControllerState.getAircraftLocation().getLongitude());
-        Log.d(DJIApplication.TAG, "droneAltitude : " + mFlightControllerState.getAircraftLocation().getAltitude());
         updateDroneLocation();
+
     }
 
     public static boolean checkGpsCoordinates(double latitude, double longitude) {
@@ -129,10 +126,9 @@ public class GoogleMapUtil implements GoogleMap.OnMapClickListener, OnMapReadyCa
 
         LatLng pos = new LatLng(droneLocationLat, droneLocationLng);
         //Create MarkerOptions object
-        final MarkerOptions markerOptions = new MarkerOptions();
+        MarkerOptions markerOptions = new MarkerOptions();
         markerOptions.position(pos);
         markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.icon_aircraft));
-//        ToastUtil.showToast("updateDroneLocation");
         activity.runOnUiThread(new Runnable() {
             @Override
             public void run() {

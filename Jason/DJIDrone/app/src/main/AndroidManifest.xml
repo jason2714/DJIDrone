@@ -71,7 +71,8 @@
         <!-- DJI SDK -->
         <activity android:name=".MobileActivity"
             android:screenOrientation="sensorLandscape"
-            tools:ignore="LockedOrientationActivity" />
+            tools:ignore="LockedOrientationActivity"
+            android:theme="@style/Theme.MobileActivity"/>
         <activity android:name=".define" />
         <activity android:name=".MainActivity"
             android:configChanges="orientation"

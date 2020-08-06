@@ -1,12 +1,14 @@
 package ntou.project.djidrone;
 
 import androidx.annotation.RequiresApi;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -17,15 +19,19 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.transition.TransitionManager;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.CompoundButton;
+import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
@@ -57,7 +63,9 @@ import ntou.project.djidrone.utils.DialogUtil;
 import ntou.project.djidrone.utils.GoogleMapUtil;
 import ntou.project.djidrone.utils.ToastUtil;
 
-public class MobileActivity extends FragmentActivity{
+public class MobileActivity extends FragmentActivity {
+    //WindowSet
+    private View decorView;
     private static final String TAG = MobileActivity.class.getName();
     private static BaseProduct mProduct = null;
     private ConstraintLayout mainLayout, constraintBottom;
@@ -65,13 +73,14 @@ public class MobileActivity extends FragmentActivity{
     private LinearLayout linearLeft, linearRight;
     private ImageView mImgSensor;
     private ImageView mBtnCamera;
-    private ImageView mBtnTakeoff, mBtnLanding;
+    private ImageView mBtnTakeoffLanding, mBtnRTH;
     private TextView mTvState, mTvBatteryPower;
     //test data
     private TextView mTvTest;
+    private StringBuffer stringBuffer;
     //test data
     private List<Fragment> fragments;
-    private VideoSurfaceFragment mVideoSurfaceFragment,mVideoSurfaceFragmentSmall;
+    private VideoSurfaceFragment mVideoSurfaceFragment, mVideoSurfaceFragmentSmall;
     private Handler mHandler;
     //camera
     private Camera camera = null;
@@ -86,13 +95,13 @@ public class MobileActivity extends FragmentActivity{
     private boolean isMapView = false;
     //battery
     private Battery battery;
-    private StringBuffer stringBuffer = new StringBuffer();
     //flightController
     private FlightController flightController;
     private FlightControllerState.Callback flightStateCallback;
     private AlertDialog comfirmLandingDialog;
     public VirtualStick mVirtualStick;
-    private String [] flightModes;
+    private String[] flightModes;
+    private boolean isFlying, isRTH;
     protected BroadcastReceiver mReceiver = new BroadcastReceiver() {
 
         @Override
@@ -101,15 +110,43 @@ public class MobileActivity extends FragmentActivity{
         }
     };
 
+//    @Override
+//    public void onWindowFocusChanged(boolean hasFocus) {
+//        super.onWindowFocusChanged(hasFocus);
+//        if (hasFocus) {
+//            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+//                getWindow().getDecorView().setSystemUiVisibility(
+//                        View.SYSTEM_UI_FLAG_IMMERSIVE | View.SYSTEM_UI_FLAG_LAYOUT_STABLE //隱藏狀態欄和標題欄
+//                                | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN//全螢幕顯示
+//                                | View.SYSTEM_UI_FLAG_FULLSCREEN | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);//隱藏手機虛擬按鍵HOME/BACK/LIST按鍵
+//            }
+//        }
+//    }
+
     //camera
     @Override
     protected void onResume() {
         super.onResume();
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+//            getWindow().getDecorView().setSystemUiVisibility(
+//                    View.SYSTEM_UI_FLAG_IMMERSIVE | View.SYSTEM_UI_FLAG_LAYOUT_STABLE //隱藏狀態欄和標題欄
+//                            | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN//全螢幕顯示
+//                            | View.SYSTEM_UI_FLAG_FULLSCREEN | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);//隱藏手機虛擬按鍵HOME/BACK/LIST按鍵
+//        }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            getWindow().getDecorView().setSystemUiVisibility(
-                    View.SYSTEM_UI_FLAG_IMMERSIVE|View.SYSTEM_UI_FLAG_LAYOUT_STABLE //隱藏狀態欄和標題欄
-                            | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN//全螢幕顯示
-                            | View.SYSTEM_UI_FLAG_FULLSCREEN | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);//隱藏手機虛擬按鍵HOME/BACK/LIST按鍵
+            decorView = getWindow().getDecorView();
+            decorView.setSystemUiVisibility(
+                    View.SYSTEM_UI_FLAG_HIDE_NAVIGATION//隱藏手機虛擬按鍵HOME/BACK/LIST按鍵
+                            | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);//讓navigation bar 過一段時間自動隱藏
+            decorView.setOnSystemUiVisibilityChangeListener(visibility -> {
+//                ToastUtil.showToast("change" + visibility);
+                if(visibility == 0){//當navigation bar顯示時會=0
+                    decorView.setSystemUiVisibility(
+                            View.SYSTEM_UI_FLAG_HIDE_NAVIGATION//隱藏手機虛擬按鍵HOME/BACK/LIST按鍵
+                                    | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);//讓navigation bar 過一段時間自動隱藏
+                    //只設hide的話會蓋掉immersive
+                }
+            });
         }
     }
 
@@ -162,13 +199,14 @@ public class MobileActivity extends FragmentActivity{
         mBtnCamera.setTag(R.drawable.icon_shoot_photo);
         droneView = findViewById(R.id.droneView);
         mFrameSetting = findViewById(R.id.container);
-        mBtnTakeoff = findViewById(R.id.btn_takeoff);
-        mBtnLanding = findViewById(R.id.btn_landing);
+        mBtnTakeoffLanding = findViewById(R.id.btn_takeoff_landing);
+        mBtnRTH = findViewById(R.id.btn_rth);
         mImgSensor = findViewById(R.id.sensorIcon);
         //test
         mTvTest = findViewById(R.id.tv_test);
         //Virtual Stick
         mVirtualStick = new VirtualStick(this);
+        //setting
         mVideoSurfaceFragmentSmall = new VideoSurfaceFragment(true);
         mVideoSurfaceFragment = new VideoSurfaceFragment(false);
         gMapFragment = SupportMapFragment.newInstance();
@@ -212,12 +250,10 @@ public class MobileActivity extends FragmentActivity{
         //test
         relativeLeftToggle.setVisibility(View.GONE);
         //test
-//        stickRight.setOnClickListener(onclick);
-//        stickLeft.setOnClickListener(onclick);
         mBtnCamera.setOnClickListener(onclick);
         mapView.setOnClickListener(onclick);
-        mBtnTakeoff.setOnClickListener(onclick);
-        mBtnLanding.setOnClickListener(onclick);
+        mBtnTakeoffLanding.setOnClickListener(onclick);
+        mBtnRTH.setOnClickListener(onclick);
         //滑動返回main fragment
         gestureDetector = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
             @Override
@@ -250,6 +286,7 @@ public class MobileActivity extends FragmentActivity{
                 return !gestureDetector.onTouchEvent(event);
             }
         });
+
     }
 
     private class Toggle implements CompoundButton.OnCheckedChangeListener {
@@ -309,9 +346,9 @@ public class MobileActivity extends FragmentActivity{
                     if ((Integer) mBtnCamera.getTag() == R.drawable.icon_shoot_photo) {
                         captureAction();
                     } else if ((Integer) mBtnCamera.getTag() == R.drawable.icon_record_video) {
-                        ToggleButton mTbtnCameraMode = findViewById(R.id.tbtn_camera_mode);
-                        if (null != mTbtnCameraMode)
-                            mTbtnCameraMode.setEnabled(isRecording);
+                        Switch mSwCameraMode = findViewById(R.id.sw_camera_mode);
+                        if (null != mSwCameraMode)
+                            mSwCameraMode.setEnabled(isRecording);
                         isRecording = !isRecording;
                         if (isRecording) {
                             startRecord();
@@ -324,22 +361,49 @@ public class MobileActivity extends FragmentActivity{
                     Log.d(TAG, "change fragment");
                     changeMapFragment();
                     break;
-                case R.id.btn_takeoff:
-                    DialogUtil.showDialogExceptActionBar(new AlertDialog.Builder(MobileActivity.this,R.style.set_dialog)
-                            .setTitle("Confirm takeoff")
-                            .setMessage("確定要起飛嗎")
+                case R.id.btn_takeoff_landing:
+                    DialogUtil.showDialogExceptActionBar(new AlertDialog.Builder(MobileActivity.this, R.style.set_dialog)
+                            .setTitle((isFlying) ? "Confirm Start Landing" : "Confirm Takeoff")
+                            .setMessage((isFlying) ? "確定要降落嗎" : "確定要起飛嗎")
                             .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
-                                    startTakeoff();
+                                    flightController = DJIApplication.getFlightControllerInstance();
+                                    if (null != flightController)
+                                        startTakeoffLanding();
+                                    else {
+                                        isFlying = !isFlying;
+                                        refreshTakeoffLandingIcon();
+                                    }
                                 }
                             })
                             .setNegativeButton(R.string.cancel, null)
                             .create());
                     break;
-                case R.id.btn_landing:
-                    DialogUtil.showDialog(MobileActivity.this, "start landing");
-                    startLanding();
+                case R.id.btn_rth:
+                    if (isRTH) {
+                        isRTH = false;
+                        mBtnRTH.setImageResource(R.drawable.icon_rth);
+                        DialogUtil.showDialog(MobileActivity.this, "Cancel RTH success");
+                    } else {
+                        DialogUtil.showDialogExceptActionBar(new AlertDialog.Builder(MobileActivity.this, R.style.set_dialog)
+                                .setTitle("Confirm Return To Home")
+                                .setMessage("確認要執行RTH Mission嗎")
+                                .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        flightController = DJIApplication.getFlightControllerInstance();
+                                        if (null != flightController)
+                                            startRTH();
+                                        else {
+                                            isRTH = true;
+                                            mBtnRTH.setImageResource(R.drawable.icon_cancel);
+                                        }
+                                    }
+                                })
+                                .setNegativeButton(R.string.cancel, null)
+                                .create());
+                    }
                     break;
                 default:
                     break;
@@ -349,7 +413,7 @@ public class MobileActivity extends FragmentActivity{
 
     private void initFlightControllerCallback() {
         flightController = DJIApplication.getFlightControllerInstance();
-        if (null == flightController){
+        if (null == flightController) {
             flightStateCallback = null;
             return;
         }
@@ -360,12 +424,27 @@ public class MobileActivity extends FragmentActivity{
                 //test flightMode
                 Log.d(DJIApplication.TAG, "isLandingConfirmationNeeded : " + flightControllerState.isLandingConfirmationNeeded());
                 Log.d(DJIApplication.TAG, "flightModeToString : " + flightControllerState.getFlightMode().toString());
+                isFlying = flightController.getState().isFlying();
+                refreshTakeoffLandingIcon();
                 mHandler.post(new Runnable() {
                     @Override
                     public void run() {
-                        mTvTest.setText(flightControllerState.getGPSSignalLevel()
-                                +" "+ flightControllerState.getAircraftLocation().getLatitude()
-                                +" "+ flightControllerState.getAircraftLocation().getLongitude());
+                        stringBuffer = new StringBuffer().append(flightControllerState.getGPSSignalLevel() + " ")
+                                .append(flightControllerState.getAircraftLocation().getLatitude() + " ")
+                                .append(flightControllerState.getAircraftLocation().getLongitude() + " ")
+                                .append(GoogleMapUtil.checkGpsCoordinates(flightControllerState.getAircraftLocation().getLatitude(),
+                                        flightControllerState.getAircraftLocation().getLongitude()) + " ");
+//                        flightController.getGoHomeHeightInMeters(new CommonCallbacks.CompletionCallbackWith<Integer>() {
+//                            @Override
+//                            public void onSuccess(Integer integer) {
+//                                stringBuffer.append(integer);
+//                            }
+//                            @Override
+//                            public void onFailure(DJIError djiError) {
+//
+//                            }
+//                        });
+                        mTvTest.setText(stringBuffer);
                         setSensor(flightControllerState.getFlightMode().toString());
                     }
                 });
@@ -400,7 +479,8 @@ public class MobileActivity extends FragmentActivity{
                                             }
                                         });
                                     }
-                                }).create();
+                                })
+                                .create();
                         DialogUtil.showDialogExceptActionBar(comfirmLandingDialog);
                     }
 
@@ -447,7 +527,7 @@ public class MobileActivity extends FragmentActivity{
                     .hide(gMapFragment)
                     .remove(mVideoSurfaceFragmentSmall)
                     .show(gMapFragmentSmall)
-                    .add(droneView.getId(),mVideoSurfaceFragment)
+                    .add(droneView.getId(), mVideoSurfaceFragment)
                     .commit();
         }
     }
@@ -549,15 +629,17 @@ public class MobileActivity extends FragmentActivity{
 
     private void refreshSDKRelativeUI() {
         mProduct = DJIApplication.getProductInstance();
+        flightController = DJIApplication.getFlightControllerInstance();
+        //virtual stick
+        mVirtualStick.flightControllerChange(flightController);
         if (null != mProduct) {
             if (mProduct.isConnected()) {
                 Log.d(TAG, "connect to icon_aircraft");
                 mTvState.setText(R.string.connected);
+                //rtmp server
                 SettingFragment.setLiveStreamUrl(getResources().getString(R.string.RTMP_url));
-                //google map
-                flightController = DJIApplication.getFlightControllerInstance();
-                if (null != flightController)
-                    flightController.setStateCallback(flightStateCallback);
+                //flight controller state callback
+                flightController.setStateCallback(flightStateCallback);
             } else if (mProduct instanceof Aircraft) {
                 Log.d(TAG, "only connect to remote controller");
                 mTvState.setText(R.string.connected_remote_control);
@@ -666,22 +748,31 @@ public class MobileActivity extends FragmentActivity{
     }
 
     private void setSensor(String flightMode) {
-        if(flightMode.equals(flightModes[0])){//s禁用避障
+        if (flightMode.equals(flightModes[0])) {//s禁用避障
             mImgSensor.setImageResource(R.drawable.sensor_none);
         }else if(flightMode.equals(flightModes[1])){//p無法左右
             mImgSensor.setImageResource(R.drawable.sensor_frontandrear);
-        }else if(flightMode.equals(flightModes[2])){
+        } else if (flightMode.equals(flightModes[2])) {
             mImgSensor.setImageResource(R.drawable.sensor_surround);//t都可
-        }else{//never use
+        } else {//never use
             mImgSensor.setImageResource(R.drawable.sensor_lateral);
         }
     }
 
-    private void startTakeoff() {
-        flightController = DJIApplication.getFlightControllerInstance();
-        if (null == flightController)
-            return;
-        if (!flightController.getState().isFlying()) {
+    private void startTakeoffLanding() {
+        if (isFlying) {
+            flightController.startLanding(new CommonCallbacks.CompletionCallback() {
+                @Override
+                public void onResult(DJIError djiError) {
+//                    DialogUtil.showDialogBasedOnError(MobileActivity.this,djiError);
+                    if (null == djiError) {
+                        ToastUtil.showToast("start landing");
+                    } else {
+                        ToastUtil.showToast(djiError.getDescription());
+                    }
+                }
+            });
+        } else {
             flightController.startTakeoff(new CommonCallbacks.CompletionCallback() {
                 @Override
                 public void onResult(DJIError djiError) {
@@ -694,25 +785,24 @@ public class MobileActivity extends FragmentActivity{
                 }
             });
         }
+
     }
 
-    private void startLanding() {
-        flightController = DJIApplication.getFlightControllerInstance();
-        if (null == flightController)
-            return;
-        if (flightController.getState().isFlying()) {
-            flightController.startLanding(new CommonCallbacks.CompletionCallback() {
-                @Override
-                public void onResult(DJIError djiError) {
-//                    DialogUtil.showDialogBasedOnError(MobileActivity.this,djiError);
-                    if (null == djiError) {
-                        ToastUtil.showToast("landing success");
-                    } else {
-                        ToastUtil.showToast(djiError.getDescription());
-                    }
-                }
-            });
-        }
+    private void startRTH() {
+        //TODO 記得加setImageResource to cancel
+    }
+
+    private void refreshTakeoffLandingIcon() {
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                if (isFlying)
+                    mBtnTakeoffLanding.setImageResource(R.drawable.icon_landing);
+                else
+                    mBtnTakeoffLanding.setImageResource(R.drawable.icon_takeoff);
+            }
+        });
+
     }
 
 //    public void virtualStickEnable(boolean enable){

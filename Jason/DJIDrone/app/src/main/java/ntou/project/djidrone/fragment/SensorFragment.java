@@ -5,6 +5,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CompoundButton;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
@@ -21,7 +22,7 @@ import ntou.project.djidrone.R;
 import ntou.project.djidrone.utils.ToastUtil;
 
 public class SensorFragment extends Fragment {
-    private ToggleButton mTbtnAvoidance;
+    private Switch mSwAvoidance;
     private TextView mTvAvoidance;
     private FlightController flightController;
 
@@ -35,9 +36,9 @@ public class SensorFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         OnToggle onToggle = new OnToggle();
-        mTbtnAvoidance = view.findViewById(R.id.tbtn_avoidance_mode);
+        mSwAvoidance = view.findViewById(R.id.sw_avoidance_mode);
         mTvAvoidance = view.findViewById(R.id.tv_avoidance_mode);
-        mTbtnAvoidance.setOnCheckedChangeListener(onToggle);
+        mSwAvoidance.setOnCheckedChangeListener(onToggle);
     }
 
     private class OnToggle implements CompoundButton.OnCheckedChangeListener {
@@ -45,7 +46,7 @@ public class SensorFragment extends Fragment {
         @Override
         public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
             switch (buttonView.getId()) {
-                case R.id.tbtn_avoidance_mode:
+                case R.id.sw_avoidance_mode:
                     setCollisionAvoidance(isChecked);
                     break;
                 default:

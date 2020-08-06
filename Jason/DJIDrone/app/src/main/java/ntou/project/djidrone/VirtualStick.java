@@ -5,6 +5,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 import android.view.View;
+import android.widget.TextView;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -37,6 +38,7 @@ public class VirtualStick {
     public VirtualStick(Activity activity) {
         mStickLeft = activity.findViewById(R.id.leftStick);
         mStickRight = activity.findViewById(R.id.rightStick);
+//        mTvDebug = activity.findViewById(R.id.tv_test);
         initListener();
         initFlightController();
     }
@@ -63,8 +65,9 @@ public class VirtualStick {
                 if (Math.abs(pY) < 0.02) {
                     pY = 0;
                 }
-                float pitchJoyControlMaxSpeed = 10;
-                float rollJoyControlMaxSpeed = 10;
+                //original value 10
+                float pitchJoyControlMaxSpeed = 1;
+                float rollJoyControlMaxSpeed = 1;
 
                 mPitch = (float) (pitchJoyControlMaxSpeed * pX);
 
@@ -74,6 +77,7 @@ public class VirtualStick {
                     mSendVirtualStickDataTask = new SendVirtualStickDataTask();
                     mSendVirtualStickDataTimer = new Timer();
                     mSendVirtualStickDataTimer.schedule(mSendVirtualStickDataTask, 100, 200);
+//                    mSendVirtualStickDataTimer.schedule(mSendVirtualStickDataTask, 0, 0);
                 }
 
             }
@@ -91,7 +95,7 @@ public class VirtualStick {
                 if (Math.abs(pY) < 0.02) {
                     pY = 0;
                 }
-                float verticalJoyControlMaxSpeed = 2;
+                float verticalJoyControlMaxSpeed = 1;
                 float yawJoyControlMaxSpeed = 30;
 
                 mYaw = (float) (yawJoyControlMaxSpeed * pX);
@@ -101,6 +105,7 @@ public class VirtualStick {
                     mSendVirtualStickDataTask = new SendVirtualStickDataTask();
                     mSendVirtualStickDataTimer = new Timer();
                     mSendVirtualStickDataTimer.schedule(mSendVirtualStickDataTask, 0, 200);
+//                    mSendVirtualStickDataTimer.schedule(mSendVirtualStickDataTask, 0, 0);
                 }
 
             }
@@ -124,14 +129,12 @@ public class VirtualStick {
                 new Handler(Looper.getMainLooper()).post(new Runnable() {
                     @Override
                     public void run() {
-
                         String yaw = String.format("%.2f", stateData.getYaw());
                         String pitch = String.format("%.2f", stateData.getPitch());
                         String roll = String.format("%.2f", stateData.getRoll());
                         String positionX = String.format("%.2f", stateData.getPositionX());
                         String positionY = String.format("%.2f", stateData.getPositionY());
                         String positionZ = String.format("%.2f", stateData.getPositionZ());
-
                         ToastUtil.showToast("Yaw : " + yaw + ", Pitch : " + pitch + ", Roll : " + roll + "\n" + ", PosX : " + positionX +
                                 ", PosY : " + positionY +
                                 ", PosZ : " + positionZ);
@@ -143,10 +146,15 @@ public class VirtualStick {
     }
 
     class SendVirtualStickDataTask extends TimerTask {
-
         @Override
         public void run() {
             if (mFlightController != null) {
+//                new Handler(Looper.getMainLooper()).post(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        mTvDebug.setText("Flight available => Pitch:"+mPitch+", Roll:"+mRoll+", Yaw:"+mYaw);
+//                    }
+//                });
                 mFlightController.sendVirtualStickFlightControlData(
                         new FlightControlData(
                                 mPitch, mRoll, mYaw, mThrottle
@@ -174,12 +182,22 @@ public class VirtualStick {
                 if (djiError != null) {
                     ToastUtil.showToast(djiError.getDescription());
                 } else {
-                    if (enable)
+                    if (enable){
+                        mFlightController.setRollPitchControlMode(RollPitchControlMode.VELOCITY);
+                        mFlightController.setYawControlMode(YawControlMode.ANGULAR_VELOCITY);
+                        mFlightController.setVerticalControlMode(VerticalControlMode.VELOCITY);
+                        mFlightController.setRollPitchCoordinateSystem(FlightCoordinateSystem.BODY);
                         ToastUtil.showToast("Enable Virtual Stick Success");
+                    }
                     else
                         ToastUtil.showToast("Disable Virtual Stick Success");
                 }
             }
         });
     }
+
+    public void flightControllerChange(FlightController flightController){
+        mFlightController = flightController;
+    }
+
 }

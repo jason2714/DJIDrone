@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CompoundButton;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
@@ -23,7 +24,7 @@ import ntou.project.djidrone.R;
 
 public class ControllerFragment extends Fragment {
 
-    private ToggleButton mTbtnVirtualStickState;
+    private Switch mTbtnVirtualStickState;
     private TextView mTvVirtualStickState;
     private BaseProduct mProduct;
 
@@ -35,7 +36,7 @@ public class ControllerFragment extends Fragment {
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        mTbtnVirtualStickState = view.findViewById(R.id.tbtn_virtual_stick_state);
+        mTbtnVirtualStickState = view.findViewById(R.id.sw_virtual_stick_state);
         mTvVirtualStickState = view.findViewById(R.id.tv_virtual_stick_state);
         OnToggle onToggle = new OnToggle();
         mTbtnVirtualStickState.setOnCheckedChangeListener(onToggle);
@@ -46,7 +47,7 @@ public class ControllerFragment extends Fragment {
         @Override
         public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
             switch (buttonView.getId()) {
-                case R.id.tbtn_virtual_stick_state:
+                case R.id.sw_virtual_stick_state:
                     mProduct = DJIApplication.getProductInstance();
                     if (null != mProduct) {//已連接
                         if(getActivity() instanceof MobileActivity)
