@@ -669,7 +669,6 @@ public class MobileActivity extends FragmentActivity{
         if(flightMode.equals(flightModes[0])){//s禁用避障
             mImgSensor.setImageResource(R.drawable.sensor_none);
         }else if(flightMode.equals(flightModes[1])){//p無法左右
-
             mImgSensor.setImageResource(R.drawable.sensor_frontandrear);
         }else if(flightMode.equals(flightModes[2])){
             mImgSensor.setImageResource(R.drawable.sensor_surround);//t都可
