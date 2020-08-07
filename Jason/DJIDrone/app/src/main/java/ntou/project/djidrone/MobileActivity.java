@@ -31,6 +31,7 @@ import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -59,6 +60,7 @@ import ntou.project.djidrone.fragment.SensorFragment;
 import ntou.project.djidrone.fragment.SettingFragment;
 import ntou.project.djidrone.fragment.SignalFragment;
 import ntou.project.djidrone.fragment.VideoSurfaceFragment;
+import ntou.project.djidrone.listener.GestureListener;
 import ntou.project.djidrone.utils.DialogUtil;
 import ntou.project.djidrone.utils.GoogleMapUtil;
 import ntou.project.djidrone.utils.ToastUtil;
@@ -87,7 +89,6 @@ public class MobileActivity extends FragmentActivity {
     private String resolutionRatio = "16:9";
     private GestureDetector gestureDetector;
     private FrameLayout mFrameSetting, mapView, droneView;
-    private int fragmentPosition;
     public static boolean isRecording = false;
     //map
     private SupportMapFragment gMapFragment, gMapFragmentSmall;
@@ -109,6 +110,8 @@ public class MobileActivity extends FragmentActivity {
             onProductConnectionChange();
         }
     };
+    //global used
+    private int fragmentPosition;
 
 //    @Override
 //    public void onWindowFocusChanged(boolean hasFocus) {
@@ -255,31 +258,7 @@ public class MobileActivity extends FragmentActivity {
         mBtnTakeoffLanding.setOnClickListener(onclick);
         mBtnRTH.setOnClickListener(onclick);
         //滑動返回main fragment
-        gestureDetector = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
-            @Override
-            public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
-                final int FLING_MIN_DISTANCE = mFrameSetting.getWidth() / 2, FLING_MIN_VELOCITY = 100;//長度一半
-                if (fragmentPosition == 0) {
-                    Log.d(TAG, "on main fragment");
-                    return super.onFling(e1, e2, velocityX, velocityY);
-                }
-                if (e1.getX() - e2.getX() < -FLING_MIN_DISTANCE
-                        && Math.abs(velocityX) > FLING_MIN_VELOCITY) {
-//                    new Thread(() -> {
-//                        try {
-//                            fragmentPosition = 0;
-//                            new Instrumentation().sendKeyDownUpSync(KeyEvent.KEYCODE_BACK);
-//                        } catch (Exception e) {
-//                            Log.e(TAG, e.toString());
-//                        }
-//                    }).start();
-                    changeFragment(0);
-                    Log.d(TAG, "back to main");
-                }
-                Log.d(TAG, "onFling");
-                return super.onFling(e1, e2, velocityX, velocityY);
-            }
-        });
+        gestureDetector = new GestureDetector(this, new GestureListener(mFrameSetting.getWidth(), 100));
         mFrameSetting.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
@@ -783,8 +762,52 @@ public class MobileActivity extends FragmentActivity {
 
     }
 
-//    public void virtualStickEnable(boolean enable){
+    //    public void virtualStickEnable(boolean enable){
 //        mVirtualStick.virtualStickEnable(enable);
 //    }
+
+    //Gesture Listener
+    private class GestureListener extends GestureDetector.SimpleOnGestureListener {
+
+        private final int FLING_MIN_DISTANCE, FLING_MIN_VELOCITY;
+
+        public GestureListener(int frameWidth, int velocity) {
+            FLING_MIN_DISTANCE = frameWidth / 2;//長度一半
+            FLING_MIN_VELOCITY = velocity;
+        }
+
+        @Override
+        public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+
+            if (fragmentPosition == 0) {
+                return super.onFling(e1, e2, velocityX, velocityY);
+            }
+            if (e1.getX() - e2.getX() < -FLING_MIN_DISTANCE
+                    && Math.abs(velocityX) > FLING_MIN_VELOCITY) {
+//                    new Thread(() -> {
+//                        try {
+//                            fragmentPosition = 0;
+//                            new Instrumentation().sendKeyDownUpSync(KeyEvent.KEYCODE_BACK);
+//                        } catch (Exception e) {
+//                            Log.e(TAG, e.toString());
+//                        }
+//                    }).start();
+                changeFragment(0);
+            }
+            return super.onFling(e1, e2, velocityX, velocityY);
+        }
+    }
+
+    //TODO not done yet
+    private class MyScrollView extends ScrollView {
+        public MyScrollView(Context context) {
+            super(context);
+        }
+        @Override
+        public boolean dispatchTouchEvent(MotionEvent ev){
+            super.dispatchTouchEvent(ev);
+            return gestureDetector.onTouchEvent(ev);
+        }
+    }
 }
 
