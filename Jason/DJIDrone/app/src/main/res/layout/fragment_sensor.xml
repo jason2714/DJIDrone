@@ -1,48 +1,67 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ntou.project.djidrone.view.MyScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:gravity="center_horizontal"
-    android:orientation="vertical"
-    android:padding="10dp">
-    <RelativeLayout
+    android:layout_height="match_parent">
+
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="match_parent"
+        android:gravity="center_horizontal"
+        android:orientation="vertical"
+        android:padding="10dp">
 
-        <TextView
-            android:id="@+id/tv_change_collision_avoidance"
+        <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="40dp"
-            android:gravity="center"
-            android:text="@string/collision_avoidance_change"
-            android:textSize="25sp" />
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="40dp"
-            android:layout_below="@id/tv_change_collision_avoidance"
-            android:gravity="center"
-            android:orientation="horizontal">
+            android:layout_height="wrap_content">
 
             <TextView
-                android:id="@+id/tv_avoidance_mode"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:text="@string/close"
-                android:textSize="25sp"
-                android:gravity="center_vertical"
-                android:layout_marginEnd="20dp"/>
-            <Switch
-                android:id="@+id/sw_avoidance_mode"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:switchMinWidth="50dp"
-                android:track="@drawable/switch_selector"
-                android:gravity="center_vertical"
-                android:checked="false"
-                android:textOff=""
-                android:textOn="" />
-        </LinearLayout>
+                android:id="@+id/tv_change_collision_avoidance"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:gravity="center"
+                android:text="@string/collision_avoidance_change"
+                android:textSize="25sp" />
 
-    </RelativeLayout>
-</LinearLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:layout_below="@id/tv_change_collision_avoidance"
+                android:gravity="center"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/tv_avoidance_mode"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_marginEnd="20dp"
+                    android:gravity="center_vertical"
+                    android:text="@string/close"
+                    android:textSize="25sp" />
+
+                <Switch
+                    android:id="@+id/sw_avoidance_mode"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:checked="false"
+                    android:gravity="center_vertical"
+                    android:switchMinWidth="50dp"
+                    android:textOff=""
+                    android:textOn=""
+                    android:track="@drawable/switch_selector" />
+            </LinearLayout>
+
+        </RelativeLayout>
+
+        <View
+            android:layout_width="fill_parent"
+            android:layout_height="2dp"
+            android:background="@color/colorBackground" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:text="@string/sensor"
+            android:textSize="40sp" />
+    </LinearLayout>
+</ntou.project.djidrone.view.MyScrollView>

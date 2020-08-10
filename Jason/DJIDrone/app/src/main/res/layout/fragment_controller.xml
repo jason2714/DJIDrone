@@ -1,104 +1,109 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ntou.project.djidrone.view.MyScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:gravity="center_horizontal"
-    android:orientation="vertical"
-    android:padding="10dp">
+    android:layout_height="match_parent">
 
-    <RelativeLayout
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
+        android:orientation="vertical"
+        android:padding="10dp">
 
-        <TextView
-            android:id="@+id/tv_virtual_stick_enable"
+        <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="40dp"
-            android:gravity="center"
-            android:text="@string/virtual_stick_enable"
-            android:textSize="25sp" />
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="40dp"
-            android:layout_below="@id/tv_virtual_stick_enable"
-            android:gravity="center"
-            android:orientation="horizontal">
+            android:layout_height="wrap_content">
 
             <TextView
-                android:id="@+id/tv_virtual_stick_state"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_marginEnd="20dp"
-                android:gravity="center_vertical"
-                android:text="@string/close"
+                android:id="@+id/tv_virtual_stick_enable"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:gravity="center"
+                android:text="@string/virtual_stick_enable"
                 android:textSize="25sp" />
 
-            <Switch
-                android:id="@+id/sw_virtual_stick_state"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:checked="false"
-                android:gravity="center_vertical"
-                android:switchMinWidth="50dp"
-                android:textOff=""
-                android:textOn=""
-                android:track="@drawable/switch_selector" />
-        </LinearLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:layout_below="@id/tv_virtual_stick_enable"
+                android:gravity="center"
+                android:orientation="horizontal">
 
-    </RelativeLayout>
+                <TextView
+                    android:id="@+id/tv_virtual_stick_state"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_marginEnd="20dp"
+                    android:gravity="center_vertical"
+                    android:text="@string/close"
+                    android:textSize="25sp" />
 
-    <View
-        android:layout_width="fill_parent"
-        android:layout_height="2dp"
-        android:background="@color/colorBackground" />
+                <Switch
+                    android:id="@+id/sw_virtual_stick_state"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:checked="false"
+                    android:gravity="center_vertical"
+                    android:switchMinWidth="50dp"
+                    android:textOff=""
+                    android:textOn=""
+                    android:track="@drawable/switch_selector" />
+            </LinearLayout>
 
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        </RelativeLayout>
 
-        <TextView
-            android:id="@+id/tv_go_home_height_info"
+        <View
+            android:layout_width="fill_parent"
+            android:layout_height="2dp"
+            android:background="@color/colorBackground" />
+
+        <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="40dp"
-            android:gravity="center"
-            android:text="@string/go_home_height_info"
-            android:textSize="25sp" />
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="40dp"
-            android:layout_below="@id/tv_go_home_height_info"
-            android:gravity="center"
-            android:orientation="horizontal">
-
-            <EditText
-                android:id="@+id/et_rth_height"
-                android:layout_width="100dp"
-                android:layout_height="match_parent"
-                android:hint="(20~100m)"
-                android:inputType="number"
-                android:singleLine="true" />
+            android:layout_height="wrap_content">
 
             <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:gravity="center_vertical"
-                android:text="Meters"
-                android:textSize="15sp" />
-        </LinearLayout>
+                android:id="@+id/tv_go_home_height_info"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:gravity="center"
+                android:text="@string/go_home_height_info"
+                android:textSize="25sp" />
 
-    </RelativeLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:layout_below="@id/tv_go_home_height_info"
+                android:gravity="center"
+                android:orientation="horizontal">
 
-    <View
-        android:layout_width="fill_parent"
-        android:layout_height="2dp"
-        android:background="@color/colorBackground" />
+                <EditText
+                    android:id="@+id/et_rth_height"
+                    android:layout_width="100dp"
+                    android:layout_height="match_parent"
+                    android:hint="(20~100m)"
+                    android:inputType="number"
+                    android:singleLine="true" />
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
-        android:text="@string/controller"
-        android:textSize="30sp" />
-</LinearLayout>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:gravity="center_vertical"
+                    android:text="Meters"
+                    android:textSize="15sp" />
+            </LinearLayout>
+
+        </RelativeLayout>
+
+        <View
+            android:layout_width="fill_parent"
+            android:layout_height="2dp"
+            android:background="@color/colorBackground" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:text="@string/controller"
+            android:textSize="30sp" />
+    </LinearLayout>
+</ntou.project.djidrone.view.MyScrollView>

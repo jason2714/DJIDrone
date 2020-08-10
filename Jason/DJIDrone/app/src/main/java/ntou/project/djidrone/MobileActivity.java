@@ -60,7 +60,6 @@ import ntou.project.djidrone.fragment.SensorFragment;
 import ntou.project.djidrone.fragment.SettingFragment;
 import ntou.project.djidrone.fragment.SignalFragment;
 import ntou.project.djidrone.fragment.VideoSurfaceFragment;
-import ntou.project.djidrone.listener.GestureListener;
 import ntou.project.djidrone.utils.DialogUtil;
 import ntou.project.djidrone.utils.GoogleMapUtil;
 import ntou.project.djidrone.utils.ToastUtil;
@@ -68,6 +67,8 @@ import ntou.project.djidrone.utils.ToastUtil;
 public class MobileActivity extends FragmentActivity {
     //WindowSet
     private View decorView;
+    //MainFragment Width
+    private int mFrameSettingWidth;
     private static final String TAG = MobileActivity.class.getName();
     private static BaseProduct mProduct = null;
     private ConstraintLayout mainLayout, constraintBottom;
@@ -87,7 +88,7 @@ public class MobileActivity extends FragmentActivity {
     //camera
     private Camera camera = null;
     private String resolutionRatio = "16:9";
-    private GestureDetector gestureDetector;
+    public static GestureDetector gestureDetector;
     private FrameLayout mFrameSetting, mapView, droneView;
     public static boolean isRecording = false;
     //map
@@ -257,14 +258,19 @@ public class MobileActivity extends FragmentActivity {
         mapView.setOnClickListener(onclick);
         mBtnTakeoffLanding.setOnClickListener(onclick);
         mBtnRTH.setOnClickListener(onclick);
-        //滑動返回main fragment
-        gestureDetector = new GestureDetector(this, new GestureListener(mFrameSetting.getWidth(), 100));
-        mFrameSetting.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                return !gestureDetector.onTouchEvent(event);
-            }
+        //用post就會排在queue後面執行 => 布局完成後才getWidth()
+        mFrameSetting.post(() -> {
+            Log.d(TAG,"post");
+            mFrameSettingWidth = mFrameSetting.getWidth();
+            gestureDetector = new GestureDetector(MobileActivity.this, new GestureListener(mFrameSettingWidth, 50, 100));
         });
+//        已在scrollview override
+//        mFrameSetting.setOnTouchListener(new View.OnTouchListener() {
+//            @Override
+//            public boolean onTouch(View v, MotionEvent event) {
+//                return gestureDetector.onTouchEvent(event);
+//            }
+//        });
 
     }
 
@@ -769,20 +775,26 @@ public class MobileActivity extends FragmentActivity {
     //Gesture Listener
     private class GestureListener extends GestureDetector.SimpleOnGestureListener {
 
-        private final int FLING_MIN_DISTANCE, FLING_MIN_VELOCITY;
+        private final int FLING_MIN_DISTANCE_HOR, FLING_MIN_VELOCITY;
+        private final int FLING_MAX_DISTANCE_VER;
 
-        public GestureListener(int frameWidth, int velocity) {
-            FLING_MIN_DISTANCE = frameWidth / 2;//長度一半
+        public GestureListener(int frameWidth, int maxDistanceVer, int velocity) {
+            FLING_MIN_DISTANCE_HOR = frameWidth / 3;//長度1/3
             FLING_MIN_VELOCITY = velocity;
+            FLING_MAX_DISTANCE_VER = maxDistanceVer;
         }
 
         @Override
         public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
-
+////            test
+//            runOnUiThread(() -> {
+//                ToastUtil.showToast(FLING_MIN_DISTANCE_HOR + " " + FLING_MAX_DISTANCE_VER);
+//            });
             if (fragmentPosition == 0) {
                 return super.onFling(e1, e2, velocityX, velocityY);
             }
-            if (e1.getX() - e2.getX() < -FLING_MIN_DISTANCE
+            if (e2.getX() - e1.getX() > FLING_MIN_DISTANCE_HOR
+                    && Math.abs(e1.getY() - e2.getY()) < FLING_MAX_DISTANCE_VER
                     && Math.abs(velocityX) > FLING_MIN_VELOCITY) {
 //                    new Thread(() -> {
 //                        try {
@@ -798,16 +810,5 @@ public class MobileActivity extends FragmentActivity {
         }
     }
 
-    //TODO not done yet
-    private class MyScrollView extends ScrollView {
-        public MyScrollView(Context context) {
-            super(context);
-        }
-        @Override
-        public boolean dispatchTouchEvent(MotionEvent ev){
-            super.dispatchTouchEvent(ev);
-            return gestureDetector.onTouchEvent(ev);
-        }
-    }
 }
 
