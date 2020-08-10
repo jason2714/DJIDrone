@@ -2,6 +2,7 @@ package ntou.project.djidrone.view;
 
 import android.content.Context;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.widget.ScrollView;
 
@@ -17,6 +18,7 @@ public class MyScrollView extends ScrollView {
     }
 
     public MyScrollView(Context context, AttributeSet attrs){
+        //被呼叫的
         super(context,attrs);
     }
 

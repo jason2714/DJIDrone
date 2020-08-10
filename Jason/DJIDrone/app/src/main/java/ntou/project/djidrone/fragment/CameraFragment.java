@@ -64,18 +64,12 @@ public class CameraFragment extends Fragment {
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         mSpnShootingMode.setAdapter(adapter);
         mSpnShootingMode.setDropDownVerticalOffset(20);
-        mSpnShootingMode.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                if(event.getAction() == MotionEvent.ACTION_UP){
-                }
-                return false;
-            }
-        });
         mSpnShootingMode.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-
+//                ToastUtil.showToast(adapter.getItem(position).toString());
+                //TODO not test yet
+                setPhotoMode(SettingsDefinitions.ShootPhotoMode.valueOf(adapter.getItem(position).toString()));
             }
 
             @Override
@@ -163,14 +157,14 @@ public class CameraFragment extends Fragment {
                 @Override
                 public void onFailure(DJIError djiError) {
                     Log.d(TAG, djiError.getDescription());
-                    photoMode = SettingsDefinitions.ShootPhotoMode.SINGLE;
+//                    photoMode = SettingsDefinitions.ShootPhotoMode.SINGLE;
                 }
             });
         }
         return photoMode;
     }
 
-//    private BroadcastReceiver mReceiver = new BroadcastReceiver() {
+    //    private BroadcastReceiver mReceiver = new BroadcastReceiver() {
 //        @Override
 //        public void onReceive(Context context, Intent intent) {
 //            switch (intent.getAction()){
@@ -185,20 +179,22 @@ public class CameraFragment extends Fragment {
 //            }
 //        }
 //    };
-//    public static synchronized void setPhotoMode(SettingsDefinitions.ShootPhotoMode newPhotoMode) {
-//        Camera camera = DJIApplication.getCameraInstance();
-//        if (null != camera)
-//            camera.setShootPhotoMode(newPhotoMode, new CommonCallbacks.CompletionCallback() {
-//                @Override
-//                public void onResult(DJIError djiError) {
-//                    if (djiError == null) {
-//                        Log.d(TAG, "init shoot photo mode single: success");
-//                        photoMode = newPhotoMode;
-//                    } else {
-//                        Log.d(TAG, djiError.getDescription());
-//                        photoMode = SettingsDefinitions.ShootPhotoMode.SINGLE;
-//                    }
-//                }
-//            });
-//    }
+    public static synchronized void setPhotoMode(SettingsDefinitions.ShootPhotoMode newPhotoMode) {
+        Camera camera = DJIApplication.getCameraInstance();
+        if (null == camera)
+            return;
+        camera.setShootPhotoMode(newPhotoMode, new CommonCallbacks.CompletionCallback() {
+            @Override
+            public void onResult(DJIError djiError) {
+                ToastUtil.showErrorToast("set photo mode to " + newPhotoMode.name() + "success",djiError);
+                if (djiError == null) {
+                    Log.d(TAG, "set shoot photo mode " + newPhotoMode.name() + "success");
+                    photoMode = newPhotoMode;
+                } else {
+                    Log.d(TAG, djiError.getDescription());
+                    photoMode = SettingsDefinitions.ShootPhotoMode.SINGLE;
+                }
+            }
+        });
+    }
 }
