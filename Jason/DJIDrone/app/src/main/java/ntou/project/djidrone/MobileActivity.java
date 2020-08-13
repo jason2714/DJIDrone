@@ -417,7 +417,7 @@ public class MobileActivity extends FragmentActivity {
             }
 
             mHandler.post(() -> {
-                stringBuffer = new StringBuffer().append(flightControllerState.getGPSSignalLevel() + " ")
+                stringBuffer = new StringBuffer().append(flightControllerState.getGPSSignalLevel())
                         .append(flightControllerState.getAircraftLocation().getLatitude() + " ")
                         .append(flightControllerState.getAircraftLocation().getLongitude() + " ")
                         .append(GoogleMapUtil.checkGpsCoordinates(flightControllerState.getAircraftLocation().getLatitude(),

@@ -22,8 +22,8 @@ import ntou.project.djidrone.utils.ToastUtil;
 public class SettingFragment extends Fragment {
 
     private static LiveStreamManager liveStreamManager;
-    private TextView mTvLiveStream;
-    private Switch mSwLiveStream;
+    private TextView mTvLiveStream, mTvGestureMode;
+    private Switch mSwLiveStream, mSwGestureMode;
 
     @Nullable
     @Override
@@ -36,6 +36,7 @@ public class SettingFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         mSwLiveStream = getActivity().findViewById(R.id.sw_live_stream);
         mTvLiveStream = getActivity().findViewById(R.id.tv_live_stream);
+        mSwGestureMode = getActivity().findViewById(R.id.sw_gesture_mode);
         initListener();
         liveStreamManager = DJISDKManager.getInstance().getLiveStreamManager();
     }
@@ -43,6 +44,7 @@ public class SettingFragment extends Fragment {
     private void initListener() {
         OnToggle onToggle = new OnToggle();
         mSwLiveStream.setOnCheckedChangeListener(onToggle);
+        mSwGestureMode.setOnCheckedChangeListener(onToggle);
     }
 
     private class OnToggle implements CompoundButton.OnCheckedChangeListener {
@@ -73,6 +75,12 @@ public class SettingFragment extends Fragment {
                         ToastUtil.showToast("live stream manager = null");
                     }
                     break;
+                    case R.id.sw_gesture_mode:
+                        if(isChecked)
+                            mSwGestureMode.setText(R.string.open);
+                        else
+                            mSwGestureMode.setText(R.string.close);
+                        break;
                 default:
                     break;
             }

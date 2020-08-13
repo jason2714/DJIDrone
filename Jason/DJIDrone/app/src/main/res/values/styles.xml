@@ -32,5 +32,12 @@
         <item name="android:windowNoTitle">true</item>
 <!--        是否讓system保留navigation bar的空間-->
         <item name="android:fitsSystemWindows">false</item>
+<!--        text color-->
+        <item name="android:textColor">@color/colorTextMobile</item>
+<!--        hint color-->
+        <item name="android:textColorHint">@color/colorTextMobile</item>
+<!--        editText color-->
+        <item name="android:editTextColor">@color/colorTextMobile</item>
     </style>
+
 </resources>
