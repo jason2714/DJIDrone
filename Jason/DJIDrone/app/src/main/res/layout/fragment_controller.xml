@@ -16,11 +16,8 @@
 
             <TextView
                 android:id="@+id/tv_virtual_stick_enable"
-                android:layout_width="match_parent"
-                android:layout_height="40dp"
-                android:gravity="center"
                 android:text="@string/virtual_stick_enable"
-                android:textSize="25sp" />
+                style="@style/TextColor.InfoText"/>
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -31,31 +28,18 @@
 
                 <TextView
                     android:id="@+id/tv_virtual_stick_state"
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:layout_marginEnd="20dp"
-                    android:gravity="center_vertical"
                     android:text="@string/close"
-                    android:textSize="25sp" />
+                    style="@style/TextColor.SwitchText"/>
 
                 <Switch
                     android:id="@+id/sw_virtual_stick_state"
-                    android:layout_width="50dp"
-                    android:layout_height="50dp"
                     android:checked="false"
-                    android:gravity="center_vertical"
-                    android:switchMinWidth="50dp"
-                    android:textOff=""
-                    android:textOn=""
-                    android:track="@drawable/switch_selector" />
+                    style="@style/Switch"/>
             </LinearLayout>
 
         </RelativeLayout>
 
-        <View
-            android:layout_width="fill_parent"
-            android:layout_height="2dp"
-            android:background="@color/colorBackground" />
+        <include layout="@layout/view_partition"/>
 
         <RelativeLayout
             android:layout_width="match_parent"
@@ -63,11 +47,8 @@
 
             <TextView
                 android:id="@+id/tv_go_home_height_info"
-                android:layout_width="match_parent"
-                android:layout_height="40dp"
-                android:gravity="center"
                 android:text="@string/go_home_height_info"
-                android:textSize="25sp" />
+                style="@style/TextColor.InfoText"/>
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -82,22 +63,18 @@
                     android:layout_height="match_parent"
                     android:hint="(20~100m)"
                     android:inputType="number"
-                    android:singleLine="true" />
+                    android:singleLine="true"
+                    android:textSize="15sp"/>
 
                 <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:gravity="center_vertical"
                     android:text="Meters"
-                    android:textSize="15sp" />
+                    android:textSize="15sp"
+                    style="@style/TextColor.SwitchText"/>
             </LinearLayout>
 
         </RelativeLayout>
 
-        <View
-            android:layout_width="fill_parent"
-            android:layout_height="2dp"
-            android:background="@color/colorBackground" />
+        <include layout="@layout/view_partition"/>
 
         <TextView
             android:layout_width="wrap_content"

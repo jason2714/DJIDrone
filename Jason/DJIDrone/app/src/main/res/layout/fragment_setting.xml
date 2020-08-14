@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ntou.project.djidrone.view.MyScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<ntou.project.djidrone.view.MyScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -16,11 +17,8 @@
 
             <TextView
                 android:id="@+id/tv_live_stream_info"
-                android:layout_width="match_parent"
-                android:layout_height="40dp"
-                android:gravity="center"
-                android:text="@string/live_stream_info"
-                android:textSize="25sp" />
+                style="@style/TextColor.InfoText"
+                android:text="@string/live_stream_info"/>
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -31,31 +29,18 @@
 
                 <TextView
                     android:id="@+id/tv_live_stream"
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:layout_marginEnd="20dp"
-                    android:gravity="center_vertical"
-                    android:text="@string/close"
-                    android:textSize="25sp" />
+                    style="@style/TextColor.SwitchText"
+                    android:text="@string/close"/>
 
                 <Switch
                     android:id="@+id/sw_live_stream"
-                    android:layout_width="50dp"
-                    android:layout_height="50dp"
                     android:checked="false"
-                    android:gravity="center_vertical"
-                    android:switchMinWidth="50dp"
-                    android:textOff=""
-                    android:textOn=""
-                    android:track="@drawable/switch_selector" />
+                    style="@style/Switch"/>
             </LinearLayout>
 
         </RelativeLayout>
 
-        <View
-            android:layout_width="fill_parent"
-            android:layout_height="2dp"
-            android:background="@color/colorBackground" />
+        <include layout="@layout/view_partition"/>
 
         <RelativeLayout
             android:layout_width="match_parent"
@@ -63,11 +48,8 @@
 
             <TextView
                 android:id="@+id/tv_gesture_mode_info"
-                android:layout_width="match_parent"
-                android:layout_height="40dp"
-                android:gravity="center"
-                android:text="@string/gesture_mode_info"
-                android:textSize="25sp" />
+                style="@style/TextColor.InfoText"
+                android:text="@string/gesture_mode_info"/>
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -87,17 +69,13 @@
                     android:textOn=""
                     android:text="@string/close"
                     android:textColor="@color/colorTextMobile"
-                    android:textSize="25sp"
                     android:paddingHorizontal="20dp"
                     android:track="@drawable/switch_selector" />
             </LinearLayout>
 
         </RelativeLayout>
 
-        <View
-            android:layout_width="fill_parent"
-            android:layout_height="2dp"
-            android:background="@color/colorBackground" />
+        <include layout="@layout/view_partition"/>
 
         <TextView
             android:layout_width="wrap_content"

@@ -60,8 +60,8 @@ public class CameraFragment extends Fragment {
         mSpnShootingMode = view.findViewById(R.id.spn_shooting_mode);
         mSwCameraMode.setOnCheckedChangeListener(onToggle);
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(getContext(),
-                R.array.shooting_mode, android.R.layout.simple_spinner_item);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                R.array.shooting_mode, R.layout.textview_spinner);
+        adapter.setDropDownViewResource(R.layout.textview_spinner);
         mSpnShootingMode.setAdapter(adapter);
         mSpnShootingMode.setDropDownVerticalOffset(20);
         mSpnShootingMode.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
