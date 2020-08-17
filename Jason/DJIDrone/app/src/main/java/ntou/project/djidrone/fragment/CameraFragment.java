@@ -63,7 +63,6 @@ public class CameraFragment extends Fragment {
                 R.array.shooting_mode, R.layout.textview_spinner);
         adapter.setDropDownViewResource(R.layout.textview_spinner_item);
         mSpnShootingMode.setAdapter(adapter);
-        mSpnShootingMode.setDropDownVerticalOffset(20);
         mSpnShootingMode.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {

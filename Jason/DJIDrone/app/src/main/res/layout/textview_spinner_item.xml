@@ -5,4 +5,5 @@
     android:textSize="15sp"
     android:padding="5dp"
     android:gravity="center"
+    android:background="@drawable/tv_spinner_item_background"
     style="@style/TextColor"/>

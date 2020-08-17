@@ -30,11 +30,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import dji.common.error.DJIError;
 import dji.common.error.DJISDKError;
-import dji.common.product.Model;
 import dji.sdk.base.BaseComponent;
 import dji.sdk.base.BaseProduct;
-import dji.sdk.camera.Camera;
-import dji.sdk.camera.VideoFeeder;
 import dji.sdk.products.Aircraft;
 import dji.sdk.sdkmanager.DJISDKInitEvent;
 import dji.sdk.sdkmanager.DJISDKManager;
@@ -221,7 +218,7 @@ public class MainActivity extends AppCompatActivity {
             intent = new Intent(MainActivity.this, MobileActivity.class);
             startActivity(intent);
         } else {
-            Log.d(define.LOG_TAG, "account : " + account.getText().toString() +
+            Log.d(Define.LOG_TAG, "account : " + account.getText().toString() +
                     "\npassword : " + password.getText().toString());
             Toast.makeText(MainActivity.this, "帳號或密碼錯誤", Toast.LENGTH_SHORT).show();
         }

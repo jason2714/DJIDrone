@@ -1,14 +1,48 @@
 package ntou.project.djidrone.utils;
 
+import ntou.project.djidrone.Define;
+
 public class OthersUtil {
     public static boolean isNumeric(String str) {
-        if(str.equals(""))
+        if (str.equals(""))
             return false;
         for (int i = str.length(); --i >= 0; ) {
             if (!Character.isDigit(str.charAt(i))) {
-                return false;
+                if (i != 0 || (str.charAt(0) != '-'))
+                    return false;
             }
         }
         return true;
+    }
+
+    public static int parseIntDefault(String str, int defaultValue) {
+        int value;
+        try {
+            value = Integer.parseInt(str);
+        } catch (NumberFormatException e) {
+            value = defaultValue;
+            if (isNumeric(str))
+                ToastUtil.showToast("out of Integer bound");
+            else
+                ToastUtil.showToast("not a number");
+        }
+        return value;
+    }
+
+    public static int parseInt(String str) {
+        int value;
+        try {
+            value = Integer.parseInt(str);
+        } catch (NumberFormatException e) {
+            if (isNumeric(str)) {
+                value = Define.OUT_OF_BOUND;
+                ToastUtil.showToast("out of Integer bound");
+            }
+            else{
+                value = Define.NOT_A_NUMBER;
+                ToastUtil.showToast("not a number");
+            }
+        }
+        return value;
     }
 }

@@ -1,6 +1,5 @@
 package ntou.project.djidrone.fragment;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -18,11 +17,9 @@ import androidx.fragment.app.Fragment;
 import java.util.ArrayList;
 import java.util.List;
 
-import ntou.project.djidrone.DJIApplication;
-import ntou.project.djidrone.MainActivity;
 import ntou.project.djidrone.MobileActivity;
 import ntou.project.djidrone.R;
-import ntou.project.djidrone.define;
+import ntou.project.djidrone.Define;
 
 public class MainFragment extends Fragment {
 
@@ -61,7 +58,7 @@ public class MainFragment extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 ((MobileActivity) getActivity()).changeFragment(position + 1);
-                Log.d(define.LOG_TAG, gridItemList.get(position).getName());
+                Log.d(Define.LOG_TAG, gridItemList.get(position).getName());
 //                setToast(position);
             }
         });

@@ -73,7 +73,7 @@
             android:screenOrientation="sensorLandscape"
             tools:ignore="LockedOrientationActivity"
             android:theme="@style/Theme.AppCompat.Light.MobileActivity"/>
-        <activity android:name=".define" />
+        <activity android:name=".Define" />
         <activity android:name=".MainActivity"
             android:configChanges="orientation"
             android:screenOrientation="portrait"

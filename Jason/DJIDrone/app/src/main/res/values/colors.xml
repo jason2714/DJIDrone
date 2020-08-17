@@ -10,5 +10,6 @@
     <color name="colorBackgroundPressed">#080F1D</color>
     <color name="colorBackgroundTranslucent">#B3151D2E</color>
     <color name="colorFragment">#2A3954</color>
+    <color name="colorFragmentPressed">#1B2A45</color>
     <color name="colorTextMobile">#AAAAAA</color>
 </resources>

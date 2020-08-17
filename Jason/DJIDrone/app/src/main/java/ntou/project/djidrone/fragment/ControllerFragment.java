@@ -20,6 +20,7 @@ import androidx.fragment.app.Fragment;
 import dji.sdk.base.BaseProduct;
 import dji.sdk.flightcontroller.FlightController;
 import ntou.project.djidrone.DJIApplication;
+import ntou.project.djidrone.Define;
 import ntou.project.djidrone.MobileActivity;
 import ntou.project.djidrone.R;
 import ntou.project.djidrone.utils.OthersUtil;
@@ -30,7 +31,6 @@ public class ControllerFragment extends Fragment {
     private Switch mTbtnVirtualStickState;
     private TextView mTvVirtualStickState;
     private EditText mEtRthHeight;
-    private int rthHeight;
     private final static int DEFAULT_RTH_HEIGHT = 30;
     private FlightController mFlightController;
     private BaseProduct mProduct;
@@ -69,22 +69,21 @@ public class ControllerFragment extends Fragment {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 if (actionId == EditorInfo.IME_ACTION_DONE) {
+                    int rthHeight;
                     mFlightController = DJIApplication.getFlightControllerInstance();
-                    if (OthersUtil.isNumeric(mEtRthHeight.getText().toString())) {
-                        rthHeight = Integer.parseInt(mEtRthHeight.getText().toString());
+                    rthHeight = OthersUtil.parseInt(mEtRthHeight.getText().toString());
+                    if (rthHeight != Define.NOT_A_NUMBER) {
                         if (rthHeight >= 20 && rthHeight <= 100) {
-                            setRthHeight("set rth height success");
+                            setRthHeight(rthHeight, "set rth height success");
                         } else {
                             rthHeight = DEFAULT_RTH_HEIGHT;
-                            mEtRthHeight.setText(String.valueOf(rthHeight));
-                            setRthHeight("out of rth height bound");
+                            setRthHeight(rthHeight, "out of rth height bound");
                         }
                     } else {
                         rthHeight = DEFAULT_RTH_HEIGHT;
-                        mEtRthHeight.setText(String.valueOf(rthHeight));
-                        setRthHeight("not a number");
+                        setRthHeight(rthHeight, "not a number");
                     }
-                    mFlightController = DJIApplication.getFlightControllerInstance();
+                    mEtRthHeight.setText(String.valueOf(rthHeight));
                 }
                 return false;
             }
@@ -120,7 +119,7 @@ public class ControllerFragment extends Fragment {
         }
     }
 
-    private void setRthHeight(String successText) {
+    private void setRthHeight(int rthHeight, String successText) {
         if (null == mFlightController)
             return;
         mFlightController.setGoHomeHeightInMeters(rthHeight, djiError -> {
