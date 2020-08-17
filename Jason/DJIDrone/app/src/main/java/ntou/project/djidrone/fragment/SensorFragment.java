@@ -38,6 +38,8 @@ public class SensorFragment extends Fragment {
         OnToggle onToggle = new OnToggle();
         mSwAvoidance = view.findViewById(R.id.sw_avoidance_mode);
         mTvAvoidance = view.findViewById(R.id.tv_avoidance_mode);
+        flightController = DJIApplication.getFlightControllerInstance();
+        setCollisionAvoidance(true);
         mSwAvoidance.setOnCheckedChangeListener(onToggle);
     }
 
@@ -57,39 +59,28 @@ public class SensorFragment extends Fragment {
 
     private void setCollisionAvoidance(boolean isOn) {
         flightController = DJIApplication.getFlightControllerInstance();
-        if (null != flightController) {
-//            mTbtnAvoidance.setEnabled(false);
-            FlightAssistant flightAssistant = flightController.getFlightAssistant();
-            if(null != flightAssistant){
-                CommonCallbacks.CompletionCallback completionCallback = new CommonCallbacks.CompletionCallback() {
-                    @Override
-                    public void onResult(DJIError djiError) {
-                        if (null == djiError) {
-//                        mTbtnAvoidance.setEnabled(true);
-                            getActivity().runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    if (isOn)
-                                        mTvAvoidance.setText(R.string.open);
-                                    else
-                                        mTvAvoidance.setText(R.string.close);
-                                }
-                            });
-                            ToastUtil.showToast("set avoidance " + isOn + " success");
-                        } else {
-                            ToastUtil.showToast(djiError.getDescription());
-                        }
-                    }
-                };
-                flightAssistant.setCollisionAvoidanceEnabled(isOn,completionCallback);
-                flightAssistant.setActiveObstacleAvoidanceEnabled(isOn,completionCallback);
-            }
-
-        }else{
+        if (null == flightController) {
             if (isOn)
                 mTvAvoidance.setText(R.string.open);
             else
                 mTvAvoidance.setText(R.string.close);
+            return;
+        }
+        FlightAssistant flightAssistant = flightController.getFlightAssistant();
+        if (null != flightAssistant) {
+            CommonCallbacks.CompletionCallback completionCallback = djiError -> {
+                ToastUtil.showErrorToast("set avoidance " + isOn + " success", djiError);
+                if (null == djiError) {
+                    getActivity().runOnUiThread(() -> {
+                        if (isOn)
+                            mTvAvoidance.setText(R.string.open);
+                        else
+                            mTvAvoidance.setText(R.string.close);
+                    });
+                }
+            };
+            flightAssistant.setCollisionAvoidanceEnabled(isOn, completionCallback);
+            flightAssistant.setActiveObstacleAvoidanceEnabled(isOn, completionCallback);
         }
     }
 }

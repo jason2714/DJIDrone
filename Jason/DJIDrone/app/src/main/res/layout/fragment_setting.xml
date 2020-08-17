@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ntou.project.djidrone.view.MyScrollView
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<ntou.project.djidrone.view.MyScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -18,7 +17,7 @@
             <TextView
                 android:id="@+id/tv_live_stream_info"
                 style="@style/TextColor.InfoText"
-                android:text="@string/live_stream_info"/>
+                android:text="@string/live_stream_info" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -30,17 +29,17 @@
                 <TextView
                     android:id="@+id/tv_live_stream"
                     style="@style/TextColor.SwitchText"
-                    android:text="@string/close"/>
+                    android:text="@string/close" />
 
                 <Switch
                     android:id="@+id/sw_live_stream"
-                    android:checked="false"
-                    style="@style/Switch"/>
+                    style="@style/Switch"
+                    android:checked="false" />
             </LinearLayout>
 
         </RelativeLayout>
 
-        <include layout="@layout/view_partition"/>
+        <include layout="@layout/view_partition" />
 
         <RelativeLayout
             android:layout_width="match_parent"
@@ -49,7 +48,7 @@
             <TextView
                 android:id="@+id/tv_gesture_mode_info"
                 style="@style/TextColor.InfoText"
-                android:text="@string/gesture_mode_info"/>
+                android:text="@string/gesture_mode_info" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -58,24 +57,42 @@
                 android:gravity="center"
                 android:orientation="horizontal">
 
+                <TextView
+                    android:id="@+id/tv_gesture_mode"
+                    style="@style/TextColor.SwitchText"
+                    android:text="@string/close" />
+
                 <Switch
                     android:id="@+id/sw_gesture_mode"
-                    android:layout_width="match_parent"
-                    android:layout_height="50dp"
-                    android:checked="false"
-                    android:gravity="center_vertical"
-                    android:switchMinWidth="50dp"
-                    android:textOff=""
-                    android:textOn=""
-                    android:text="@string/close"
-                    android:textColor="@color/colorTextMobile"
-                    android:paddingHorizontal="20dp"
-                    android:track="@drawable/switch_selector" />
+                    style="@style/Switch"
+                    android:checked="false" />
             </LinearLayout>
+
+            <!--            <LinearLayout-->
+            <!--                android:layout_width="match_parent"-->
+            <!--                android:layout_height="40dp"-->
+            <!--                android:layout_below="@id/tv_gesture_mode_info"-->
+            <!--                android:gravity="center"-->
+            <!--                android:orientation="horizontal">-->
+
+            <!--                <Switch-->
+            <!--                    android:id="@+id/sw_gesture_mode"-->
+            <!--                    android:layout_width="match_parent"-->
+            <!--                    android:layout_height="50dp"-->
+            <!--                    android:checked="false"-->
+            <!--                    android:gravity="center_vertical"-->
+            <!--                    android:switchMinWidth="50dp"-->
+            <!--                    android:textOff=""-->
+            <!--                    android:textOn=""-->
+            <!--                    android:text="@string/close"-->
+            <!--                    android:textColor="@color/colorTextMobile"-->
+            <!--                    android:paddingHorizontal="20dp"-->
+            <!--                    android:track="@drawable/switch_selector" />-->
+            <!--            </LinearLayout>-->
 
         </RelativeLayout>
 
-        <include layout="@layout/view_partition"/>
+        <include layout="@layout/view_partition" />
 
         <TextView
             android:layout_width="wrap_content"

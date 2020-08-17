@@ -14,6 +14,8 @@ import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.fragment.app.Fragment;
 
+import dji.sdk.mission.MissionControl;
+import dji.sdk.mission.activetrack.ActiveTrackOperator;
 import dji.sdk.sdkmanager.DJISDKManager;
 import dji.sdk.sdkmanager.LiveStreamManager;
 import ntou.project.djidrone.R;
@@ -24,6 +26,7 @@ public class SettingFragment extends Fragment {
     private static LiveStreamManager liveStreamManager;
     private TextView mTvLiveStream, mTvGestureMode;
     private Switch mSwLiveStream, mSwGestureMode;
+    private ActiveTrackOperator mActiveTrackOperator;
 
     @Nullable
     @Override
@@ -37,12 +40,16 @@ public class SettingFragment extends Fragment {
         mSwLiveStream = getActivity().findViewById(R.id.sw_live_stream);
         mTvLiveStream = getActivity().findViewById(R.id.tv_live_stream);
         mSwGestureMode = getActivity().findViewById(R.id.sw_gesture_mode);
+        mTvGestureMode = getActivity().findViewById(R.id.tv_gesture_mode);
         initListener();
         liveStreamManager = DJISDKManager.getInstance().getLiveStreamManager();
     }
 
     private void initListener() {
         OnToggle onToggle = new OnToggle();
+        mActiveTrackOperator = MissionControl.getInstance().getActiveTrackOperator();
+        if(mActiveTrackOperator != null)
+            mSwGestureMode.setChecked(mActiveTrackOperator.isGestureModeEnabled());
         mSwLiveStream.setOnCheckedChangeListener(onToggle);
         mSwGestureMode.setOnCheckedChangeListener(onToggle);
     }
@@ -76,10 +83,23 @@ public class SettingFragment extends Fragment {
                     }
                     break;
                     case R.id.sw_gesture_mode:
-                        if(isChecked)
-                            mSwGestureMode.setText(R.string.open);
-                        else
-                            mSwGestureMode.setText(R.string.close);
+                        mActiveTrackOperator = MissionControl.getInstance().getActiveTrackOperator();
+                        if(mActiveTrackOperator != null){
+                            mActiveTrackOperator.setGestureModeEnabled(isChecked,djiError -> {
+                                ToastUtil.showErrorToast("set gesture mode " + isChecked + " success",djiError);
+                                if(null == djiError){
+                                    if(isChecked)
+                                        mTvGestureMode.setText(R.string.open);
+                                    else
+                                        mTvGestureMode.setText(R.string.close);
+                                }
+                            });
+                        }else{
+                            if(isChecked)
+                                mTvGestureMode.setText(R.string.open);
+                            else
+                                mTvGestureMode.setText(R.string.close);
+                        }
                         break;
                 default:
                     break;
