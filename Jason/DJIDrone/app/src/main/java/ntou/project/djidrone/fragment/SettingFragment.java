@@ -25,7 +25,9 @@ public class SettingFragment extends Fragment {
 
     private static LiveStreamManager liveStreamManager;
     private TextView mTvLiveStream, mTvGestureMode;
+    private TextView mTvRetreat;
     private Switch mSwLiveStream, mSwGestureMode;
+    private Switch mSwRetreat;
     private ActiveTrackOperator mActiveTrackOperator;
 
     @Nullable
@@ -37,27 +39,41 @@ public class SettingFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        mSwLiveStream = getActivity().findViewById(R.id.sw_live_stream);
-        mTvLiveStream = getActivity().findViewById(R.id.tv_live_stream);
-        mSwGestureMode = getActivity().findViewById(R.id.sw_gesture_mode);
-        mTvGestureMode = getActivity().findViewById(R.id.tv_gesture_mode);
+        initView();
         initListener();
         liveStreamManager = DJISDKManager.getInstance().getLiveStreamManager();
     }
 
+    private void initView() {
+        mSwLiveStream = getActivity().findViewById(R.id.sw_live_stream);
+        mTvLiveStream = getActivity().findViewById(R.id.tv_live_stream);
+        mSwGestureMode = getActivity().findViewById(R.id.sw_gesture_mode);
+        mTvGestureMode = getActivity().findViewById(R.id.tv_gesture_mode);
+        mSwRetreat = getActivity().findViewById(R.id.sw_retreat);
+        mTvRetreat = getActivity().findViewById(R.id.tv_retreat);
+        //init
+        mActiveTrackOperator = MissionControl.getInstance().getActiveTrackOperator();
+        mSwGestureMode.setChecked(mActiveTrackOperator.isGestureModeEnabled());
+        mActiveTrackOperator.setRecommendedConfiguration(djiError -> {
+            getActivity().runOnUiThread(() -> {
+                ToastUtil.showErrorToast("Set Recommended Config Success", djiError);
+            });
+        });
+
+    }
+
     private void initListener() {
         OnToggle onToggle = new OnToggle();
-        mActiveTrackOperator = MissionControl.getInstance().getActiveTrackOperator();
-        if(mActiveTrackOperator != null)
-            mSwGestureMode.setChecked(mActiveTrackOperator.isGestureModeEnabled());
         mSwLiveStream.setOnCheckedChangeListener(onToggle);
         mSwGestureMode.setOnCheckedChangeListener(onToggle);
+        mSwRetreat.setOnCheckedChangeListener(onToggle);
     }
 
     private class OnToggle implements CompoundButton.OnCheckedChangeListener {
         @RequiresApi(api = Build.VERSION_CODES.KITKAT)
         @Override
         public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+            mActiveTrackOperator = MissionControl.getInstance().getActiveTrackOperator();
             switch (buttonView.getId()) {
                 case R.id.sw_live_stream:
                     liveStreamManager = DJISDKManager.getInstance().getLiveStreamManager();
@@ -82,25 +98,32 @@ public class SettingFragment extends Fragment {
                         ToastUtil.showToast("live stream manager = null");
                     }
                     break;
-                    case R.id.sw_gesture_mode:
-                        mActiveTrackOperator = MissionControl.getInstance().getActiveTrackOperator();
-                        if(mActiveTrackOperator != null){
-                            mActiveTrackOperator.setGestureModeEnabled(isChecked,djiError -> {
-                                ToastUtil.showErrorToast("set gesture mode " + isChecked + " success",djiError);
-                                if(null == djiError){
-                                    if(isChecked)
-                                        mTvGestureMode.setText(R.string.open);
-                                    else
-                                        mTvGestureMode.setText(R.string.close);
-                                }
-                            });
-                        }else{
-                            if(isChecked)
+                case R.id.sw_gesture_mode:
+                    mActiveTrackOperator.setGestureModeEnabled(isChecked, djiError -> {
+                        ToastUtil.showErrorToast("set gesture mode " + isChecked + " success", djiError);
+                        if (null == djiError) {
+                            if (isChecked)
                                 mTvGestureMode.setText(R.string.open);
                             else
                                 mTvGestureMode.setText(R.string.close);
+                        }else{
+                            mSwGestureMode.setChecked(!isChecked);
                         }
-                        break;
+                    });
+                    break;
+                case R.id.sw_retreat:
+                    mActiveTrackOperator.setRetreatEnabled(isChecked, djiError -> {
+                        ToastUtil.showErrorToast("set retreat " + isChecked + " success", djiError);
+                        if (null == djiError) {
+                            if (isChecked)
+                                mTvRetreat.setText(R.string.open);
+                            else
+                                mTvRetreat.setText(R.string.close);
+                        }else{
+                            mSwRetreat.setChecked(!isChecked);
+                        }
+                    });
+                    break;
                 default:
                     break;
             }

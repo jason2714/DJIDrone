@@ -53,5 +53,7 @@
     <string name="go_home_height_info">返航高度</string>
     <string name="virtual_stick_enable">Virtual Stick</string>
     <string name="gesture_mode_info">Gesture Mode</string>
+    <string name="retreat_info">Drone Retreat</string>
+    <string name="recommended_configuration_info">Recommend Configuration</string>
     <string name="api_key">3afcbfbcba1e0e72936a8144</string>
 </resources>
