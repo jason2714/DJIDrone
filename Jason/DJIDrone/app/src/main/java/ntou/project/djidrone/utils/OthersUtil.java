@@ -37,12 +37,16 @@ public class OthersUtil {
             if (isNumeric(str)) {
                 value = Define.OUT_OF_BOUND;
                 ToastUtil.showToast("out of Integer bound");
-            }
-            else{
+            } else {
                 value = Define.NOT_A_NUMBER;
                 ToastUtil.showToast("not a number");
             }
         }
         return value;
     }
+
+    public static double calcManhattanDistance(double point1X, double point1Y, double point2X, double point2Y) {
+        return Math.abs(point1X - point2X) + Math.abs(point1Y - point2Y);
+    }
+
 }

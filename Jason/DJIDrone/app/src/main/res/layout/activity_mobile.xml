@@ -54,11 +54,20 @@
         android:id="@+id/droneView"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:background="#000"
+        android:background="#FFF"
         app:layout_constraintBottom_toTopOf="@id/gdlnhzBottom"
         app:layout_constraintLeft_toLeftOf="@id/gdlnvtLeft"
         app:layout_constraintRight_toLeftOf="@id/gdlnvtRight"
-        app:layout_constraintTop_toTopOf="@id/gdlnhzTop" />
+        app:layout_constraintTop_toTopOf="@id/gdlnhzTop" >
+        <ImageView
+            android:id="@+id/img_active_track_rect"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:src="@drawable/icon_active_track_rect"
+            android:scaleType="fitXY"
+            android:visibility="invisible"/>
+    </FrameLayout>
+
 
     <LinearLayout
         android:id="@+id/linearLeft"
@@ -140,7 +149,7 @@
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:orientation="vertical"
-            app:layout_constraintGuide_percent="0.13" />
+            app:layout_constraintGuide_end="636dp" />
 
         <androidx.constraintlayout.widget.Guideline
             android:id="@+id/gdlnvtStickRight"

@@ -15,6 +15,8 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Rect;
+import android.graphics.RectF;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -46,11 +48,20 @@ import dji.common.battery.BatteryState;
 import dji.common.camera.ResolutionAndFrameRate;
 import dji.common.error.DJIError;
 import dji.common.flightcontroller.FlightControllerState;
+import dji.common.mission.activetrack.ActiveTrackMission;
+import dji.common.mission.activetrack.ActiveTrackMissionEvent;
+import dji.common.mission.activetrack.ActiveTrackMode;
+import dji.common.mission.activetrack.ActiveTrackState;
+import dji.common.mission.activetrack.ActiveTrackTargetState;
+import dji.common.mission.activetrack.ActiveTrackTrackingState;
 import dji.common.util.CommonCallbacks;
 import dji.sdk.base.BaseProduct;
 import dji.sdk.battery.Battery;
 import dji.sdk.camera.Camera;
 import dji.sdk.flightcontroller.FlightController;
+import dji.sdk.mission.MissionControl;
+import dji.sdk.mission.activetrack.ActiveTrackMissionOperatorListener;
+import dji.sdk.mission.activetrack.ActiveTrackOperator;
 import dji.sdk.products.Aircraft;
 import ntou.project.djidrone.fragment.BatteryFragment;
 import ntou.project.djidrone.fragment.CameraFragment;
@@ -62,6 +73,7 @@ import ntou.project.djidrone.fragment.SignalFragment;
 import ntou.project.djidrone.fragment.VideoSurfaceFragment;
 import ntou.project.djidrone.utils.DialogUtil;
 import ntou.project.djidrone.utils.GoogleMapUtil;
+import ntou.project.djidrone.utils.OthersUtil;
 import ntou.project.djidrone.utils.ToastUtil;
 
 public class MobileActivity extends FragmentActivity {
@@ -111,21 +123,57 @@ public class MobileActivity extends FragmentActivity {
             onProductConnectionChange();
         }
     };
-    //global used
     private int fragmentPosition;
-
-//    @Override
-//    public void onWindowFocusChanged(boolean hasFocus) {
-//        super.onWindowFocusChanged(hasFocus);
-//        if (hasFocus) {
-//            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-//                getWindow().getDecorView().setSystemUiVisibility(
-//                        View.SYSTEM_UI_FLAG_IMMERSIVE | View.SYSTEM_UI_FLAG_LAYOUT_STABLE //隱藏狀態欄和標題欄
-//                                | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN//全螢幕顯示
-//                                | View.SYSTEM_UI_FLAG_FULLSCREEN | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);//隱藏手機虛擬按鍵HOME/BACK/LIST按鍵
-//            }
-//        }
-//    }
+    //Active Track
+//    ActiveTrack mActiveTrack = null;
+    private boolean isDrawingRect;
+    private double startX, startY;
+    private ImageView mImgActiveTrackRect;
+    private ActiveTrackOperator mActiveTrackOperator;
+    private ActiveTrackMissionOperatorListener mActiveTrackListener = activeTrackEvent ->
+            updateActiveTrackRect(activeTrackEvent.getTrackingState());
+    @SuppressLint("ClickableViewAccessibility")
+    private View.OnTouchListener mDroneViewOnTouch = (view, event) -> {
+        switch (event.getAction()) {
+            case MotionEvent.ACTION_DOWN:
+                startX = event.getX();
+                startY = event.getY();
+                break;
+            case MotionEvent.ACTION_MOVE:
+                if (OthersUtil.calcManhattanDistance(startX, startY, event.getX(), event.getY()) < 20
+                        && !isDrawingRect)
+                    return true;
+                isDrawingRect = true;
+                Rect rect = new Rect(Math.max((int) (startX < event.getX() ? startX : event.getX()), 0)
+                        , Math.max((int) (startY < event.getY() ? startY : event.getY()), 0)
+                        , Math.min((int) (startX >= event.getX() ? startX : event.getX()), view.getWidth())
+                        , Math.min((int) (startY >= event.getY() ? startY : event.getY()), view.getHeight()));
+                if (rect.height() == 0 || rect.width() == 0)
+                    return true;
+                mHandler.post(() -> drawActiveTrackRect(rect));
+                break;
+            case MotionEvent.ACTION_UP:
+                RectF mActiveTrackRectF = getActiveTrackRect(mImgActiveTrackRect);
+                mActiveTrackOperator = MissionControl.getInstance().getActiveTrackOperator();
+                ActiveTrackMission mActiveTrackMission = new ActiveTrackMission(mActiveTrackRectF, ActiveTrackMode.TRACE);
+                if (isDrawingRect)
+                    mActiveTrackOperator.startTracking(mActiveTrackMission, djiError -> {
+                        ToastUtil.showErrorToast("Start Active Track Success", djiError);
+                        if (null == djiError) {
+                            mActiveTrackOperator.addListener(mActiveTrackListener);
+                        }
+                    });
+                isDrawingRect = false;
+                //如果不push進UI thread的queue而讓其他thread執行
+                //執行的thread會跟UI thread concurrent執行而造成順序相反
+                //rect 圖形不會消失
+                mHandler.post(() -> mImgActiveTrackRect.setVisibility(View.INVISIBLE));
+                break;
+            default:
+                break;
+        }
+        return true;
+    };
 
     //camera
     @Override
@@ -142,8 +190,7 @@ public class MobileActivity extends FragmentActivity {
             decorView.setSystemUiVisibility(
                     View.SYSTEM_UI_FLAG_HIDE_NAVIGATION//隱藏手機虛擬按鍵HOME/BACK/LIST按鍵
                             | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);//讓navigation bar 過一段時間自動隱藏
-            decorView.setOnSystemUiVisibilityChangeListener(visibility -> {
-//                ToastUtil.showToast("change" + visibility);
+            decorView.setOnSystemUiVisibilityChangeListener(visibility -> {//called when UI change
                 if (visibility == 0) {//當navigation bar顯示時會=0
                     decorView.setSystemUiVisibility(
                             View.SYSTEM_UI_FLAG_HIDE_NAVIGATION//隱藏手機虛擬按鍵HOME/BACK/LIST按鍵
@@ -181,7 +228,6 @@ public class MobileActivity extends FragmentActivity {
     }
 
     private void initUI() {
-//        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
         refreshSDKRelativeUI();
         setFrameRatio();
         setBattery();
@@ -210,6 +256,9 @@ public class MobileActivity extends FragmentActivity {
         mTvTest = findViewById(R.id.tv_test);
         //Virtual Stick
         mVirtualStick = new VirtualStick(this);
+        //Active Track
+//        mActiveTrack = new ActiveTrack();
+        mImgActiveTrackRect = findViewById(R.id.img_active_track_rect);
         //setting
         mVideoSurfaceFragmentSmall = new VideoSurfaceFragment(true);
         mVideoSurfaceFragment = new VideoSurfaceFragment(false);
@@ -260,7 +309,7 @@ public class MobileActivity extends FragmentActivity {
         mBtnRTH.setOnClickListener(onclick);
         //用post就會排在queue後面執行 => 布局完成後才getWidth()
         mFrameSetting.post(() -> {
-            Log.d(TAG,"post");
+            Log.d(TAG, "post");
             mFrameSettingWidth = mFrameSetting.getWidth();
             gestureDetector = new GestureDetector(MobileActivity.this, new GestureListener(mFrameSettingWidth, 50, 100));
         });
@@ -735,9 +784,6 @@ public class MobileActivity extends FragmentActivity {
 
     }
 
-    //    public void virtualStickEnable(boolean enable){
-//        mVirtualStick.virtualStickEnable(enable);
-//    }
 
     //Gesture Listener
     private class GestureListener extends GestureDetector.SimpleOnGestureListener {
@@ -777,5 +823,64 @@ public class MobileActivity extends FragmentActivity {
         }
     }
 
+    private RectF getActiveTrackRect(View iv) {
+        View parent = (View) iv.getParent();
+        return new RectF(
+                ((float) iv.getLeft() + iv.getX()) / (float) parent.getWidth(),
+                ((float) iv.getTop() + iv.getY()) / (float) parent.getHeight(),
+                ((float) iv.getRight() + iv.getX()) / (float) parent.getWidth(),
+                ((float) iv.getBottom() + iv.getY()) / (float) parent.getHeight()
+        );
+    }
+
+    private void drawActiveTrackRect(Rect rect) {
+        mImgActiveTrackRect.setX(rect.left);
+        mImgActiveTrackRect.setY(rect.top);
+        mImgActiveTrackRect.getLayoutParams().width = rect.right - rect.left;
+        mImgActiveTrackRect.getLayoutParams().height = rect.bottom - rect.top;
+        mImgActiveTrackRect.requestLayout();
+        mImgActiveTrackRect.setVisibility(View.VISIBLE);
+    }
+
+    private void updateActiveTrackRect(ActiveTrackTrackingState trackingState) {
+        if (null == trackingState)
+            return;
+        RectF trackingRectF = trackingState.getTargetRect();
+        if (trackingRectF == null)
+            return;
+        //TODO 有什差????
+//        final int l = (int)((trackingRect.centerX() - trackingRect.width() / 2) * parent.getWidth());
+//        final int t = (int)((trackingRect.centerY() - trackingRect.height() / 2) * parent.getHeight());
+//        final int r = (int)((trackingRect.centerX() + trackingRect.width() / 2) * parent.getWidth());
+//        final int b = (int)((trackingRect.centerY() + trackingRect.height() / 2) * parent.getHeight());
+        Rect trackingRect = new Rect((int) (trackingRectF.top * droneView.getWidth())
+                , (int) (trackingRectF.left * droneView.getHeight())
+                , (int) (trackingRectF.right * droneView.getWidth())
+                , (int) (trackingRectF.bottom * droneView.getHeight()));
+        mHandler.post(() -> {
+            ActiveTrackTargetState targetState = trackingState.getState();
+            //TODO
+//            if ((targetState == ActiveTrackTargetState.CANNOT_CONFIRM)
+//                    || (targetState == ActiveTrackTargetState.UNKNOWN))
+//            {
+//                mImgActiveTrackRect.setImageResource(R.drawable.visual_track_cannotconfirm);
+//            } else if (targetState == ActiveTrackTargetState.WAITING_FOR_CONFIRMATION) {
+//                mImgActiveTrackRect.setImageResource(R.drawable.visual_track_needconfirm);
+//            } else if (targetState == ActiveTrackTargetState.TRACKING_WITH_LOW_CONFIDENCE){
+//                mImgActiveTrackRect.setImageResource(R.drawable.visual_track_lowconfidence);
+//            } else if (targetState == ActiveTrackTargetState.TRACKING_WITH_HIGH_CONFIDENCE){
+//                mImgActiveTrackRect.setImageResource(R.drawable.visual_track_highconfidence);
+//            }
+            drawActiveTrackRect(trackingRect);
+        });
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    public void activeTrackEnable(boolean enable) {
+        if (enable)
+            droneView.setOnTouchListener(mDroneViewOnTouch);
+        else
+            droneView.setOnTouchListener(null);
+    }
 }
 

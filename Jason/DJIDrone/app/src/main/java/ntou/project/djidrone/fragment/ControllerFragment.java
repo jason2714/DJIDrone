@@ -28,8 +28,8 @@ import ntou.project.djidrone.utils.ToastUtil;
 
 public class ControllerFragment extends Fragment {
 
-    private Switch mTbtnVirtualStickState;
-    private TextView mTvVirtualStickState;
+    private Switch mSwVirtualStickState, mSwActiveTrackState;
+    private TextView mTvVirtualStickState, mTvActiveTrackState;
     private EditText mEtRthHeight;
     private final static int DEFAULT_RTH_HEIGHT = 30;
     private FlightController mFlightController;
@@ -45,8 +45,10 @@ public class ControllerFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         //TODO init height true
-        mTbtnVirtualStickState = view.findViewById(R.id.sw_virtual_stick_state);
+        mSwVirtualStickState = view.findViewById(R.id.sw_virtual_stick_state);
         mTvVirtualStickState = view.findViewById(R.id.tv_virtual_stick_state);
+        mSwActiveTrackState = view.findViewById(R.id.sw_active_track_state);
+        mTvActiveTrackState = view.findViewById(R.id.tv_active_track_state);
         mEtRthHeight = view.findViewById(R.id.et_rth_height);
         initListener();
     }
@@ -64,7 +66,8 @@ public class ControllerFragment extends Fragment {
 //    });
     private void initListener() {
         OnToggle onToggle = new OnToggle();
-        mTbtnVirtualStickState.setOnCheckedChangeListener(onToggle);
+        mSwVirtualStickState.setOnCheckedChangeListener(onToggle);
+        mSwActiveTrackState.setOnCheckedChangeListener(onToggle);
         mEtRthHeight.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
@@ -112,6 +115,15 @@ public class ControllerFragment extends Fragment {
                             mTvVirtualStickState.setText(R.string.close);
                         }
                     }
+                    break;
+                case R.id.sw_active_track_state:
+                    if (isChecked) {
+                        mTvActiveTrackState.setText(R.string.open);
+                    } else {
+                        mTvActiveTrackState.setText(R.string.close);
+                    }
+                    if (getActivity() instanceof MobileActivity)
+                        ((MobileActivity)getActivity()).activeTrackEnable(isChecked);
                     break;
                 default:
                     break;
