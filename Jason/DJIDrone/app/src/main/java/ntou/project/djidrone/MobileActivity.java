@@ -1,14 +1,12 @@
 package ntou.project.djidrone;
 
 import androidx.annotation.RequiresApi;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -21,19 +19,15 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.transition.TransitionManager;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.CompoundButton;
-import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ScrollView;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -49,9 +43,7 @@ import dji.common.camera.ResolutionAndFrameRate;
 import dji.common.error.DJIError;
 import dji.common.flightcontroller.FlightControllerState;
 import dji.common.mission.activetrack.ActiveTrackMission;
-import dji.common.mission.activetrack.ActiveTrackMissionEvent;
 import dji.common.mission.activetrack.ActiveTrackMode;
-import dji.common.mission.activetrack.ActiveTrackState;
 import dji.common.mission.activetrack.ActiveTrackTargetState;
 import dji.common.mission.activetrack.ActiveTrackTrackingState;
 import dji.common.util.CommonCallbacks;
@@ -63,6 +55,7 @@ import dji.sdk.mission.MissionControl;
 import dji.sdk.mission.activetrack.ActiveTrackMissionOperatorListener;
 import dji.sdk.mission.activetrack.ActiveTrackOperator;
 import dji.sdk.products.Aircraft;
+import dji.sdk.sdkmanager.DJISDKManager;
 import ntou.project.djidrone.fragment.BatteryFragment;
 import ntou.project.djidrone.fragment.CameraFragment;
 import ntou.project.djidrone.fragment.ControllerFragment;
@@ -71,6 +64,7 @@ import ntou.project.djidrone.fragment.SensorFragment;
 import ntou.project.djidrone.fragment.SettingFragment;
 import ntou.project.djidrone.fragment.SignalFragment;
 import ntou.project.djidrone.fragment.VideoSurfaceFragment;
+import ntou.project.djidrone.utils.DJIApplication;
 import ntou.project.djidrone.utils.DialogUtil;
 import ntou.project.djidrone.utils.GoogleMapUtil;
 import ntou.project.djidrone.utils.OthersUtil;
@@ -103,6 +97,12 @@ public class MobileActivity extends FragmentActivity {
     public static GestureDetector gestureDetector;
     private FrameLayout mFrameSetting, mapView, droneView;
     public static boolean isRecording = false;
+    //signal
+    private ImageView mImgSignal;
+    private final int[] signalLevelDrawble = new int[]{R.drawable.icon_signal_level0, R.drawable.icon_signal_level1
+            , R.drawable.icon_signal_level2, R.drawable.icon_signal_level3
+            , R.drawable.icon_signal_level4, R.drawable.icon_signal_level5};
+
     //map
     private SupportMapFragment gMapFragment, gMapFragmentSmall;
     private GoogleMapUtil gMapUtil, gMapUtilSmall;
@@ -112,7 +112,7 @@ public class MobileActivity extends FragmentActivity {
     //flightController
     private FlightController flightController;
     private FlightControllerState.Callback flightStateCallback;
-    private AlertDialog comfirmLandingDialog;
+    private AlertDialog confirmLandingDialog;
     public VirtualStick mVirtualStick;
     private String[] flightModes;
     private boolean isFlying, isRTH;
@@ -128,52 +128,10 @@ public class MobileActivity extends FragmentActivity {
 //    ActiveTrack mActiveTrack = null;
     private boolean isDrawingRect;
     private double startX, startY;
-    private ImageView mImgActiveTrackRect;
+    private ImageView mImgSelectRect;
+    private ImageView mImgTargetRect;
     private ActiveTrackOperator mActiveTrackOperator;
-    private ActiveTrackMissionOperatorListener mActiveTrackListener = activeTrackEvent ->
-            updateActiveTrackRect(activeTrackEvent.getTrackingState());
-    @SuppressLint("ClickableViewAccessibility")
-    private View.OnTouchListener mDroneViewOnTouch = (view, event) -> {
-        switch (event.getAction()) {
-            case MotionEvent.ACTION_DOWN:
-                startX = event.getX();
-                startY = event.getY();
-                break;
-            case MotionEvent.ACTION_MOVE:
-                if (OthersUtil.calcManhattanDistance(startX, startY, event.getX(), event.getY()) < 20
-                        && !isDrawingRect)
-                    return true;
-                isDrawingRect = true;
-                Rect rect = new Rect(Math.max((int) (startX < event.getX() ? startX : event.getX()), 0)
-                        , Math.max((int) (startY < event.getY() ? startY : event.getY()), 0)
-                        , Math.min((int) (startX >= event.getX() ? startX : event.getX()), view.getWidth())
-                        , Math.min((int) (startY >= event.getY() ? startY : event.getY()), view.getHeight()));
-                if (rect.height() == 0 || rect.width() == 0)
-                    return true;
-                mHandler.post(() -> drawActiveTrackRect(rect));
-                break;
-            case MotionEvent.ACTION_UP:
-                RectF mActiveTrackRectF = getActiveTrackRect(mImgActiveTrackRect);
-                mActiveTrackOperator = MissionControl.getInstance().getActiveTrackOperator();
-                ActiveTrackMission mActiveTrackMission = new ActiveTrackMission(mActiveTrackRectF, ActiveTrackMode.TRACE);
-                if (isDrawingRect)
-                    mActiveTrackOperator.startTracking(mActiveTrackMission, djiError -> {
-                        ToastUtil.showErrorToast("Start Active Track Success", djiError);
-                        if (null == djiError) {
-                            mActiveTrackOperator.addListener(mActiveTrackListener);
-                        }
-                    });
-                isDrawingRect = false;
-                //如果不push進UI thread的queue而讓其他thread執行
-                //執行的thread會跟UI thread concurrent執行而造成順序相反
-                //rect 圖形不會消失
-                mHandler.post(() -> mImgActiveTrackRect.setVisibility(View.INVISIBLE));
-                break;
-            default:
-                break;
-        }
-        return true;
-    };
+    private AlertDialog confirmActiveTrackDialog;
 
     //camera
     @Override
@@ -220,9 +178,9 @@ public class MobileActivity extends FragmentActivity {
         IntentFilter filter = new IntentFilter(DJIApplication.FLAG_CONNECTION_CHANGE);
         registerReceiver(mReceiver, filter);
 
-        Toast.makeText(MobileActivity.this, "登入成功", Toast.LENGTH_SHORT).show();
         initViewId();
         initLinstener();
+        initActiveTrack();
         initFlightControllerCallback();
         initUI();
     }
@@ -252,13 +210,15 @@ public class MobileActivity extends FragmentActivity {
         mBtnTakeoffLanding = findViewById(R.id.btn_takeoff_landing);
         mBtnRTH = findViewById(R.id.btn_rth);
         mImgSensor = findViewById(R.id.sensorIcon);
+        mImgSignal = findViewById(R.id.img_sensorIcon);
         //test
         mTvTest = findViewById(R.id.tv_test);
         //Virtual Stick
         mVirtualStick = new VirtualStick(this);
         //Active Track
 //        mActiveTrack = new ActiveTrack();
-        mImgActiveTrackRect = findViewById(R.id.img_active_track_rect);
+        mImgSelectRect = findViewById(R.id.img_active_track_select_rect);
+        mImgTargetRect = findViewById(R.id.img_active_track_target_rect);
         //setting
         mVideoSurfaceFragmentSmall = new VideoSurfaceFragment(true);
         mVideoSurfaceFragment = new VideoSurfaceFragment(false);
@@ -320,6 +280,11 @@ public class MobileActivity extends FragmentActivity {
 //                return gestureDetector.onTouchEvent(event);
 //            }
 //        });
+
+    }
+
+    private void initActiveTrack() {
+        mActiveTrackOperator = MissionControl.getInstance().getActiveTrackOperator();
 
     }
 
@@ -466,27 +431,28 @@ public class MobileActivity extends FragmentActivity {
             }
 
             mHandler.post(() -> {
-                stringBuffer = new StringBuffer().append(flightControllerState.getGPSSignalLevel())
-                        .append(flightControllerState.getAircraftLocation().getLatitude() + " ")
-                        .append(flightControllerState.getAircraftLocation().getLongitude() + " ")
-                        .append(GoogleMapUtil.checkGpsCoordinates(flightControllerState.getAircraftLocation().getLatitude(),
-                                flightControllerState.getAircraftLocation().getLongitude()) + " ");
-                mTvTest.setText(stringBuffer);
+//                stringBuffer = new StringBuffer().append(flightControllerState.getGPSSignalLevel())
+//                        .append(flightControllerState.getAircraftLocation().getLatitude() + " ")
+//                        .append(flightControllerState.getAircraftLocation().getLongitude() + " ")
+//                        .append(GoogleMapUtil.checkGpsCoordinates(flightControllerState.getAircraftLocation().getLatitude(),
+//                                flightControllerState.getAircraftLocation().getLongitude()) + " ");
+//                mTvTest.setText(stringBuffer);
                 setSensor(flightControllerState.getFlightMode().toString());
+                setGPSLevelIcon(flightControllerState);
             });
 
 //                ToastUtil.showToast(flightControllerState.getFlightMode().toString());
             gMapUtil.initFlightController(flightControllerState);
             if (flightControllerState.isLandingConfirmationNeeded()) {
-                if (comfirmLandingDialog == null) {
-                    comfirmLandingDialog = new AlertDialog.Builder(MobileActivity.this)
+                if (confirmLandingDialog == null) {
+                    confirmLandingDialog = new AlertDialog.Builder(MobileActivity.this, R.style.set_dialog)
                             .setTitle("Confirm landing")
                             .setMessage("確定要降落嗎")
                             .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
                                     flightController.confirmLanding(djiError -> {
-                                        comfirmLandingDialog = null;
+                                        confirmLandingDialog = null;
                                         ToastUtil.showErrorToast("降落成功", djiError);
                                     });
                                 }
@@ -495,13 +461,13 @@ public class MobileActivity extends FragmentActivity {
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
                                     flightController.cancelLanding(djiError -> {
-                                        comfirmLandingDialog = null;
+                                        confirmLandingDialog = null;
                                         ToastUtil.showErrorToast("取消降落成功", djiError);
                                     });
                                 }
                             })
                             .create();
-                    DialogUtil.showDialogExceptActionBar(comfirmLandingDialog);
+                    DialogUtil.showDialogExceptActionBar(confirmLandingDialog);
                 }
 
             }
@@ -716,18 +682,6 @@ public class MobileActivity extends FragmentActivity {
         }
     }
 
-    private void setSignal() {
-        flightController = DJIApplication.getFlightControllerInstance();
-//        if (null != flightController) {
-//            flightController.setStateCallback(new FlightControllerState.Callback() {
-//                @Override
-//                public void onUpdate(FlightControllerState flightControllerState) {
-//                    flightControllerState.getGPSSignalLevel();
-//                }
-//            });
-//        }
-    }
-
     private void setSensor(String flightMode) {
         if (flightMode.equals(flightModes[0])) {//s禁用避障
             mImgSensor.setImageResource(R.drawable.sensor_none);
@@ -833,54 +787,142 @@ public class MobileActivity extends FragmentActivity {
         );
     }
 
-    private void drawActiveTrackRect(Rect rect) {
-        mImgActiveTrackRect.setX(rect.left);
-        mImgActiveTrackRect.setY(rect.top);
-        mImgActiveTrackRect.getLayoutParams().width = rect.right - rect.left;
-        mImgActiveTrackRect.getLayoutParams().height = rect.bottom - rect.top;
-        mImgActiveTrackRect.requestLayout();
-        mImgActiveTrackRect.setVisibility(View.VISIBLE);
+    private void drawActiveTrackRect(View view, Rect rect) {
+        view.setX(rect.left);
+        view.setY(rect.top);
+        view.getLayoutParams().width = rect.right - rect.left;
+        view.getLayoutParams().height = rect.bottom - rect.top;
+        view.requestLayout();
+        view.setVisibility(View.VISIBLE);
     }
 
     private void updateActiveTrackRect(ActiveTrackTrackingState trackingState) {
         if (null == trackingState)
             return;
         RectF trackingRectF = trackingState.getTargetRect();
-        if (trackingRectF == null)
+        if (trackingRectF == null) {
+            mHandler.post(() -> mImgTargetRect.setVisibility(View.INVISIBLE));
             return;
+        }
+
         //TODO 有什差????
 //        final int l = (int)((trackingRect.centerX() - trackingRect.width() / 2) * parent.getWidth());
 //        final int t = (int)((trackingRect.centerY() - trackingRect.height() / 2) * parent.getHeight());
 //        final int r = (int)((trackingRect.centerX() + trackingRect.width() / 2) * parent.getWidth());
 //        final int b = (int)((trackingRect.centerY() + trackingRect.height() / 2) * parent.getHeight());
-        Rect trackingRect = new Rect((int) (trackingRectF.top * droneView.getWidth())
-                , (int) (trackingRectF.left * droneView.getHeight())
+        Rect trackingRect = new Rect((int) (trackingRectF.left * droneView.getWidth())
+                , (int) (trackingRectF.top * droneView.getHeight())
                 , (int) (trackingRectF.right * droneView.getWidth())
                 , (int) (trackingRectF.bottom * droneView.getHeight()));
         mHandler.post(() -> {
             ActiveTrackTargetState targetState = trackingState.getState();
             //TODO
-//            if ((targetState == ActiveTrackTargetState.CANNOT_CONFIRM)
-//                    || (targetState == ActiveTrackTargetState.UNKNOWN))
-//            {
-//                mImgActiveTrackRect.setImageResource(R.drawable.visual_track_cannotconfirm);
-//            } else if (targetState == ActiveTrackTargetState.WAITING_FOR_CONFIRMATION) {
-//                mImgActiveTrackRect.setImageResource(R.drawable.visual_track_needconfirm);
-//            } else if (targetState == ActiveTrackTargetState.TRACKING_WITH_LOW_CONFIDENCE){
-//                mImgActiveTrackRect.setImageResource(R.drawable.visual_track_lowconfidence);
-//            } else if (targetState == ActiveTrackTargetState.TRACKING_WITH_HIGH_CONFIDENCE){
-//                mImgActiveTrackRect.setImageResource(R.drawable.visual_track_highconfidence);
-//            }
-            drawActiveTrackRect(trackingRect);
+            if ((targetState == ActiveTrackTargetState.CANNOT_CONFIRM)
+                    || (targetState == ActiveTrackTargetState.UNKNOWN)) {
+                mImgTargetRect.setImageResource(R.drawable.rect_active_track_cannotconfirm);
+                mHandler.post(() -> mTvTest.setText(trackingState.getReason().toString()));
+            } else if (targetState == ActiveTrackTargetState.WAITING_FOR_CONFIRMATION) {
+                if (confirmActiveTrackDialog == null) {
+                    confirmActiveTrackDialog = new AlertDialog.Builder(MobileActivity.this, R.style.set_dialog)
+                            .setTitle("Confirm ActiveTrack")
+                            .setMessage("Confirming Active Track?")
+                            .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    mActiveTrackOperator.acceptConfirmation(djiError -> {
+                                        confirmActiveTrackDialog = null;
+                                        ToastUtil.showToast("Accept Active Track\nStart Active Tracking");
+                                    });
+                                }
+                            })
+                            .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    mActiveTrackOperator.rejectConfirmation(djiError -> {
+                                        confirmActiveTrackDialog = null;
+                                        ToastUtil.showErrorToast("Reject Active Track Success", djiError);
+                                    });
+                                }
+                            })
+                            .create();
+                    DialogUtil.showDialogExceptActionBar(confirmActiveTrackDialog);
+                }
+                mImgTargetRect.setImageResource(R.drawable.rect_active_track_needconfirm);
+            } else if (targetState == ActiveTrackTargetState.TRACKING_WITH_LOW_CONFIDENCE) {
+                mImgTargetRect.setImageResource(R.drawable.rect_active_track_lowconfidence);
+            } else if (targetState == ActiveTrackTargetState.TRACKING_WITH_HIGH_CONFIDENCE) {
+                mImgTargetRect.setImageResource(R.drawable.rect_active_track_highconfidence);
+            }
+            drawActiveTrackRect(mImgTargetRect, trackingRect);
         });
     }
 
     @SuppressLint("ClickableViewAccessibility")
     public void activeTrackEnable(boolean enable) {
-        if (enable)
-            droneView.setOnTouchListener(mDroneViewOnTouch);
-        else
+        if (enable) {
+            mImgSelectRect.bringToFront();
+            mImgTargetRect.bringToFront();
+            mActiveTrackOperator.addListener(activeTrackEvent -> {
+//                mHandler.post(() -> mTvTest.setText(activeTrackEvent.getCurrentState().toString()));
+                updateActiveTrackRect(activeTrackEvent.getTrackingState());
+            });
+            if (DJIApplication.isAircraftConnected())
+                //auto sensing
+                mActiveTrackOperator.enableAutoSensing(djiError -> ToastUtil.showErrorToast("start Auto Sensing success", djiError));
+//            mActiveTrackOperator.setRecommendedConfiguration(djiError ->mHandler.post(()-> ToastUtil.showErrorToast("Set Recommended Config Success", djiError)));
+            droneView.setOnTouchListener((view, event) -> {
+                switch (event.getAction()) {
+                    case MotionEvent.ACTION_DOWN:
+                        startX = event.getX();
+                        startY = event.getY();
+                        break;
+                    case MotionEvent.ACTION_MOVE:
+                        if (OthersUtil.calcManhattanDistance(startX, startY, event.getX(), event.getY()) < 20
+                                && !isDrawingRect)
+                            return true;
+                        isDrawingRect = true;
+                        Rect rect = new Rect(Math.max((int) (startX < event.getX() ? startX : event.getX()), 0)
+                                , Math.max((int) (startY < event.getY() ? startY : event.getY()), 0)
+                                , Math.min((int) (startX >= event.getX() ? startX : event.getX()), view.getWidth())
+                                , Math.min((int) (startY >= event.getY() ? startY : event.getY()), view.getHeight()));
+                        if (rect.height() == 0 || rect.width() == 0)
+                            return true;
+                        mHandler.post(() -> drawActiveTrackRect(mImgSelectRect, rect));
+                        break;
+                    case MotionEvent.ACTION_UP:
+                        RectF mActiveTrackRectF = getActiveTrackRect(mImgSelectRect);
+//                        ToastUtil.showToast(mActiveTrackRectF.left + " " +
+//                                mActiveTrackRectF.top + " " +
+//                                mActiveTrackRectF.right + " " +
+//                                mActiveTrackRectF.bottom + " ");
+                        ActiveTrackMission mActiveTrackMission = new ActiveTrackMission(mActiveTrackRectF, ActiveTrackMode.TRACE);
+                        if (isDrawingRect) {
+                            mActiveTrackOperator.startTracking(mActiveTrackMission, djiError ->
+                                    mHandler.post(() -> ToastUtil.showErrorToast("Start Active Track Success", djiError)));
+                        }
+                        isDrawingRect = false;
+                        //如果不push進UI thread的queue而讓其他thread執行
+                        //執行的thread會跟UI thread concurrent執行而造成順序相反
+                        //rect 圖形不會消失
+                        mHandler.post(() -> mImgSelectRect.setVisibility(View.INVISIBLE));
+                        break;
+                    default:
+                        break;
+                }
+                return true;
+            });
+        } else {
             droneView.setOnTouchListener(null);
+//            mActiveTrackOperator.disableAutoSensing(djiError -> ToastUtil.showErrorToast("Disable Auto Sensing Success", djiError));
+            mActiveTrackOperator.stopTracking(djiError -> ToastUtil.showErrorToast("Stop Tracking Success", djiError));
+            mActiveTrackOperator.removeAllListeners();
+        }
+    }
+
+    private void setGPSLevelIcon(FlightControllerState flightControllerState) {
+        String signalLevel = flightControllerState.getGPSSignalLevel().toString();
+        int level = OthersUtil.parseInt(signalLevel.substring(signalLevel.length() - 1));
+        mImgSignal.setImageResource(signalLevelDrawble[level]);
     }
 }
 

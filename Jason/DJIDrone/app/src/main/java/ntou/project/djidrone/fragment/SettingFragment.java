@@ -54,12 +54,6 @@ public class SettingFragment extends Fragment {
         //init
         mActiveTrackOperator = MissionControl.getInstance().getActiveTrackOperator();
         mSwGestureMode.setChecked(mActiveTrackOperator.isGestureModeEnabled());
-        mActiveTrackOperator.setRecommendedConfiguration(djiError -> {
-            getActivity().runOnUiThread(() -> {
-                ToastUtil.showErrorToast("Set Recommended Config Success", djiError);
-            });
-        });
-
     }
 
     private void initListener() {
@@ -106,7 +100,7 @@ public class SettingFragment extends Fragment {
                                 mTvGestureMode.setText(R.string.open);
                             else
                                 mTvGestureMode.setText(R.string.close);
-                        }else{
+                        } else {
                             mSwGestureMode.setChecked(!isChecked);
                         }
                     });
@@ -119,7 +113,7 @@ public class SettingFragment extends Fragment {
                                 mTvRetreat.setText(R.string.open);
                             else
                                 mTvRetreat.setText(R.string.close);
-                        }else{
+                        } else {
                             mSwRetreat.setChecked(!isChecked);
                         }
                     });

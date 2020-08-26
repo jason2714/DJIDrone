@@ -7,17 +7,15 @@ import android.view.ViewGroup;
 import android.widget.CompoundButton;
 import android.widget.Switch;
 import android.widget.TextView;
-import android.widget.ToggleButton;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import dji.common.error.DJIError;
 import dji.common.util.CommonCallbacks;
 import dji.sdk.flightcontroller.FlightAssistant;
 import dji.sdk.flightcontroller.FlightController;
-import ntou.project.djidrone.DJIApplication;
+import ntou.project.djidrone.utils.DJIApplication;
 import ntou.project.djidrone.R;
 import ntou.project.djidrone.utils.ToastUtil;
 

@@ -23,7 +23,6 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 import dji.common.flightcontroller.FlightControllerState;
 import dji.sdk.flightcontroller.FlightController;
-import ntou.project.djidrone.DJIApplication;
 import ntou.project.djidrone.MobileActivity;
 import ntou.project.djidrone.R;
 

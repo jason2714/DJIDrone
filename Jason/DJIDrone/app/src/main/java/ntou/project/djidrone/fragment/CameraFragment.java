@@ -1,39 +1,31 @@
 package ntou.project.djidrone.fragment;
 
-import android.content.Context;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
-import android.widget.ListPopupWindow;
-import android.widget.PopupWindow;
 import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.TextView;
-import android.widget.ToggleButton;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.fragment.app.Fragment;
 
-import java.lang.reflect.Field;
-
 import dji.common.camera.SettingsDefinitions;
 import dji.common.error.DJIError;
 import dji.common.util.CommonCallbacks;
 import dji.sdk.camera.Camera;
-import ntou.project.djidrone.DJIApplication;
+import ntou.project.djidrone.utils.DJIApplication;
 import ntou.project.djidrone.R;
 import ntou.project.djidrone.utils.ToastUtil;
 

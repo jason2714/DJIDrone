@@ -19,7 +19,7 @@ import androidx.fragment.app.Fragment;
 
 import dji.sdk.base.BaseProduct;
 import dji.sdk.flightcontroller.FlightController;
-import ntou.project.djidrone.DJIApplication;
+import ntou.project.djidrone.utils.DJIApplication;
 import ntou.project.djidrone.Define;
 import ntou.project.djidrone.MobileActivity;
 import ntou.project.djidrone.R;

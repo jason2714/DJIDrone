@@ -34,7 +34,7 @@
         android:required="true" />
     <!-- Permissions and features -->
     <application
-        android:name=".DJIApplication"
+        android:name=".utils.DJIApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"

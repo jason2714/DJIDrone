@@ -1,12 +1,8 @@
 package ntou.project.djidrone.utils;
 
-import android.os.Looper;
 import android.widget.Toast;
 
-import java.util.logging.Handler;
-
 import dji.common.error.DJIError;
-import ntou.project.djidrone.DJIApplication;
 
 public class ToastUtil {
 

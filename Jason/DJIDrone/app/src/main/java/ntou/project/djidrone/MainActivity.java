@@ -35,6 +35,7 @@ import dji.sdk.base.BaseProduct;
 import dji.sdk.products.Aircraft;
 import dji.sdk.sdkmanager.DJISDKInitEvent;
 import dji.sdk.sdkmanager.DJISDKManager;
+import ntou.project.djidrone.utils.DJIApplication;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -215,6 +216,7 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = null;
         if (account.getText().toString().equals(getResources().getString(R.string.account)) &&
                 password.getText().toString().equals(getResources().getString(R.string.password))) {
+            showToast("登入成功");
             intent = new Intent(MainActivity.this, MobileActivity.class);
             startActivity(intent);
         } else {

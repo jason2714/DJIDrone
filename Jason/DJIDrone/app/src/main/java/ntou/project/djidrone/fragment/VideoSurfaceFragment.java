@@ -16,7 +16,7 @@ import dji.common.product.Model;
 import dji.sdk.base.BaseProduct;
 import dji.sdk.camera.VideoFeeder;
 import dji.sdk.codec.DJICodecManager;
-import ntou.project.djidrone.DJIApplication;
+import ntou.project.djidrone.utils.DJIApplication;
 import ntou.project.djidrone.MobileActivity;
 import ntou.project.djidrone.R;
 import ntou.project.djidrone.utils.ToastUtil;

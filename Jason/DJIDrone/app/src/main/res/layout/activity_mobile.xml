@@ -60,10 +60,17 @@
         app:layout_constraintRight_toLeftOf="@id/gdlnvtRight"
         app:layout_constraintTop_toTopOf="@id/gdlnhzTop" >
         <ImageView
-            android:id="@+id/img_active_track_rect"
+            android:id="@+id/img_active_track_select_rect"
             android:layout_width="0dp"
             android:layout_height="0dp"
-            android:src="@drawable/icon_active_track_rect"
+            android:src="@drawable/rect_active_track_target"
+            android:scaleType="fitXY"
+            android:visibility="invisible"/>
+        <ImageView
+            android:id="@+id/img_active_track_target_rect"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:src="@drawable/rect_active_track_target"
             android:scaleType="fitXY"
             android:visibility="invisible"/>
     </FrameLayout>
@@ -261,11 +268,11 @@
                 android:layout_height="20dp"
                 android:layout_centerVertical="true"
                 android:layout_marginEnd="10dp"
-                android:layout_toStartOf="@id/signalIcon"
+                android:layout_toStartOf="@id/img_sensorIcon"
                 android:src="@drawable/icon_controller" />
 
             <ImageView
-                android:id="@+id/signalIcon"
+                android:id="@+id/img_sensorIcon"
                 android:layout_width="18dp"
                 android:layout_height="20dp"
                 android:layout_centerVertical="true"

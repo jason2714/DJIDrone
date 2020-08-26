@@ -3,9 +3,7 @@ package ntou.project.djidrone;
 import android.app.Activity;
 import android.os.Handler;
 import android.os.Looper;
-import android.util.Log;
 import android.view.View;
-import android.widget.TextView;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -21,6 +19,7 @@ import dji.common.util.CommonCallbacks;
 import dji.sdk.flightcontroller.FlightController;
 import dji.sdk.products.Aircraft;
 import ntou.project.djidrone.listener.OnScreenJoystickListener;
+import ntou.project.djidrone.utils.DJIApplication;
 import ntou.project.djidrone.utils.ToastUtil;
 
 public class VirtualStick {
