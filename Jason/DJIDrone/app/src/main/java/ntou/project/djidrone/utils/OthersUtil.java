@@ -1,5 +1,9 @@
 package ntou.project.djidrone.utils;
 
+import android.content.Context;
+import android.util.DisplayMetrics;
+import android.util.Size;
+
 import ntou.project.djidrone.Define;
 
 public class OthersUtil {
@@ -47,6 +51,26 @@ public class OthersUtil {
 
     public static double calcManhattanDistance(double point1X, double point1Y, double point2X, double point2Y) {
         return Math.abs(point1X - point2X) + Math.abs(point1Y - point2Y);
+    }
+
+    public static float convertDpToPixel(float dp, Context context){
+        float px = dp * getDensity(context);
+        return px;
+    }
+
+    public static float convertPixelToDp(float px, Context context){
+        float dp = px / getDensity(context);
+        return dp;
+    }
+
+    public static float getDensity(Context context){
+        DisplayMetrics metrics = context.getResources().getDisplayMetrics();
+        return metrics.density;
+    }
+
+    public static Size getScreenSizePixel(Context context){
+        DisplayMetrics metrics = context.getResources().getDisplayMetrics();
+        return new Size(metrics.widthPixels,metrics.heightPixels);
     }
 
 }

@@ -21,6 +21,7 @@ import java.util.List;
 import ntou.project.djidrone.MobileActivity;
 import ntou.project.djidrone.R;
 import ntou.project.djidrone.Define;
+import ntou.project.djidrone.utils.OthersUtil;
 import ntou.project.djidrone.utils.ToastUtil;
 import ntou.project.djidrone.view.GridItem;
 
@@ -94,8 +95,8 @@ public class MainFragment extends Fragment {
 //        View itemView = mGridAdapter.getView(0);
         int nRows = gridItemList.size() / gridViewMain.getNumColumns();
         int nCols = gridViewMain.getNumColumns();
-        int widthSpace = (parentSize.getWidth() - (70 * 3 * nCols)) / (nCols + 1);
-        int heightSpace = (parentSize.getHeight() - (63 * 3 * nRows)) / (nRows + 1);
+        int widthSpace = (parentSize.getWidth() - (int) OthersUtil.convertDpToPixel(70 * nCols, getActivity())) / (nCols + 1);
+        int heightSpace = (parentSize.getHeight() - (int) OthersUtil.convertDpToPixel(63 * nRows, getActivity())) / (nRows + 1);
         gridViewMain.setPadding(widthSpace, heightSpace, widthSpace, heightSpace);
         gridViewMain.setHorizontalSpacing(widthSpace);
         gridViewMain.setVerticalSpacing(heightSpace);
