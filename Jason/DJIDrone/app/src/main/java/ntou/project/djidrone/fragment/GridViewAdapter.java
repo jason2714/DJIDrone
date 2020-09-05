@@ -1,5 +1,6 @@
 package ntou.project.djidrone.fragment;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,6 +12,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import ntou.project.djidrone.R;
+import ntou.project.djidrone.utils.ToastUtil;
+import ntou.project.djidrone.view.GridItem;
 
 public class GridViewAdapter extends BaseAdapter {
 
@@ -18,9 +21,9 @@ public class GridViewAdapter extends BaseAdapter {
     private List<GridItem> gridItemList = new ArrayList<>();
     private MainFragment context;
 
-    public GridViewAdapter(MainFragment context,List<GridItem> gridItemList) {
+    public GridViewAdapter(MainFragment context, List<GridItem> gridItemList) {
         this.gridItemList = gridItemList;
-        this.context=context;
+        this.context = context;
     }
 
     @Override
@@ -41,7 +44,7 @@ public class GridViewAdapter extends BaseAdapter {
     @Override
     public View getView(final int position, View convertView, ViewGroup parent) {
         if (convertView == null) {
-            layoutInflater=context.getLayoutInflater();
+            layoutInflater = context.getLayoutInflater();
             convertView = layoutInflater.inflate(R.layout.layout_fragment_main_grid_item, null);
         }
         GridItem gridItem = gridItemList.get(position);
@@ -56,15 +59,27 @@ public class GridViewAdapter extends BaseAdapter {
             }
         });*/
         return convertView;
-
     }
+
+    public View getView(final int position) {
+        layoutInflater = context.getLayoutInflater();
+        View itemView = layoutInflater.inflate(R.layout.layout_fragment_main_grid_item, null);
+        GridItem gridItem = gridItemList.get(position);
+        TextView gridViewName = itemView.findViewById(R.id.gridViewName);
+        gridViewName.setText(gridItem.getName());
+        ImageView gridViewImage = itemView.findViewById(R.id.gridViewImage);
+        gridViewImage.setImageResource(gridItem.getImageSrc());
+        return itemView;
+    }
+
+//    public View getItemView() {
+//        layoutInflater=context.getLayoutInflater();
+//        View view = layoutInflater.inflate(R.layout.layout_fragment_main_grid_item, null);
+//        GridItem gridItem = gridItemList.get(0);
+//        return view;
+//    }
 
     private void remove(Object item) {
     }
-//    AbsList/*View.LayoutParamslp=newAbsListView.LayoutParams(android.view.ViewGroup
-//
-//            .LayoutParams.MATCH_PARENT,(gridview 的高度(
-//    这里gridview如果设置了wrapcontent 那么你要给他外面包裹一个父控件高度是matchparent然后传过来这个父控件 计算父控件的高度 的这样才知道到底高度是多少）
-//            -缝隙的宽度*缝隙个数*/)/行数);
 
 }
