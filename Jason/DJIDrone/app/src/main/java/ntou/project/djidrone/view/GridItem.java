@@ -1,4 +1,4 @@
-package ntou.project.djidrone.fragment;
+package ntou.project.djidrone.view;
 
 public class GridItem {
     private String name;

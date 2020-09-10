@@ -3,6 +3,7 @@ package ntou.project.djidrone;
 import androidx.annotation.RequiresApi;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
+import androidx.constraintlayout.widget.Guideline;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 
@@ -20,7 +21,9 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.transition.TransitionManager;
+import android.util.DisplayMetrics;
 import android.util.Log;
+import android.util.Size;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
@@ -91,8 +94,9 @@ import ntou.project.djidrone.utils.ToastUtil;
 public class MobileActivity extends FragmentActivity {
     //WindowSet
     private View decorView;
+    private final Float gdlnBottomPercent = 0.75f;
     //MainFragment Width
-    private int mFrameSettingWidth;
+    private Size mFragmentFrameSize;
     private static final String TAG = MobileActivity.class.getName();
     private static BaseProduct mProduct = null;
     private ConstraintLayout mainLayout, constraintBottom;
@@ -113,7 +117,7 @@ public class MobileActivity extends FragmentActivity {
     private Camera camera = null;
     private String resolutionRatio = "16:9";
     public static GestureDetector gestureDetector;
-    private FrameLayout mFrameSetting, mapView, droneView;
+    private FrameLayout mFragmentFrame, mapView, droneView;
     public static boolean isRecording = false;
     //signal
     private ImageView mImgSignal;
@@ -245,13 +249,13 @@ public class MobileActivity extends FragmentActivity {
         btn_changeMode = findViewById(R.id.btn_changeMode);
         linearLeft = findViewById(R.id.linearLeft);
         linearRight = findViewById(R.id.linearRight);
-        constraintBottom = findViewById(R.id.constraintBottomBottom);
+        constraintBottom = findViewById(R.id.constraintBottom);
         relativeLeftToggle = findViewById(R.id.relativeLeftToggle);
         mapView = findViewById(R.id.mapView);
         mBtnCamera = findViewById(R.id.btn_camera);
         mBtnCamera.setTag(R.drawable.icon_shoot_photo);
         droneView = findViewById(R.id.droneView);
-        mFrameSetting = findViewById(R.id.container);
+        mFragmentFrame = findViewById(R.id.container);
         mBtnTakeoffLanding = findViewById(R.id.btn_takeoff_landing);
         mBtnRTH = findViewById(R.id.btn_rth);
         mImgSensor = findViewById(R.id.sensorIcon);
@@ -277,13 +281,13 @@ public class MobileActivity extends FragmentActivity {
         fragmentPosition = 0;
         getSupportFragmentManager()//getFragmentManager
                 .beginTransaction()//要求 FragmentManager 回傳一個 FragmentTransaction 物件，用以進行 Fragment 的切換。
-                .add(mFrameSetting.getId(), fragments.get(0))
-                .add(mFrameSetting.getId(), fragments.get(1))
-                .add(mFrameSetting.getId(), fragments.get(2))
-                .add(mFrameSetting.getId(), fragments.get(3))
-                .add(mFrameSetting.getId(), fragments.get(4))
-                .add(mFrameSetting.getId(), fragments.get(5))
-                .add(mFrameSetting.getId(), fragments.get(6))
+                .add(mFragmentFrame.getId(), fragments.get(0))
+                .add(mFragmentFrame.getId(), fragments.get(1))
+                .add(mFragmentFrame.getId(), fragments.get(2))
+                .add(mFragmentFrame.getId(), fragments.get(3))
+                .add(mFragmentFrame.getId(), fragments.get(4))
+                .add(mFragmentFrame.getId(), fragments.get(5))
+                .add(mFragmentFrame.getId(), fragments.get(6))
                 .hide(fragments.get(1))
                 .hide(fragments.get(2))
                 .hide(fragments.get(3))
@@ -313,13 +317,13 @@ public class MobileActivity extends FragmentActivity {
         mBtnTakeoffLanding.setOnClickListener(onclick);
         mBtnRTH.setOnClickListener(onclick);
         //用post就會排在queue後面執行 => 布局完成後才getWidth()
-        mFrameSetting.post(() -> {
-            Log.d(TAG, "post");
-            mFrameSettingWidth = mFrameSetting.getWidth();
-            gestureDetector = new GestureDetector(MobileActivity.this, new GestureListener(mFrameSettingWidth, 50, 100));
+        mFragmentFrame.post(() -> {
+            mFragmentFrameSize = new Size(mFragmentFrame.getWidth(), mFragmentFrame.getHeight());
+            ((MainFragment) fragments.get(0)).setGridLLayout(mFragmentFrameSize);
+            gestureDetector = new GestureDetector(MobileActivity.this, new GestureListener(mFragmentFrameSize.getWidth(), 50, 100));
         });
 //        已在scrollview override
-//        mFrameSetting.setOnTouchListener(new View.OnTouchListener() {
+//        mFragmentFrame.setOnTouchListener(new View.OnTouchListener() {
 //            @Override
 //            public boolean onTouch(View v, MotionEvent event) {
 //                return gestureDetector.onTouchEvent(event);
@@ -342,7 +346,6 @@ public class MobileActivity extends FragmentActivity {
             TransitionManager.beginDelayedTransition(mainLayout);
             switch (buttonView.getId()) {
                 case R.id.btn_changeMode:
-//                    TransitionManager.beginDelayedTransition(mainLayout);
                     if (isChecked) {
                         layoutMainSet.connect(droneView.getId(), ConstraintSet.RIGHT, ConstraintSet.PARENT_ID, ConstraintSet.RIGHT);
                         layoutMainSet.connect(droneView.getId(), ConstraintSet.BOTTOM, ConstraintSet.PARENT_ID, ConstraintSet.BOTTOM);
@@ -665,7 +668,17 @@ public class MobileActivity extends FragmentActivity {
         }
         layoutMainSet.setDimensionRatio(R.id.droneView, resolutionRatio);
         layoutMainSet.setDimensionRatio(mapView.getId(), resolutionRatio);
+        layoutMainSet.setGuidelinePercent(R.id.gdlnhzBottom, gdlnBottomPercent);
         layoutMainSet.applyTo(mainLayout);
+
+        Size screenSize = OthersUtil.getScreenSizePixel(MobileActivity.this);
+        float stickSize = screenSize.getHeight() * (1 - gdlnBottomPercent) * 0.95f;
+        Log.d(DJIApplication.TAG, stickSize + " " + stickSize / screenSize.getWidth());
+        Log.d(DJIApplication.TAG, screenSize.getWidth() + " " + screenSize.getHeight());
+        layoutMainSet.clone(constraintBottom);
+        layoutMainSet.setGuidelinePercent(R.id.gdlnvtStickLeft, stickSize / screenSize.getWidth());
+        layoutMainSet.setGuidelinePercent(R.id.gdlnvtStickRight, 1 - (stickSize / screenSize.getWidth()));
+        layoutMainSet.applyTo(constraintBottom);
     }
 
     private void setBattery() {
