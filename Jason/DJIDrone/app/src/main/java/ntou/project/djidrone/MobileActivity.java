@@ -35,8 +35,26 @@ import android.widget.ToggleButton;
 
 import com.google.android.gms.maps.SupportMapFragment;
 
+import org.java_websocket.client.WebSocketClient;
+import org.java_websocket.handshake.ServerHandshake;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+
+import javax.websocket.OnClose;
+import javax.websocket.OnError;
+import javax.websocket.OnMessage;
+import javax.websocket.OnOpen;
+import javax.websocket.Session;
+import javax.websocket.server.PathParam;
+import javax.websocket.server.ServerEndpoint;
 
 import dji.common.battery.BatteryState;
 import dji.common.camera.ResolutionAndFrameRate;
@@ -183,6 +201,33 @@ public class MobileActivity extends FragmentActivity {
         initActiveTrack();
         initFlightControllerCallback();
         initUI();
+//        URI uri = null;
+//        try {
+//            uri = new URI("140.121.198.99");
+//        } catch (URISyntaxException e) {
+//            e.printStackTrace();
+//        }
+//        webSocketClient = new WebSocketClient(uri) {
+//            @Override
+//            public void onOpen(ServerHandshake handshakedata) {
+//                Log.d("TAG","open success");
+//            }
+//
+//            @Override
+//            public void onMessage(String message) {
+//                Log.d("TAG","receive" + message);
+//            }
+//
+//            @Override
+//            public void onClose(int code, String reason, boolean remote) {
+//                Log.d("TAG","close");
+//            }
+//
+//            @Override
+//            public void onError(Exception ex) {
+//                Log.d("TAG","error");
+//            }
+//        };
     }
 
     private void initUI() {
@@ -342,6 +387,7 @@ public class MobileActivity extends FragmentActivity {
         public void onClick(View v) {
             switch (v.getId()) {
                 case R.id.btn_camera:
+//                    webSocketClient.connect();
                     if ((Integer) mBtnCamera.getTag() == R.drawable.icon_shoot_photo) {
                         captureAction();
                     } else if ((Integer) mBtnCamera.getTag() == R.drawable.icon_record_video) {
@@ -924,5 +970,7 @@ public class MobileActivity extends FragmentActivity {
         int level = OthersUtil.parseInt(signalLevel.substring(signalLevel.length() - 1));
         mImgSignal.setImageResource(signalLevelDrawble[level]);
     }
+
+    private WebSocketClient webSocketClient;
 }
 
