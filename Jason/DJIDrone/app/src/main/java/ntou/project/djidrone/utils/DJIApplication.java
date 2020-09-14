@@ -8,20 +8,6 @@ import android.os.Handler;
 import androidx.multidex.MultiDex;
 
 import com.secneo.sdk.Helper;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-
-import javax.websocket.OnClose;
-import javax.websocket.OnError;
-import javax.websocket.OnMessage;
-import javax.websocket.OnOpen;
-import javax.websocket.Session;
-import javax.websocket.server.PathParam;
-import javax.websocket.server.ServerEndpoint;
-
 import dji.sdk.base.BaseProduct;
 import dji.sdk.battery.Battery;
 import dji.sdk.camera.Camera;

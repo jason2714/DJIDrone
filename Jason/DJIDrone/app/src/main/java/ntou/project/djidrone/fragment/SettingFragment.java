@@ -53,13 +53,37 @@ public class SettingFragment extends Fragment {
     private static final String SERVER_IP = "140.121.198.99";
     private Runnable connect = () -> {
         String statusStr = "";
+        Log.d(DJIApplication.TAG, "run runnable->connect");
         try {
             Socket mSocketClient = new Socket(SERVER_IP, SERVER_PORT);
             BufferedReader mBufferedReader = new BufferedReader(new InputStreamReader(mSocketClient.getInputStream()));
             if (mSocketClient.isConnected()) {
                 statusStr = "Connect Success";
-            }else{
+            } else {
                 statusStr = "Connect Fail";
+            }
+            Log.d(DJIApplication.TAG, statusStr);
+            String finalStatusStr = statusStr;
+            getActivity().runOnUiThread(() -> ToastUtil.showToast(finalStatusStr));
+            if (getActivity() instanceof MobileActivity)
+                ((MobileActivity) getActivity()).setWebSocketTest(statusStr);
+            while (true) {
+                try {
+                    String socketData = mBufferedReader.readLine();
+                    Log.d(DJIApplication.TAG, "check data");
+                    Log.d(DJIApplication.TAG, socketData);
+                    if (!socketData.isEmpty())
+                        if (getActivity() instanceof MobileActivity)
+                            ((MobileActivity) getActivity()).setWebSocketTest(socketData);
+                    PrintWriter printwriter = new PrintWriter(mSocketClient.getOutputStream(), true);
+                    printwriter.write("receive data success"); // write the message to output stream
+                    printwriter.flush();
+//                                printwriter.close();
+                } catch (IOException e) {
+                    Log.d(DJIApplication.TAG, "read file error");
+                    Log.d(DJIApplication.TAG, e.toString());
+                    e.printStackTrace();
+                }
             }
 //            new Timer().schedule(new TimerTask() {
 //                @Override
@@ -85,29 +109,11 @@ public class SettingFragment extends Fragment {
 //                    }
 //                }
 //            }, 0, 100);
-            while (true) {
-                try {
-                    String socketData = mBufferedReader.readLine();
-                    Log.d(DJIApplication.TAG, "check data");
-                    Log.d(DJIApplication.TAG, socketData);
-                    if (!socketData.isEmpty())
-                        if (getActivity() instanceof MobileActivity)
-                            ((MobileActivity) getActivity()).setWebSocketTest(socketData);
-                    PrintWriter printwriter = new PrintWriter(mSocketClient.getOutputStream(), true);
-                    printwriter.write("receive data success"); // write the message to output stream
-                    printwriter.flush();
-//                                printwriter.close();
-                } catch (IOException e) {
-                    Log.d(DJIApplication.TAG, "read file error");
-                    Log.d(DJIApplication.TAG, e.toString());
-                    e.printStackTrace();
-                }
-            }
         } catch (UnknownHostException e1) {
             statusStr = "Unknown host please make sure IP address";
         } catch (IOException e2) {
             statusStr = "Error Occurred";
-        }finally {
+        } finally {
             Log.d(DJIApplication.TAG, statusStr);
             String finalStatusStr = statusStr;
             getActivity().runOnUiThread(() -> ToastUtil.showToast(finalStatusStr));
@@ -133,13 +139,13 @@ public class SettingFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        Log.d(DJIApplication.TAG,"setting onResume");
+        Log.d(DJIApplication.TAG, "setting onResume");
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        Log.d(DJIApplication.TAG,"setting onPause");
+        Log.d(DJIApplication.TAG, "setting onPause");
     }
 
     private void initView() {
@@ -226,10 +232,12 @@ public class SettingFragment extends Fragment {
                     if (isChecked) {
                         mTvWebSocket.setText(R.string.open);
 //                        webSocketHandlerThread.start();
+                        Log.d(DJIApplication.TAG, "is check");
                         webSocketHandler.post(connect);
                     } else {
                         mTvWebSocket.setText(R.string.close);
 //                        webSocketHandlerThread.quitSafely();
+                        Log.d(DJIApplication.TAG, "is uncheck");
                         webSocketHandler.removeCallbacks(connect);
                     }
                     break;

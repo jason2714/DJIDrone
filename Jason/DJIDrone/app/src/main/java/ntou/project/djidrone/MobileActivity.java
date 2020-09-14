@@ -3,7 +3,6 @@ package ntou.project.djidrone;
 import androidx.annotation.RequiresApi;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
-import androidx.constraintlayout.widget.Guideline;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 
@@ -21,7 +20,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.transition.TransitionManager;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.Size;
 import android.view.GestureDetector;
@@ -33,31 +31,13 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Switch;
 import android.widget.TextView;
-import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import com.google.android.gms.maps.SupportMapFragment;
 
-import org.java_websocket.client.WebSocketClient;
-import org.java_websocket.handshake.ServerHandshake;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
-import javax.websocket.OnClose;
-import javax.websocket.OnError;
-import javax.websocket.OnMessage;
-import javax.websocket.OnOpen;
-import javax.websocket.Session;
-import javax.websocket.server.PathParam;
-import javax.websocket.server.ServerEndpoint;
 
 import dji.common.battery.BatteryState;
 import dji.common.camera.ResolutionAndFrameRate;
@@ -73,10 +53,8 @@ import dji.sdk.battery.Battery;
 import dji.sdk.camera.Camera;
 import dji.sdk.flightcontroller.FlightController;
 import dji.sdk.mission.MissionControl;
-import dji.sdk.mission.activetrack.ActiveTrackMissionOperatorListener;
 import dji.sdk.mission.activetrack.ActiveTrackOperator;
 import dji.sdk.products.Aircraft;
-import dji.sdk.sdkmanager.DJISDKManager;
 import ntou.project.djidrone.fragment.BatteryFragment;
 import ntou.project.djidrone.fragment.CameraFragment;
 import ntou.project.djidrone.fragment.ControllerFragment;

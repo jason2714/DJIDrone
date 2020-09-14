@@ -70,10 +70,10 @@ dependencies {
     implementation 'com.google.android.gms:play-services:12.0.1'
     implementation 'com.android.support:multidex:1.0.3'
     //Glide
-    implementation 'com.github.bumptech.glide:glide:4.11.0'
-    annotationProcessor 'com.github.bumptech.glide:compiler:4.11.0'
+//    implementation 'com.github.bumptech.glide:glide:4.11.0'
+//    annotationProcessor 'com.github.bumptech.glide:compiler:4.11.0'
     //websocket
-    implementation "org.java-websocket:Java-WebSocket:1.5.1"
-    implementation "javax.websocket:javax.websocket-api:1.1"
+//    implementation "org.java-websocket:Java-WebSocket:1.5.1"
+//    implementation "javax.websocket:javax.websocket-api:1.1"
 
 }

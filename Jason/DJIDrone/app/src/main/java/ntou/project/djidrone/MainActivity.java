@@ -102,6 +102,7 @@ public class MainActivity extends AppCompatActivity {
 
         }
 
+
         @Override
         public void onComponentChange(BaseProduct.ComponentKey componentKey, BaseComponent oldComponent,
                                       BaseComponent newComponent) {
