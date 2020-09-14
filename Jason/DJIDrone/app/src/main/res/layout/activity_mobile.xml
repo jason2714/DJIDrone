@@ -58,21 +58,23 @@
         app:layout_constraintBottom_toTopOf="@id/gdlnhzBottom"
         app:layout_constraintLeft_toLeftOf="@id/gdlnvtLeft"
         app:layout_constraintRight_toLeftOf="@id/gdlnvtRight"
-        app:layout_constraintTop_toTopOf="@id/gdlnhzTop" >
+        app:layout_constraintTop_toTopOf="@id/gdlnhzTop">
+
         <ImageView
             android:id="@+id/img_active_track_select_rect"
             android:layout_width="0dp"
             android:layout_height="0dp"
-            android:src="@drawable/rect_active_track_target"
             android:scaleType="fitXY"
-            android:visibility="invisible"/>
+            android:src="@drawable/rect_active_track_target"
+            android:visibility="invisible" />
+
         <ImageView
             android:id="@+id/img_active_track_target_rect"
             android:layout_width="0dp"
             android:layout_height="0dp"
-            android:src="@drawable/rect_active_track_target"
             android:scaleType="fitXY"
-            android:visibility="invisible"/>
+            android:src="@drawable/rect_active_track_target"
+            android:visibility="invisible" />
     </FrameLayout>
 
 
@@ -164,24 +166,35 @@
             android:layout_height="match_parent"
             android:orientation="vertical"
             app:layout_constraintGuide_percent="0.87" />
-            <ntou.project.djidrone.OnScreenJoystick
-                android:id="@+id/rightStick"
-                android:layout_width="0dp"
-                android:layout_height="0dp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintLeft_toLeftOf="@id/gdlnvtStickRight"
-                app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                android:background="@drawable/stick_base"/>
-            <ntou.project.djidrone.OnScreenJoystick
-                android:id="@+id/leftStick"
-                android:layout_width="0dp"
-                android:layout_height="0dp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintRight_toLeftOf="@id/gdlnvtStickLeft"
-                app:layout_constraintTop_toTopOf="parent"
-                android:background="@drawable/stick_base"/>
+
+        <TextView
+            android:id="@+id/tv_web_socket_test"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toRightOf="@id/gdlnvtStickLeft"
+            app:layout_constraintTop_toTopOf="parent"
+            style="@style/TextColor.statusText"
+            android:text="@string/app_name"/>
+
+        <ntou.project.djidrone.OnScreenJoystick
+            android:id="@+id/leftStick"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:background="@drawable/stick_base"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toLeftOf="@id/gdlnvtStickLeft"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ntou.project.djidrone.OnScreenJoystick
+            android:id="@+id/rightStick"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:background="@drawable/stick_base"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toLeftOf="@id/gdlnvtStickRight"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <FrameLayout
@@ -226,19 +239,19 @@
             android:id="@+id/logo"
             android:layout_width="40dp"
             android:layout_height="match_parent"
+            android:layout_alignParentStart="true"
             android:padding="5dp"
             android:scaleType="fitXY"
-            android:layout_alignParentStart="true"
             android:src="@drawable/logo_drone" />
 
         <RelativeLayout
             android:id="@+id/titleBar"
             android:layout_width="0dp"
             android:layout_height="30dp"
-            android:gravity="center_vertical"
-            android:layout_toEndOf="@id/logo"
             android:layout_marginEnd="10dp"
             android:layout_toStartOf="@id/linear_changeMode_Bg"
+            android:layout_toEndOf="@id/logo"
+            android:gravity="center_vertical"
             android:padding="4dp">
 
             <TextView
@@ -256,8 +269,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
-                android:layout_toStartOf="@+id/controllerIcon"
                 android:layout_marginEnd="10dp"
+                android:layout_toStartOf="@+id/controllerIcon"
                 android:text="test"
                 android:textColor="#FFF"
                 android:textSize="15sp" />
@@ -303,21 +316,23 @@
                 android:id="@+id/tv_battery_power"
                 android:layout_width="wrap_content"
                 android:layout_height="20dp"
-                android:layout_centerVertical="true"
                 android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
                 android:text="100%"
                 android:textColor="#FFF"
                 android:textSize="15sp" />
 
-<!--            android:layout_alignParentEnd="true"-->
-<!--            android:layout_centerVertical="true"-->
+            <!--            android:layout_alignParentEnd="true"-->
+            <!--            android:layout_centerVertical="true"-->
         </RelativeLayout>
+
         <LinearLayout
             android:id="@+id/linear_changeMode_Bg"
             android:layout_width="30dp"
             android:layout_height="match_parent"
             android:layout_alignParentEnd="true"
             android:background="@color/colorBackgroundPressed">
+
             <ToggleButton
                 android:id="@+id/btn_changeMode"
                 android:layout_width="wrap_content"

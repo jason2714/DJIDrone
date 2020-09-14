@@ -56,5 +56,6 @@
     <string name="retreat_info">Drone Retreat</string>
     <string name="active_track_enable">Active Track</string>
     <string name="recommended_configuration_info">Recommend Configuration</string>
+    <string name="web_socket_info">Web Socket</string>
     <string name="api_key">3afcbfbcba1e0e72936a8144</string>
 </resources>

@@ -2,33 +2,119 @@ package ntou.project.djidrone.fragment;
 
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.HandlerThread;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CompoundButton;
 import android.widget.Switch;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.fragment.app.Fragment;
 
+import java.io.BufferedReader;
+import java.io.DataInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.net.Socket;
+import java.net.UnknownHostException;
+import java.util.Timer;
+import java.util.TimerTask;
+
 import dji.sdk.mission.MissionControl;
 import dji.sdk.mission.activetrack.ActiveTrackOperator;
 import dji.sdk.sdkmanager.DJISDKManager;
 import dji.sdk.sdkmanager.LiveStreamManager;
+import ntou.project.djidrone.MainActivity;
+import ntou.project.djidrone.MobileActivity;
 import ntou.project.djidrone.R;
+import ntou.project.djidrone.utils.DJIApplication;
 import ntou.project.djidrone.utils.ToastUtil;
 
 public class SettingFragment extends Fragment {
 
     private static LiveStreamManager liveStreamManager;
     private TextView mTvLiveStream, mTvGestureMode;
-    private TextView mTvRetreat;
+    private TextView mTvRetreat, mTvWebSocket;
     private Switch mSwLiveStream, mSwGestureMode;
-    private Switch mSwRetreat;
+    private Switch mSwRetreat, mSwWebSocket;
     private ActiveTrackOperator mActiveTrackOperator;
+    //web socket
+    private Handler webSocketHandler;
+    private HandlerThread webSocketHandlerThread;
+    private static final int SERVER_PORT = 5000;
+    private static final String SERVER_IP = "140.121.198.99";
+    private Runnable connect = () -> {
+        String statusStr = "";
+        try {
+            Socket mSocketClient = new Socket(SERVER_IP, SERVER_PORT);
+            BufferedReader mBufferedReader = new BufferedReader(new InputStreamReader(mSocketClient.getInputStream()));
+            if (mSocketClient.isConnected()) {
+                statusStr = "Connect Success";
+            }else{
+                statusStr = "Connect Fail";
+            }
+//            new Timer().schedule(new TimerTask() {
+//                @Override
+//                public void run() {
+//                    try {
+//                        tmp = br.readLine();
+//                        Log.d(DJIApplication.TAG, "check data");
+//                        Log.d(DJIApplication.TAG, tmp);
+//                        runOnUiThread(new Runnable() {
+//                            public void run() {
+//                                //Do your UI operations like dialog opening or Toast here
+//                                tv_show.setText(tmp);
+//                            }
+//                        });
+//                        PrintWriter printwriter = new PrintWriter(client.getOutputStream(), true);
+//                        printwriter.write("receive data success"); // write the message to output stream
+//                        printwriter.flush();
+////                                printwriter.close();
+//                    } catch (IOException e) {
+//                        Log.d(DJIApplication.TAG, "read file error");
+//                        Log.d(DJIApplication.TAG, e.toString());
+//                        e.printStackTrace();
+//                    }
+//                }
+//            }, 0, 100);
+            while (true) {
+                try {
+                    String socketData = mBufferedReader.readLine();
+                    Log.d(DJIApplication.TAG, "check data");
+                    Log.d(DJIApplication.TAG, socketData);
+                    if (!socketData.isEmpty())
+                        if (getActivity() instanceof MobileActivity)
+                            ((MobileActivity) getActivity()).setWebSocketTest(socketData);
+                    PrintWriter printwriter = new PrintWriter(mSocketClient.getOutputStream(), true);
+                    printwriter.write("receive data success"); // write the message to output stream
+                    printwriter.flush();
+//                                printwriter.close();
+                } catch (IOException e) {
+                    Log.d(DJIApplication.TAG, "read file error");
+                    Log.d(DJIApplication.TAG, e.toString());
+                    e.printStackTrace();
+                }
+            }
+        } catch (UnknownHostException e1) {
+            statusStr = "Unknown host please make sure IP address";
+        } catch (IOException e2) {
+            statusStr = "Error Occurred";
+        }finally {
+            Log.d(DJIApplication.TAG, statusStr);
+            String finalStatusStr = statusStr;
+            getActivity().runOnUiThread(() -> ToastUtil.showToast(finalStatusStr));
+            if (getActivity() instanceof MobileActivity)
+                ((MobileActivity) getActivity()).setWebSocketTest(statusStr);
+        }
+    };
 
     @Nullable
     @Override
@@ -44,6 +130,18 @@ public class SettingFragment extends Fragment {
         liveStreamManager = DJISDKManager.getInstance().getLiveStreamManager();
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        Log.d(DJIApplication.TAG,"setting onResume");
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        Log.d(DJIApplication.TAG,"setting onPause");
+    }
+
     private void initView() {
         mSwLiveStream = getActivity().findViewById(R.id.sw_live_stream);
         mTvLiveStream = getActivity().findViewById(R.id.tv_live_stream);
@@ -51,9 +149,15 @@ public class SettingFragment extends Fragment {
         mTvGestureMode = getActivity().findViewById(R.id.tv_gesture_mode);
         mSwRetreat = getActivity().findViewById(R.id.sw_retreat);
         mTvRetreat = getActivity().findViewById(R.id.tv_retreat);
+        mTvWebSocket = getActivity().findViewById(R.id.tv_web_socket);
+        mSwWebSocket = getActivity().findViewById(R.id.sw_web_socket);
         //init
         mActiveTrackOperator = MissionControl.getInstance().getActiveTrackOperator();
         mSwGestureMode.setChecked(mActiveTrackOperator.isGestureModeEnabled());
+        //webSocket
+        webSocketHandlerThread = new HandlerThread("webSocket");
+        webSocketHandlerThread.start();
+        webSocketHandler = new Handler(webSocketHandlerThread.getLooper());
     }
 
     private void initListener() {
@@ -61,13 +165,13 @@ public class SettingFragment extends Fragment {
         mSwLiveStream.setOnCheckedChangeListener(onToggle);
         mSwGestureMode.setOnCheckedChangeListener(onToggle);
         mSwRetreat.setOnCheckedChangeListener(onToggle);
+        mSwWebSocket.setOnCheckedChangeListener(onToggle);
     }
 
     private class OnToggle implements CompoundButton.OnCheckedChangeListener {
         @RequiresApi(api = Build.VERSION_CODES.KITKAT)
         @Override
         public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-            mActiveTrackOperator = MissionControl.getInstance().getActiveTrackOperator();
             switch (buttonView.getId()) {
                 case R.id.sw_live_stream:
                     liveStreamManager = DJISDKManager.getInstance().getLiveStreamManager();
@@ -118,6 +222,17 @@ public class SettingFragment extends Fragment {
                         }
                     });
                     break;
+                case R.id.sw_web_socket:
+                    if (isChecked) {
+                        mTvWebSocket.setText(R.string.open);
+//                        webSocketHandlerThread.start();
+                        webSocketHandler.post(connect);
+                    } else {
+                        mTvWebSocket.setText(R.string.close);
+//                        webSocketHandlerThread.quitSafely();
+                        webSocketHandler.removeCallbacks(connect);
+                    }
+                    break;
                 default:
                     break;
             }
@@ -132,5 +247,6 @@ public class SettingFragment extends Fragment {
             ToastUtil.showToast("live stream manager = null");
         }
     }
+
 
 }
