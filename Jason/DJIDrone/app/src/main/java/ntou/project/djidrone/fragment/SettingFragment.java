@@ -28,6 +28,12 @@ import java.net.UnknownHostException;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import dji.common.flightcontroller.virtualstick.FlightControlData;
+import dji.common.flightcontroller.virtualstick.FlightCoordinateSystem;
+import dji.common.flightcontroller.virtualstick.RollPitchControlMode;
+import dji.common.flightcontroller.virtualstick.VerticalControlMode;
+import dji.common.flightcontroller.virtualstick.YawControlMode;
+import dji.sdk.flightcontroller.FlightController;
 import dji.sdk.mission.MissionControl;
 import dji.sdk.mission.activetrack.ActiveTrackOperator;
 import dji.sdk.sdkmanager.DJISDKManager;
@@ -46,7 +52,9 @@ public class SettingFragment extends Fragment {
     private Switch mSwLiveStream, mSwGestureMode;
     private Switch mSwRetreat, mSwWebSocket;
     private ActiveTrackOperator mActiveTrackOperator;
+    private FlightController mFlightController;
     //web socket
+    private TextView mTvWebSocketTest;
     private Handler webSocketHandler;
     private HandlerThread webSocketHandlerThread;
     private static final int SERVER_PORT = 5000;
@@ -64,17 +72,21 @@ public class SettingFragment extends Fragment {
             }
             Log.d(DJIApplication.TAG, statusStr);
             String finalStatusStr = statusStr;
-            getActivity().runOnUiThread(() -> ToastUtil.showToast(finalStatusStr));
-            if (getActivity() instanceof MobileActivity)
-                ((MobileActivity) getActivity()).setWebSocketTest(statusStr);
+            getActivity().runOnUiThread(() -> {
+                ToastUtil.showToast(finalStatusStr);
+                mTvWebSocketTest.setText(finalStatusStr);
+            });
             while (true) {
                 try {
                     String socketData = mBufferedReader.readLine();
                     Log.d(DJIApplication.TAG, "check data");
                     Log.d(DJIApplication.TAG, socketData);
-                    if (!socketData.isEmpty())
-                        if (getActivity() instanceof MobileActivity)
-                            ((MobileActivity) getActivity()).setWebSocketTest(socketData);
+                    if (!socketData.isEmpty()) {
+                        getActivity().runOnUiThread(() -> {
+                            getSocketData(socketData);
+                            mTvWebSocketTest.setText(socketData);
+                        });
+                    }
                     PrintWriter printwriter = new PrintWriter(mSocketClient.getOutputStream(), true);
                     printwriter.write("receive data success"); // write the message to output stream
                     printwriter.flush();
@@ -116,9 +128,9 @@ public class SettingFragment extends Fragment {
         } finally {
             Log.d(DJIApplication.TAG, statusStr);
             String finalStatusStr = statusStr;
-            getActivity().runOnUiThread(() -> ToastUtil.showToast(finalStatusStr));
-            if (getActivity() instanceof MobileActivity)
-                ((MobileActivity) getActivity()).setWebSocketTest(statusStr);
+            getActivity().runOnUiThread(() -> {
+                mTvWebSocketTest.setText(finalStatusStr);
+            });
         }
     };
 
@@ -157,6 +169,7 @@ public class SettingFragment extends Fragment {
         mTvRetreat = getActivity().findViewById(R.id.tv_retreat);
         mTvWebSocket = getActivity().findViewById(R.id.tv_web_socket);
         mSwWebSocket = getActivity().findViewById(R.id.sw_web_socket);
+        mTvWebSocketTest = getActivity().findViewById(R.id.tv_web_socket_test);
         //init
         mActiveTrackOperator = MissionControl.getInstance().getActiveTrackOperator();
         mSwGestureMode.setChecked(mActiveTrackOperator.isGestureModeEnabled());
@@ -229,15 +242,16 @@ public class SettingFragment extends Fragment {
                     });
                     break;
                 case R.id.sw_web_socket:
+                    flightControlEnable(isChecked);
                     if (isChecked) {
                         mTvWebSocket.setText(R.string.open);
 //                        webSocketHandlerThread.start();
-                        Log.d(DJIApplication.TAG, "is check");
+                        Log.d(DJIApplication.TAG, "sw_web_socket checked");
                         webSocketHandler.post(connect);
                     } else {
                         mTvWebSocket.setText(R.string.close);
 //                        webSocketHandlerThread.quitSafely();
-                        Log.d(DJIApplication.TAG, "is uncheck");
+                        Log.d(DJIApplication.TAG, "sw_web_socket unchecked");
                         webSocketHandler.removeCallbacks(connect);
                     }
                     break;
@@ -256,5 +270,73 @@ public class SettingFragment extends Fragment {
         }
     }
 
+    private void flightControlEnable(boolean enable) {
+        mFlightController = DJIApplication.getFlightControllerInstance();
+        if (null == mFlightController)
+            return;
+        mFlightController.setVirtualStickModeEnabled(enable, djiError -> {
+            if (djiError != null) {
+                ToastUtil.showToast(djiError.getDescription());
+            } else {
+                if (enable) {
+                    mFlightController.setRollPitchControlMode(RollPitchControlMode.VELOCITY);
+                    mFlightController.setYawControlMode(YawControlMode.ANGULAR_VELOCITY);
+                    mFlightController.setVerticalControlMode(VerticalControlMode.VELOCITY);
+                    mFlightController.setRollPitchCoordinateSystem(FlightCoordinateSystem.BODY);
+                    ToastUtil.showToast("Enable Virtual Stick Success");
+                } else {
+                    ToastUtil.showToast("Disable Virtual Stick Success");
+                }
+            }
+        });
+    }
 
+    private void getSocketData(String socketData) {
+        float distance = 5;
+        float mPitch = 0;
+        float mRoll = 0;
+        float mThrottle = 0;
+        float mYaw = 0;
+        boolean flag = true;
+        switch (socketData) {
+            case "w":
+            case "W":
+                mThrottle = distance;
+                break;
+            case "a":
+            case "A":
+                mRoll = -distance;
+                break;
+            case "s":
+            case "S":
+                mThrottle = -distance;
+                break;
+            case "d":
+            case "D":
+                mRoll = distance;
+                break;
+            case "q":
+            case "Q":
+                mYaw = -90;
+                break;
+            case "e":
+            case "E":
+                mYaw = 90;
+                break;
+            default:
+                flag = false;
+                break;
+
+        }
+        if (flag) {
+            mFlightController.sendVirtualStickFlightControlData(
+                    new FlightControlData(mPitch, mRoll, mYaw, mThrottle), djiError -> {
+                        if (djiError == null) {
+                            ToastUtil.showToast("set data: success");
+                        } else {
+                            ToastUtil.showToast(djiError.getDescription());
+                        }
+                    });
+        }
+    }
 }

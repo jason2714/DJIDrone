@@ -54,7 +54,6 @@ public class VirtualStick {
 
     private void initListener() {
         mStickRight.setJoystickListener(new OnScreenJoystickListener() {
-
             @Override
             public void onTouch(OnScreenJoystick joystick, float pX, float pY) {
                 if (Math.abs(pX) < 0.02) {
@@ -69,15 +68,13 @@ public class VirtualStick {
                 float rollJoyControlMaxSpeed = 1;
 
                 mPitch = (float) (pitchJoyControlMaxSpeed * pX);
-
                 mRoll = (float) (rollJoyControlMaxSpeed * pY);
 
-                if (null == mSendVirtualStickDataTimer) {
-                    mSendVirtualStickDataTask = new SendVirtualStickDataTask();
-                    mSendVirtualStickDataTimer = new Timer();
-                    mSendVirtualStickDataTimer.schedule(mSendVirtualStickDataTask, 100, 200);
-//                    mSendVirtualStickDataTimer.schedule(mSendVirtualStickDataTask, 0, 0);
-                }
+//                if (null == mSendVirtualStickDataTimer) {
+//                    mSendVirtualStickDataTask = new SendVirtualStickDataTask();
+//                    mSendVirtualStickDataTimer = new Timer();
+//                    mSendVirtualStickDataTimer.schedule(mSendVirtualStickDataTask, 100, 200);
+//                }
 
             }
 
@@ -100,12 +97,12 @@ public class VirtualStick {
                 mYaw = (float) (yawJoyControlMaxSpeed * pX);
                 mThrottle = (float) (verticalJoyControlMaxSpeed * pY);
 
-                if (null == mSendVirtualStickDataTimer) {
-                    mSendVirtualStickDataTask = new SendVirtualStickDataTask();
-                    mSendVirtualStickDataTimer = new Timer();
-                    mSendVirtualStickDataTimer.schedule(mSendVirtualStickDataTask, 0, 200);
+//                if (null == mSendVirtualStickDataTimer) {
+//                    mSendVirtualStickDataTask = new SendVirtualStickDataTask();
+//                    mSendVirtualStickDataTimer = new Timer();
+//                    mSendVirtualStickDataTimer.schedule(mSendVirtualStickDataTask, 0, 200);
 //                    mSendVirtualStickDataTimer.schedule(mSendVirtualStickDataTask, 0, 0);
-                }
+//                }
 
             }
         });
@@ -125,19 +122,16 @@ public class VirtualStick {
         mFlightController.getSimulator().setStateCallback(new SimulatorState.Callback() {
             @Override
             public void onUpdate(final SimulatorState stateData) {
-                new Handler(Looper.getMainLooper()).post(new Runnable() {
-                    @Override
-                    public void run() {
-                        String yaw = String.format("%.2f", stateData.getYaw());
-                        String pitch = String.format("%.2f", stateData.getPitch());
-                        String roll = String.format("%.2f", stateData.getRoll());
-                        String positionX = String.format("%.2f", stateData.getPositionX());
-                        String positionY = String.format("%.2f", stateData.getPositionY());
-                        String positionZ = String.format("%.2f", stateData.getPositionZ());
-                        ToastUtil.showToast("Yaw : " + yaw + ", Pitch : " + pitch + ", Roll : " + roll + "\n" + ", PosX : " + positionX +
-                                ", PosY : " + positionY +
-                                ", PosZ : " + positionZ);
-                    }
+                new Handler(Looper.getMainLooper()).post(() -> {
+                    String yaw = String.format("%.2f", stateData.getYaw());
+                    String pitch = String.format("%.2f", stateData.getPitch());
+                    String roll = String.format("%.2f", stateData.getRoll());
+                    String positionX = String.format("%.2f", stateData.getPositionX());
+                    String positionY = String.format("%.2f", stateData.getPositionY());
+                    String positionZ = String.format("%.2f", stateData.getPositionZ());
+                    ToastUtil.showToast("Yaw : " + yaw + ", Pitch : " + pitch + ", Roll : " + roll + "\n" + ", PosX : " + positionX +
+                            ", PosY : " + positionY +
+                            ", PosZ : " + positionZ);
                 });
             }
         });
@@ -155,48 +149,50 @@ public class VirtualStick {
 //                    }
 //                });
                 mFlightController.sendVirtualStickFlightControlData(
-                        new FlightControlData(
-                                mPitch, mRoll, mYaw, mThrottle
-                        ), new CommonCallbacks.CompletionCallback() {
-                            @Override
-                            public void onResult(DJIError djiError) {
+                        new FlightControlData(mPitch, mRoll, mYaw, mThrottle), djiError -> {
 //                                if (djiError == null) {
 //                                    ToastUtil.showToast("set data: success");
 //                                } else {
 //                                    ToastUtil.showToast(djiError.getDescription());
 //                                }
-                            }
-                        }
-                );
+                        });
             }
         }
     }
 
+    public void flightControllerChange(FlightController flightController) {
+        mFlightController = flightController;
+    }
+
     public void virtualStickEnable(boolean enable) {
+        FlightController mFlightController = DJIApplication.getFlightControllerInstance();
         if (null == mFlightController)
             return;
-        mFlightController.setVirtualStickModeEnabled(enable, new CommonCallbacks.CompletionCallback() {
-            @Override
-            public void onResult(DJIError djiError) {
-                if (djiError != null) {
-                    ToastUtil.showToast(djiError.getDescription());
-                } else {
-                    if (enable){
-                        mFlightController.setRollPitchControlMode(RollPitchControlMode.VELOCITY);
-                        mFlightController.setYawControlMode(YawControlMode.ANGULAR_VELOCITY);
-                        mFlightController.setVerticalControlMode(VerticalControlMode.VELOCITY);
-                        mFlightController.setRollPitchCoordinateSystem(FlightCoordinateSystem.BODY);
-                        ToastUtil.showToast("Enable Virtual Stick Success");
+        mFlightController.setVirtualStickModeEnabled(enable, djiError -> {
+            if (djiError != null) {
+                ToastUtil.showToast(djiError.getDescription());
+            } else {
+                if (enable) {
+                    if (null == mSendVirtualStickDataTimer) {
+                        mSendVirtualStickDataTask = new SendVirtualStickDataTask();
+                        mSendVirtualStickDataTimer = new Timer();
+                        mSendVirtualStickDataTimer.schedule(mSendVirtualStickDataTask, 100, 200);
                     }
-                    else
-                        ToastUtil.showToast("Disable Virtual Stick Success");
+                    mFlightController.setRollPitchControlMode(RollPitchControlMode.VELOCITY);
+                    mFlightController.setYawControlMode(YawControlMode.ANGULAR_VELOCITY);
+                    mFlightController.setVerticalControlMode(VerticalControlMode.VELOCITY);
+                    mFlightController.setRollPitchCoordinateSystem(FlightCoordinateSystem.BODY);
+                    ToastUtil.showToast("Enable Virtual Stick Success");
+                } else {
+                    if (null != mSendVirtualStickDataTimer) {
+                        if (null != mSendVirtualStickDataTask)
+                            mSendVirtualStickDataTask.cancel();
+                        mSendVirtualStickDataTimer.purge();
+                    }
+                    ToastUtil.showToast("Disable Virtual Stick Success");
                 }
             }
         });
-    }
-
-    public void flightControllerChange(FlightController flightController){
-        mFlightController = flightController;
     }
 
 }

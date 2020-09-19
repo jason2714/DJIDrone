@@ -167,13 +167,13 @@
             android:orientation="vertical"
             app:layout_constraintGuide_percent="0.87" />
 
-        <TextView
-            android:id="@+id/tv_web_socket_test"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintLeft_toRightOf="@id/gdlnvtStickLeft"
-            app:layout_constraintTop_toTopOf="parent"
-            style="@style/TextColor.statusText"
-            android:text="@string/app_name"/>
+<!--        <TextView-->
+<!--            android:id="@+id/tv_web_socket_test"-->
+<!--            app:layout_constraintBottom_toBottomOf="parent"-->
+<!--            app:layout_constraintLeft_toRightOf="@id/gdlnvtStickLeft"-->
+<!--            app:layout_constraintTop_toTopOf="parent"-->
+<!--            style="@style/TextColor.statusText"-->
+<!--            android:text="@string/app_name"/>-->
 
         <ntou.project.djidrone.OnScreenJoystick
             android:id="@+id/leftStick"

@@ -132,8 +132,6 @@ public class MobileActivity extends FragmentActivity {
     private ImageView mImgTargetRect;
     private ActiveTrackOperator mActiveTrackOperator;
     private AlertDialog confirmActiveTrackDialog;
-    //web socket
-    private TextView mTvWebSocketTest;
 
     //camera
     @Override
@@ -964,9 +962,5 @@ public class MobileActivity extends FragmentActivity {
         mImgSignal.setImageResource(signalLevelDrawble[level]);
     }
 
-    public void setWebSocketTest(String testStr){
-        mTvWebSocketTest = findViewById(R.id.tv_web_socket_test);
-        mHandler.post(() -> mTvWebSocketTest.setText(testStr));
-    }
 }
 
