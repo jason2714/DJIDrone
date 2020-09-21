@@ -1,5 +1,7 @@
 package ntou.project.djidrone.fragment;
 
+import android.graphics.Rect;
+import android.graphics.RectF;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -42,6 +44,7 @@ import ntou.project.djidrone.MainActivity;
 import ntou.project.djidrone.MobileActivity;
 import ntou.project.djidrone.R;
 import ntou.project.djidrone.utils.DJIApplication;
+import ntou.project.djidrone.utils.OthersUtil;
 import ntou.project.djidrone.utils.ToastUtil;
 
 public class SettingFragment extends Fragment {
@@ -80,8 +83,7 @@ public class SettingFragment extends Fragment {
                 try {
                     String socketData = mBufferedReader.readLine();
                     Log.d(DJIApplication.TAG, "check data");
-                    Log.d(DJIApplication.TAG, socketData);
-                    if (!socketData.isEmpty()) {
+                    if (socketData != null) {
                         getActivity().runOnUiThread(() -> {
                             getSocketData(socketData);
                             mTvWebSocketTest.setText(socketData);
@@ -329,14 +331,29 @@ public class SettingFragment extends Fragment {
 
         }
         if (flag) {
-            mFlightController.sendVirtualStickFlightControlData(
-                    new FlightControlData(mPitch, mRoll, mYaw, mThrottle), djiError -> {
-                        if (djiError == null) {
-                            ToastUtil.showToast("set data: success");
-                        } else {
-                            ToastUtil.showToast(djiError.getDescription());
-                        }
-                    });
+            Log.d(DJIApplication.TAG, socketData);
+            if (null != mFlightController) {
+                mFlightController.sendVirtualStickFlightControlData(
+                        new FlightControlData(mPitch, mRoll, mYaw, mThrottle), djiError -> {
+                            if (djiError == null) {
+                                ToastUtil.showToast("set data: success");
+                            } else {
+                                ToastUtil.showToast(djiError.getDescription());
+                            }
+                        });
+            }
+        } else {
+            String[] cord = socketData.split(",");
+            RectF mRectF = new RectF(OthersUtil.parseFloat(cord[0]),
+                    OthersUtil.parseFloat(cord[1]),
+                    OthersUtil.parseFloat(cord[2]),
+                    OthersUtil.parseFloat(cord[3]));
+//            Log.d(DJIApplication.TAG,mRectF.left + "\n" +
+//                    mRectF.top + "\n" +
+//                    mRectF.right + "\n" +
+//                    mRectF.bottom + "\n");
+            if (getActivity() instanceof MobileActivity)
+                ((MobileActivity) getActivity()).drawTestRect(mRectF);
         }
     }
 }

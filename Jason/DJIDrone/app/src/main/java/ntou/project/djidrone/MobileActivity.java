@@ -962,5 +962,16 @@ public class MobileActivity extends FragmentActivity {
         mImgSignal.setImageResource(signalLevelDrawble[level]);
     }
 
+    public void drawTestRect(RectF mRectF) {
+        Rect mRect = new Rect((int) (mRectF.left * droneView.getWidth()),
+                (int) (mRectF.top * droneView.getHeight()),
+                (int) (mRectF.right * droneView.getWidth()),
+                (int) (mRectF.bottom * droneView.getHeight()));
+        Log.d(DJIApplication.TAG, mRect.left + "\n" +
+                mRect.top + "\n" +
+                mRect.right + "\n" +
+                mRect.bottom + "\n");
+        mHandler.post(() -> drawActiveTrackRect(mImgTargetRect, mRect));
+    }
 }
 
