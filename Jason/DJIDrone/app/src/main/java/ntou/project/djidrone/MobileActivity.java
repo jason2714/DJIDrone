@@ -43,6 +43,7 @@ import dji.common.battery.BatteryState;
 import dji.common.camera.ResolutionAndFrameRate;
 import dji.common.error.DJIError;
 import dji.common.flightcontroller.FlightControllerState;
+import dji.common.flightcontroller.virtualstick.FlightControlData;
 import dji.common.mission.activetrack.ActiveTrackMission;
 import dji.common.mission.activetrack.ActiveTrackMode;
 import dji.common.mission.activetrack.ActiveTrackTargetState;
@@ -312,7 +313,6 @@ public class MobileActivity extends FragmentActivity {
 
     private void initActiveTrack() {
         mActiveTrackOperator = MissionControl.getInstance().getActiveTrackOperator();
-
     }
 
     private class Toggle implements CompoundButton.OnCheckedChangeListener {
@@ -962,16 +962,90 @@ public class MobileActivity extends FragmentActivity {
         mImgSignal.setImageResource(signalLevelDrawble[level]);
     }
 
-    public void drawTestRect(RectF mRectF) {
-        Rect mRect = new Rect((int) (mRectF.left * droneView.getWidth()),
-                (int) (mRectF.top * droneView.getHeight()),
-                (int) (mRectF.right * droneView.getWidth()),
-                (int) (mRectF.bottom * droneView.getHeight()));
-        Log.d(DJIApplication.TAG, mRect.left + "\n" +
-                mRect.top + "\n" +
-                mRect.right + "\n" +
-                mRect.bottom + "\n");
-        mHandler.post(() -> drawActiveTrackRect(mImgTargetRect, mRect));
+    public void getSocketData(String socketData) {
+        float distance = 0.5f;
+        float mPitch = 0;
+        float mRoll = 0;
+        float mThrottle = 0;
+        float mYaw = 0;
+        boolean flag = true;
+        switch (socketData) {
+            case "x":
+            case "X":
+                mThrottle = distance;
+                break;
+            case "c":
+            case "C":
+                mThrottle = -distance;
+                break;
+            case "w":
+            case "W":
+                mRoll = distance;
+                break;
+            case "a":
+            case "A":
+                mPitch = -distance;
+                break;
+            case "s":
+            case "S":
+                mRoll = -distance;
+                break;
+            case "d":
+            case "D":
+                mPitch = distance;
+                break;
+            case "q":
+            case "Q":
+                mYaw = -90;
+                break;
+            case "e":
+            case "E":
+                mYaw = 90;
+                break;
+            case "t":
+            case "T":
+            case "l":
+            case "L":
+                if (null == flightController)
+                    return;
+                startTakeoffLanding();
+                break;
+            case "rth":
+            case "RTH":
+                if (null == flightController)
+                    return;
+                startRTH();
+                break;
+            default:
+                flag = false;
+                break;
+
+        }
+        if (flag) {
+            if (null == flightController)
+                return;
+            Log.d(DJIApplication.TAG, socketData);
+            activeTrackEnable(true);
+            flightController.sendVirtualStickFlightControlData(
+                    new FlightControlData(mPitch, mRoll, mYaw, mThrottle), djiError -> {
+//                        mHandler.post(() -> ToastUtil.showErrorToast("set data: success", djiError))
+                    }
+            );
+        } else {
+            String[] cord = socketData.split(",");
+            RectF mRectF = new RectF(OthersUtil.parseFloat(cord[0]),
+                    OthersUtil.parseFloat(cord[1]),
+                    OthersUtil.parseFloat(cord[2]),
+                    OthersUtil.parseFloat(cord[3]));
+            ActiveTrackMission mActiveTrackMission = new ActiveTrackMission(mRectF, ActiveTrackMode.TRACE);
+            mActiveTrackOperator.startTracking(mActiveTrackMission, djiError ->
+                    mHandler.post(() -> ToastUtil.showErrorToast("Start Active Track Success", djiError)));
+            Rect mRect = new Rect((int) (mRectF.left * droneView.getWidth()),
+                    (int) (mRectF.top * droneView.getHeight()),
+                    (int) (mRectF.right * droneView.getWidth()),
+                    (int) (mRectF.bottom * droneView.getHeight()));
+            mHandler.post(() -> drawActiveTrackRect(mImgTargetRect, mRect));
+        }
     }
 }
 

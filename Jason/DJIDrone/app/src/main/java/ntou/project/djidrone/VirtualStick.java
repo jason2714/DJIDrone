@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.os.Handler;
 import android.os.Looper;
 import android.view.View;
+import android.widget.TextView;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -28,6 +29,7 @@ public class VirtualStick {
     private FlightController mFlightController;
     private Timer mSendVirtualStickDataTimer;
     private SendVirtualStickDataTask mSendVirtualStickDataTask;
+    private TextView mTvDebug;
 
     private float mPitch;
     private float mRoll;
@@ -37,7 +39,7 @@ public class VirtualStick {
     public VirtualStick(Activity activity) {
         mStickLeft = activity.findViewById(R.id.leftStick);
         mStickRight = activity.findViewById(R.id.rightStick);
-//        mTvDebug = activity.findViewById(R.id.tv_test);
+        mTvDebug = activity.findViewById(R.id.tv_test);
         initListener();
         initFlightController();
     }
@@ -142,12 +144,8 @@ public class VirtualStick {
         @Override
         public void run() {
             if (mFlightController != null) {
-//                new Handler(Looper.getMainLooper()).post(new Runnable() {
-//                    @Override
-//                    public void run() {
-//                        mTvDebug.setText("Flight available => Pitch:"+mPitch+", Roll:"+mRoll+", Yaw:"+mYaw);
-//                    }
-//                });
+                new Handler(Looper.getMainLooper()).post(
+                        () -> mTvDebug.setText("Flight available => Pitch:" + mPitch + ", Roll:" + mRoll + ", Yaw:" + mYaw + ", Throttle:" + mThrottle));
                 mFlightController.sendVirtualStickFlightControlData(
                         new FlightControlData(mPitch, mRoll, mYaw, mThrottle), djiError -> {
 //                                if (djiError == null) {

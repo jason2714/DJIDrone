@@ -82,17 +82,18 @@ public class SettingFragment extends Fragment {
             while (true) {
                 try {
                     String socketData = mBufferedReader.readLine();
+                    if (socketData == null)
+                        break;
                     Log.d(DJIApplication.TAG, "check data");
-                    if (socketData != null) {
-                        getActivity().runOnUiThread(() -> {
-                            getSocketData(socketData);
-                            mTvWebSocketTest.setText(socketData);
-                        });
-                    }
+                    getActivity().runOnUiThread(() -> {
+                        if(getActivity() instanceof  MobileActivity)
+                            ((MobileActivity)getActivity()).getSocketData(socketData);
+                        mTvWebSocketTest.setText(socketData);
+                    });
                     PrintWriter printwriter = new PrintWriter(mSocketClient.getOutputStream(), true);
                     printwriter.write("receive data success"); // write the message to output stream
                     printwriter.flush();
-//                                printwriter.close();
+//                    printwriter.close();
                 } catch (IOException e) {
                     Log.d(DJIApplication.TAG, "read file error");
                     Log.d(DJIApplication.TAG, e.toString());
@@ -293,67 +294,4 @@ public class SettingFragment extends Fragment {
         });
     }
 
-    private void getSocketData(String socketData) {
-        float distance = 5;
-        float mPitch = 0;
-        float mRoll = 0;
-        float mThrottle = 0;
-        float mYaw = 0;
-        boolean flag = true;
-        switch (socketData) {
-            case "w":
-            case "W":
-                mThrottle = distance;
-                break;
-            case "a":
-            case "A":
-                mRoll = -distance;
-                break;
-            case "s":
-            case "S":
-                mThrottle = -distance;
-                break;
-            case "d":
-            case "D":
-                mRoll = distance;
-                break;
-            case "q":
-            case "Q":
-                mYaw = -90;
-                break;
-            case "e":
-            case "E":
-                mYaw = 90;
-                break;
-            default:
-                flag = false;
-                break;
-
-        }
-        if (flag) {
-            Log.d(DJIApplication.TAG, socketData);
-            if (null != mFlightController) {
-                mFlightController.sendVirtualStickFlightControlData(
-                        new FlightControlData(mPitch, mRoll, mYaw, mThrottle), djiError -> {
-                            if (djiError == null) {
-                                ToastUtil.showToast("set data: success");
-                            } else {
-                                ToastUtil.showToast(djiError.getDescription());
-                            }
-                        });
-            }
-        } else {
-            String[] cord = socketData.split(",");
-            RectF mRectF = new RectF(OthersUtil.parseFloat(cord[0]),
-                    OthersUtil.parseFloat(cord[1]),
-                    OthersUtil.parseFloat(cord[2]),
-                    OthersUtil.parseFloat(cord[3]));
-//            Log.d(DJIApplication.TAG,mRectF.left + "\n" +
-//                    mRectF.top + "\n" +
-//                    mRectF.right + "\n" +
-//                    mRectF.bottom + "\n");
-            if (getActivity() instanceof MobileActivity)
-                ((MobileActivity) getActivity()).drawTestRect(mRectF);
-        }
-    }
 }
