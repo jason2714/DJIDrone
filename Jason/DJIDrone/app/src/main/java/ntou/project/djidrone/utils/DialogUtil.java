@@ -59,6 +59,7 @@ public class DialogUtil{
                 WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE);
 //TODO COLOR
 //        alertDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.BLACK));
-        alertDialog.show();
+        if(!alertDialog.isShowing())
+            alertDialog.show();
     }
 }
