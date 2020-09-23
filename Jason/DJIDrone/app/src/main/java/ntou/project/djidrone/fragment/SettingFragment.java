@@ -245,7 +245,7 @@ public class SettingFragment extends Fragment {
                     });
                     break;
                 case R.id.sw_web_socket:
-                    flightControlEnable(isChecked);
+//                    flightControlEnable(isChecked);
                     if (isChecked) {
                         mTvWebSocket.setText(R.string.open);
 //                        webSocketHandlerThread.start();

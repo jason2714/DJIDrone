@@ -144,8 +144,8 @@ public class VirtualStick {
         @Override
         public void run() {
             if (mFlightController != null) {
-                new Handler(Looper.getMainLooper()).post(
-                        () -> mTvDebug.setText("Flight available => Pitch:" + mPitch + ", Roll:" + mRoll + ", Yaw:" + mYaw + ", Throttle:" + mThrottle));
+//                new Handler(Looper.getMainLooper()).post(
+//                        () -> mTvDebug.setText("Flight available => Pitch:" + mPitch + ", Roll:" + mRoll + ", Yaw:" + mYaw + ", Throttle:" + mThrottle));
                 mFlightController.sendVirtualStickFlightControlData(
                         new FlightControlData(mPitch, mRoll, mYaw, mThrottle), djiError -> {
 //                                if (djiError == null) {

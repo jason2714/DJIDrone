@@ -64,6 +64,12 @@
         <item name="android:track">@drawable/switch_selector</item>
         <item name="android:showText">false</item>
     </style>
+    <style name= "LeftButton">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:layout_margin">2dp</item>
+    </style>
 
     <style name="Theme.AppCompat.Light.MobileActivity">
         <item name="colorAccent">@color/colorWhite</item>

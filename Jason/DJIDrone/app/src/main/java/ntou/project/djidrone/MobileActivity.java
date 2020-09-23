@@ -84,6 +84,7 @@ public class MobileActivity extends FragmentActivity {
     private ImageView mImgSensor;
     private ImageView mBtnCamera;
     private ImageView mBtnTakeoffLanding, mBtnRTH;
+    private ImageView mBtnTrackStop;
     private TextView mTvState, mTvBatteryPower;
     //test data
     private TextView mTvTest;
@@ -233,6 +234,7 @@ public class MobileActivity extends FragmentActivity {
         mapView = findViewById(R.id.mapView);
         mBtnCamera = findViewById(R.id.btn_camera);
         mBtnCamera.setTag(R.drawable.icon_shoot_photo);
+        mBtnTrackStop = findViewById(R.id.btn_active_track_stop);
         droneView = findViewById(R.id.droneView);
         mFragmentFrame = findViewById(R.id.container);
         mBtnTakeoffLanding = findViewById(R.id.btn_takeoff_landing);
@@ -295,6 +297,9 @@ public class MobileActivity extends FragmentActivity {
         mapView.setOnClickListener(onclick);
         mBtnTakeoffLanding.setOnClickListener(onclick);
         mBtnRTH.setOnClickListener(onclick);
+//        mBtnTrackStop.setVisibility(View.INVISIBLE);
+        mBtnTrackStop.setAlpha(0.1f);
+        mBtnTrackStop.setOnClickListener(onclick);
         //用post就會排在queue後面執行 => 布局完成後才getWidth()
         mFragmentFrame.post(() -> {
             mFragmentFrameSize = new Size(mFragmentFrame.getWidth(), mFragmentFrame.getHeight());
@@ -434,6 +439,9 @@ public class MobileActivity extends FragmentActivity {
                                 .setNegativeButton(R.string.cancel, null)
                                 .create());
                     }
+                    break;
+                case R.id.btn_active_track_stop:
+                    mActiveTrackOperator.stopTracking(djiError -> ToastUtil.showErrorToast("Stop Tracking Success", djiError));
                     break;
                 default:
                     break;
@@ -888,6 +896,7 @@ public class MobileActivity extends FragmentActivity {
             } else if (targetState == ActiveTrackTargetState.TRACKING_WITH_LOW_CONFIDENCE) {
                 mImgTargetRect.setImageResource(R.drawable.rect_active_track_lowconfidence);
             } else if (targetState == ActiveTrackTargetState.TRACKING_WITH_HIGH_CONFIDENCE) {
+                mTvTest.setText(mActiveTrackOperator.getCurrentState().getName());
                 mImgTargetRect.setImageResource(R.drawable.rect_active_track_highconfidence);
             }
             drawActiveTrackRect(mImgTargetRect, trackingRect);
@@ -899,14 +908,14 @@ public class MobileActivity extends FragmentActivity {
         if (enable) {
             mImgSelectRect.bringToFront();
             mImgTargetRect.bringToFront();
-            mActiveTrackOperator.addListener(activeTrackEvent -> {
-//                mHandler.post(() -> mTvTest.setText(activeTrackEvent.getCurrentState().toString()));
-                updateActiveTrackRect(activeTrackEvent.getTrackingState());
-            });
-            if (DJIApplication.isAircraftConnected())
+            mActiveTrackOperator.addListener(activeTrackEvent ->
+                updateActiveTrackRect(activeTrackEvent.getTrackingState()));
+            if (DJIApplication.isAircraftConnected()) {
                 //auto sensing
                 mActiveTrackOperator.enableAutoSensing(djiError -> ToastUtil.showErrorToast("start Auto Sensing success", djiError));
-//            mActiveTrackOperator.setRecommendedConfiguration(djiError ->mHandler.post(()-> ToastUtil.showErrorToast("Set Recommended Config Success", djiError)));
+                mActiveTrackOperator.setRecommendedConfiguration(djiError ->
+                        mHandler.post(() -> ToastUtil.showErrorToast("Set Recommended Config Success", djiError)));
+            }
             droneView.setOnTouchListener((view, event) -> {
                 switch (event.getAction()) {
                     case MotionEvent.ACTION_DOWN:
@@ -951,7 +960,6 @@ public class MobileActivity extends FragmentActivity {
         } else {
             droneView.setOnTouchListener(null);
 //            mActiveTrackOperator.disableAutoSensing(djiError -> ToastUtil.showErrorToast("Disable Auto Sensing Success", djiError));
-            mActiveTrackOperator.stopTracking(djiError -> ToastUtil.showErrorToast("Stop Tracking Success", djiError));
             mActiveTrackOperator.removeAllListeners();
         }
     }

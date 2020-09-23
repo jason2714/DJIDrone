@@ -13,7 +13,7 @@
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        app:layout_constraintGuide_percent="0.1" />
+        app:layout_constraintGuide_percent="0.11" />
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/gdlnvtRight"
@@ -41,7 +41,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.6" />
+        app:layout_constraintGuide_percent="0.6"/>
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/gdlnhzBottom"
@@ -85,34 +85,29 @@
         android:background="@color/colorFragment"
         android:orientation="vertical"
         android:padding="15dp"
-        app:layout_constraintBottom_toBottomOf="@id/gdlnhzMiddle"
+        app:layout_constraintBottom_toBottomOf="@id/gdlnhzBottom"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="@id/gdlnvtLeft"
         app:layout_constraintTop_toTopOf="@id/gdlnhzTop">
         <!--        android:background="@color/colorBackground"-->
         <ImageView
             android:id="@+id/btn_takeoff_landing"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_margin="2dp"
-            android:layout_weight="1"
+            style="@style/LeftButton"
             android:src="@drawable/icon_takeoff" />
 
         <ImageView
             android:id="@+id/btn_rth"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_margin="2dp"
-            android:layout_weight="1"
+            style="@style/LeftButton"
             android:src="@drawable/icon_rth" />
 
         <ImageView
             android:id="@+id/btn_camera"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_margin="2dp"
-            android:layout_weight="1"
+            style="@style/LeftButton"
             android:src="@drawable/icon_shoot_photo" />
+        <ImageView
+            android:id="@+id/btn_active_track_stop"
+            style="@style/LeftButton"
+            android:src="@drawable/icon_active_track_stop" />
     </LinearLayout>
 
     <ToggleButton
@@ -125,7 +120,7 @@
         android:scaleType="fitXY"
         android:textOff=""
         android:textOn=""
-        app:layout_constraintBottom_toBottomOf="@id/gdlnhzMiddle"
+        app:layout_constraintBottom_toBottomOf="@id/gdlnhzBottom"
         app:layout_constraintRight_toRightOf="@id/gdlnvtLeft" />
 
     <LinearLayout
