@@ -443,11 +443,7 @@ public class MobileActivity extends FragmentActivity {
                 case R.id.btn_active_track_stop:
                     mBtnTrackStop.setAlpha(0.1f);
                     //TODO 沒跑進來
-                    mActiveTrackOperator.stopTracking(djiError -> {
-                        isWaitingForConfirm = false;
-                        ToastUtil.showErrorToast("Stop Tracking Success", djiError);
-                        Log.d(DJIApplication.TAG,"Stop Tracking Success");
-                    });
+                    stopTracking();
                     break;
                 default:
                     break;
@@ -984,6 +980,14 @@ public class MobileActivity extends FragmentActivity {
         }
     }
 
+    private void stopTracking(){
+        mActiveTrackOperator.stopTracking(djiError -> {
+            isWaitingForConfirm = false;
+            ToastUtil.showErrorToast("Stop Tracking Success", djiError);
+            Log.d(DJIApplication.TAG,"Stop Tracking Success");
+        });
+    }
+
     private void setGPSLevelIcon(FlightControllerState flightControllerState) {
         String signalLevel = flightControllerState.getGPSSignalLevel().toString();
         int level = OthersUtil.parseInt(signalLevel.substring(signalLevel.length() - 1));
@@ -998,39 +1002,48 @@ public class MobileActivity extends FragmentActivity {
         float mRoll = 0;
         float mThrottle = 0;
         float mYaw = 0;
-        boolean flag = true;
+        boolean isFlightControl = false;
+        boolean isGettingRect = false;
         switch (socketData) {
             case "x":
             case "X":
                 mThrottle = distance;
+                isFlightControl = true;
                 break;
             case "c":
             case "C":
                 mThrottle = -distance;
+                isFlightControl = true;
                 break;
             case "w":
             case "W":
                 mRoll = distance;
+                isFlightControl = true;
                 break;
             case "a":
             case "A":
                 mPitch = -distance;
+                isFlightControl = true;
                 break;
             case "s":
             case "S":
                 mRoll = -distance;
+                isFlightControl = true;
                 break;
             case "d":
             case "D":
                 mPitch = distance;
+                isFlightControl = true;
                 break;
             case "q":
             case "Q":
                 mYaw = -90;
+                isFlightControl = true;
                 break;
             case "e":
             case "E":
                 mYaw = 90;
+                isFlightControl = true;
                 break;
             case "t":
             case "T":
@@ -1042,19 +1055,23 @@ public class MobileActivity extends FragmentActivity {
             case "RTH":
                 startRTH();
                 break;
+            case "st":
+            case "ST":
+                stopTracking();
+                break;
             default:
-                flag = false;
+                isGettingRect =true;
                 break;
 
         }
-        if (flag) {
+        if (isFlightControl) {
             Log.d(DJIApplication.TAG, socketData);
             flightController.sendVirtualStickFlightControlData(
                     new FlightControlData(mPitch, mRoll, mYaw, mThrottle), djiError -> {
                         mHandler.post(() -> ToastUtil.showErrorToast("set data: success", djiError));
                     }
             );
-        } else {
+        } else if(isGettingRect){
             String[] cord = socketData.split(",");
             RectF mRectF = new RectF(OthersUtil.parseFloat(cord[0]),
                     OthersUtil.parseFloat(cord[1]),

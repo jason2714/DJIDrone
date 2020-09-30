@@ -8,6 +8,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_gravity="center"
         android:orientation="vertical">
         <RelativeLayout
             android:layout_width="match_parent"
@@ -36,6 +37,7 @@
                 android:textSize="20sp"
                 android:text="@string/connection_loose"/>
         </RelativeLayout>
+
         <EditText
             android:id="@+id/userId"
             android:layout_width="match_parent"
@@ -61,8 +63,7 @@
             android:inputType="textPassword"
             android:paddingStart="10dp"
             android:singleLine="true"
-            android:textSize="30sp" />
-
+            android:textSize="30sp"/>
         <Button
             android:id="@+id/submit"
             android:layout_width="match_parent"
@@ -70,8 +71,9 @@
             android:layout_marginTop="30dp"
             android:background="@drawable/submit_button"
             android:enabled="false"
-            android:text="送出"
+            android:text="@string/submit"
             android:textColor="#FFF"
+            android:textAllCaps="false"
             android:textSize="30sp" />
 
         <Button
@@ -82,7 +84,7 @@
             android:background="@drawable/submit_button"
             android:text="skip"
             android:textColor="#FFF"
-            android:textSize="30sp" />
+            android:textSize="30sp"/>
 
     </LinearLayout>
 </LinearLayout>
