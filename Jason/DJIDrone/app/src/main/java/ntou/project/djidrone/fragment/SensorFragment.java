@@ -12,7 +12,9 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import dji.common.error.DJIError;
 import dji.common.util.CommonCallbacks;
+import dji.sdk.flightcontroller.Compass;
 import dji.sdk.flightcontroller.FlightAssistant;
 import dji.sdk.flightcontroller.FlightController;
 import ntou.project.djidrone.utils.DJIApplication;
@@ -22,7 +24,8 @@ import ntou.project.djidrone.utils.ToastUtil;
 public class SensorFragment extends Fragment {
     private Switch mSwAvoidance;
     private TextView mTvAvoidance;
-    private FlightController flightController;
+    private FlightController mFlightController;
+    private Compass compass;
 
     @Nullable
     @Override
@@ -36,9 +39,18 @@ public class SensorFragment extends Fragment {
         OnToggle onToggle = new OnToggle();
         mSwAvoidance = view.findViewById(R.id.sw_avoidance_mode);
         mTvAvoidance = view.findViewById(R.id.tv_avoidance_mode);
-        flightController = DJIApplication.getFlightControllerInstance();
+        mFlightController = DJIApplication.getFlightControllerInstance();
         setCollisionAvoidance(true);
         mSwAvoidance.setOnCheckedChangeListener(onToggle);
+        //TODO compass calibration
+        if (null != mFlightController) {
+            compass = mFlightController.getCompass();
+            if (compass.hasError()) {
+//            compass.startCalibration(djiError -> {
+//                //TODO
+//            });
+            }
+        }
     }
 
     private class OnToggle implements CompoundButton.OnCheckedChangeListener {
@@ -56,15 +68,15 @@ public class SensorFragment extends Fragment {
     }
 
     private void setCollisionAvoidance(boolean isOn) {
-        flightController = DJIApplication.getFlightControllerInstance();
-        if (null == flightController) {
+        mFlightController = DJIApplication.getFlightControllerInstance();
+        if (null == mFlightController) {
             if (isOn)
                 mTvAvoidance.setText(R.string.open);
             else
                 mTvAvoidance.setText(R.string.close);
             return;
         }
-        FlightAssistant flightAssistant = flightController.getFlightAssistant();
+        FlightAssistant flightAssistant = mFlightController.getFlightAssistant();
         if (null != flightAssistant) {
             CommonCallbacks.CompletionCallback completionCallback = djiError -> {
                 ToastUtil.showErrorToast("set avoidance " + isOn + " success", djiError);

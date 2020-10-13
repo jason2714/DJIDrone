@@ -62,6 +62,8 @@ public class SettingFragment extends Fragment {
     private HandlerThread webSocketHandlerThread;
     private static final int SERVER_PORT = 5000;
     private static final String SERVER_IP = "140.121.198.99";
+    private boolean isWebSocketConnect = false;
+    private int count = 0;
     private Runnable connect = () -> {
         String statusStr = "";
         Log.d(DJIApplication.TAG, "run runnable->connect");
@@ -79,7 +81,7 @@ public class SettingFragment extends Fragment {
                 ToastUtil.showToast(finalStatusStr);
                 mTvWebSocketTest.setText(finalStatusStr);
             });
-            while (true) {
+            while (isWebSocketConnect) {
                 try {
                     String socketData = mBufferedReader.readLine();
                     if (socketData == null)
@@ -248,13 +250,15 @@ public class SettingFragment extends Fragment {
 //                    flightControlEnable(isChecked);
                     if (isChecked) {
                         mTvWebSocket.setText(R.string.open);
-//                        webSocketHandlerThread.start();
                         Log.d(DJIApplication.TAG, "sw_web_socket checked");
+                        isWebSocketConnect = true;
                         webSocketHandler.post(connect);
                     } else {
                         mTvWebSocket.setText(R.string.close);
 //                        webSocketHandlerThread.quitSafely();
                         Log.d(DJIApplication.TAG, "sw_web_socket unchecked");
+                        isWebSocketConnect = false;
+//                        不能使用在已開始的runnable上
                         webSocketHandler.removeCallbacks(connect);
                     }
                     break;
@@ -273,25 +277,25 @@ public class SettingFragment extends Fragment {
         }
     }
 
-    private void flightControlEnable(boolean enable) {
-        mFlightController = DJIApplication.getFlightControllerInstance();
-        if (null == mFlightController)
-            return;
-        mFlightController.setVirtualStickModeEnabled(enable, djiError -> {
-            if (djiError != null) {
-                ToastUtil.showToast(djiError.getDescription());
-            } else {
-                if (enable) {
-                    mFlightController.setRollPitchControlMode(RollPitchControlMode.VELOCITY);
-                    mFlightController.setYawControlMode(YawControlMode.ANGULAR_VELOCITY);
-                    mFlightController.setVerticalControlMode(VerticalControlMode.VELOCITY);
-                    mFlightController.setRollPitchCoordinateSystem(FlightCoordinateSystem.BODY);
-                    ToastUtil.showToast("Enable Virtual Stick Success");
-                } else {
-                    ToastUtil.showToast("Disable Virtual Stick Success");
-                }
-            }
-        });
-    }
+//    private void flightControlEnable(boolean enable) {
+//        mFlightController = DJIApplication.getFlightControllerInstance();
+//        if (null == mFlightController)
+//            return;
+//        mFlightController.setVirtualStickModeEnabled(enable, djiError -> {
+//            if (djiError != null) {
+//                ToastUtil.showToast(djiError.getDescription());
+//            } else {
+//                if (enable) {
+//                    mFlightController.setRollPitchControlMode(RollPitchControlMode.VELOCITY);
+//                    mFlightController.setYawControlMode(YawControlMode.ANGULAR_VELOCITY);
+//                    mFlightController.setVerticalControlMode(VerticalControlMode.VELOCITY);
+//                    mFlightController.setRollPitchCoordinateSystem(FlightCoordinateSystem.BODY);
+//                    ToastUtil.showToast("Enable Virtual Stick Success");
+//                } else {
+//                    ToastUtil.showToast("Disable Virtual Stick Success");
+//                }
+//            }
+//        });
+//    }
 
 }

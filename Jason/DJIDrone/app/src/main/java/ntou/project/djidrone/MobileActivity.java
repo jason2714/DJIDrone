@@ -441,8 +441,6 @@ public class MobileActivity extends FragmentActivity {
                     }
                     break;
                 case R.id.btn_active_track_stop:
-                    mBtnTrackStop.setAlpha(0.1f);
-                    //TODO 沒跑進來
                     stopTracking();
                     break;
                 default:
@@ -880,7 +878,7 @@ public class MobileActivity extends FragmentActivity {
                                     mActiveTrackOperator.acceptConfirmation(djiError -> {
                                         isWaitingForConfirm = false;
                                         confirmActiveTrackDialog = null;
-                                        mHandler.post(() ->{
+                                        mHandler.post(() -> {
                                             mBtnTrackStop.setAlpha(1f);
                                             ToastUtil.showToast("Start Active Track");
                                         });
@@ -970,9 +968,9 @@ public class MobileActivity extends FragmentActivity {
         } else {
             droneView.setOnTouchListener(null);
             if (DJIApplication.isAircraftConnected()) {
-                mHandler.postDelayed(() ->{
+                mHandler.postDelayed(() -> {
                     mImgTargetRect.setVisibility(View.INVISIBLE);
-                },100);
+                }, 100);
                 mActiveTrackOperator.disableAutoSensing(djiError -> ToastUtil.showErrorToast("Disable Auto Sensing Success", djiError));
                 mActiveTrackOperator.removeAllListeners();
                 mBtnTrackStop.setAlpha(0.1f);
@@ -980,11 +978,13 @@ public class MobileActivity extends FragmentActivity {
         }
     }
 
-    private void stopTracking(){
+    private void stopTracking() {
+        mBtnTrackStop.setAlpha(0.1f);
         mActiveTrackOperator.stopTracking(djiError -> {
+            //TODO 沒跑進來
             isWaitingForConfirm = false;
             ToastUtil.showErrorToast("Stop Tracking Success", djiError);
-            Log.d(DJIApplication.TAG,"Stop Tracking Success");
+            Log.d(DJIApplication.TAG, "Stop Tracking Success");
         });
     }
 
@@ -1060,7 +1060,7 @@ public class MobileActivity extends FragmentActivity {
                 stopTracking();
                 break;
             default:
-                isGettingRect =true;
+                isGettingRect = true;
                 break;
 
         }
@@ -1068,25 +1068,28 @@ public class MobileActivity extends FragmentActivity {
             Log.d(DJIApplication.TAG, socketData);
             flightController.sendVirtualStickFlightControlData(
                     new FlightControlData(mPitch, mRoll, mYaw, mThrottle), djiError -> {
-                        mHandler.post(() -> ToastUtil.showErrorToast("set data: success", djiError));
+//                        mHandler.post(() -> ToastUtil.showErrorToast("set data: success", djiError));
+                        Log.d(DJIApplication.TAG, "set data " + socketData + " success");
                     }
             );
-        } else if(isGettingRect){
+        } else if (isGettingRect) {
+            //counting & drawing rectangle
             String[] cord = socketData.split(",");
             RectF mRectF = new RectF(OthersUtil.parseFloat(cord[0]),
                     OthersUtil.parseFloat(cord[1]),
                     OthersUtil.parseFloat(cord[2]),
                     OthersUtil.parseFloat(cord[3]));
-            ActiveTrackMission mActiveTrackMission = new ActiveTrackMission(mRectF, ActiveTrackMode.TRACE);
-            mActiveTrackOperator.startTracking(mActiveTrackMission, djiError -> {
-                isWaitingForConfirm = true;
-                mHandler.post(() -> ToastUtil.showErrorToast("Accept Active Track Mission", djiError));
-            });
             Rect mRect = new Rect((int) (mRectF.left * droneView.getWidth()),
                     (int) (mRectF.top * droneView.getHeight()),
                     (int) (mRectF.right * droneView.getWidth()),
                     (int) (mRectF.bottom * droneView.getHeight()));
             mHandler.post(() -> drawActiveTrackRect(mImgTargetRect, mRect));
+            //active track mission
+            ActiveTrackMission mActiveTrackMission = new ActiveTrackMission(mRectF, ActiveTrackMode.TRACE);
+            mActiveTrackOperator.startTracking(mActiveTrackMission, djiError -> {
+                isWaitingForConfirm = true;
+                mHandler.post(() -> ToastUtil.showErrorToast("Accept Active Track Mission", djiError));
+            });
         }
     }
 }
