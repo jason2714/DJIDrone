@@ -33,7 +33,10 @@
     <string name="password">ntoucse</string>
     <string name="camera_mode_info">切換相機模式</string>
     <string name="shooting_mode_info">切換拍照模式</string>
-    <string name="collision_avoidance_change">避障系統設定</string>
+    <string name="collision_avoidance_info">避障系統</string>
+    <string name="APAS_info">APAS</string>
+    <string name="RTH_avoidance_info">RTH Avoidance</string>
+    <string name="landing_protection_info">Landing Protection</string>
     <string name="shoot_photo">拍照</string>
     <string name="record_video">錄影</string>
     <string name="product_information">Product Information</string>

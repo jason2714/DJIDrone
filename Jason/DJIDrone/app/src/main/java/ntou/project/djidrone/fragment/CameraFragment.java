@@ -59,7 +59,6 @@ public class CameraFragment extends Fragment {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
 //                ToastUtil.showToast(adapter.getItem(position).toString());
-                //TODO not test yet
                 setPhotoMode(SettingsDefinitions.ShootPhotoMode.valueOf(adapter.getItem(position).toString()));
             }
 

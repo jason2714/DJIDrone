@@ -15,31 +15,129 @@
             android:layout_height="wrap_content">
 
             <TextView
-                android:id="@+id/tv_change_collision_avoidance"
-                android:text="@string/collision_avoidance_change"
-                style="@style/TextColor.InfoText"/>
+                android:id="@+id/tv_collision_avoidance_info"
+                style="@style/TextColor.InfoText"
+                android:text="@string/collision_avoidance_info" />
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="40dp"
-                android:layout_below="@id/tv_change_collision_avoidance"
+                android:layout_below="@id/tv_collision_avoidance_info"
                 android:gravity="center"
                 android:orientation="horizontal">
 
                 <TextView
-                    android:id="@+id/tv_avoidance_mode"
-                    android:text="@string/close"
-                    style="@style/TextColor.SwitchText"/>
+                    android:id="@+id/tv_avoidance"
+                    style="@style/TextColor.SwitchText"
+                    android:text="@string/close" />
 
                 <Switch
-                    android:id="@+id/sw_avoidance_mode"
-                    android:checked="false"
-                    style="@style/Switch"/>
+                    android:id="@+id/sw_avoidance"
+                    style="@style/Switch"
+                    android:checked="false" />
             </LinearLayout>
 
         </RelativeLayout>
 
-        <include layout="@layout/view_partition"/>
+        <include layout="@layout/view_partition" />
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/tv_RTH_avoidance_info"
+                style="@style/TextColor.InfoText"
+                android:text="@string/RTH_avoidance_info" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:layout_below="@id/tv_RTH_avoidance_info"
+                android:gravity="center"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/tv_RTH_avoidance"
+                    style="@style/TextColor.SwitchText"
+                    android:text="@string/close" />
+
+                <Switch
+                    android:id="@+id/sw_RTH_avoidance"
+                    style="@style/Switch"
+                    android:checked="false" />
+            </LinearLayout>
+
+        </RelativeLayout>
+
+        <include layout="@layout/view_partition" />
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/tv_landing_protection_info"
+                style="@style/TextColor.InfoText"
+                android:ellipsize="marquee"
+                android:marqueeRepeatLimit="marquee_forever"
+                android:focusableInTouchMode="true"
+                android:focusable="true"
+                android:singleLine="true"
+                android:text="@string/landing_protection_info" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:layout_below="@id/tv_landing_protection_info"
+                android:gravity="center"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/tv_landing_protection"
+                    style="@style/TextColor.SwitchText"
+                    android:text="@string/close" />
+
+                <Switch
+                    android:id="@+id/sw_landing_protection"
+                    style="@style/Switch"
+                    android:checked="false" />
+            </LinearLayout>
+
+        </RelativeLayout>
+
+        <include layout="@layout/view_partition" />
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/tv_APAS_info"
+                style="@style/TextColor.InfoText"
+                android:text="@string/APAS_info" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:layout_below="@id/tv_APAS_info"
+                android:gravity="center"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/tv_APAS"
+                    style="@style/TextColor.SwitchText"
+                    android:text="@string/close" />
+
+                <Switch
+                    android:id="@+id/sw_APAS"
+                    style="@style/Switch"
+                    android:checked="false" />
+            </LinearLayout>
+
+        </RelativeLayout>
+
+        <include layout="@layout/view_partition" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -47,5 +145,7 @@
             android:layout_marginTop="20dp"
             android:text="@string/sensor"
             android:textSize="40sp" />
+
     </LinearLayout>
+
 </ntou.project.djidrone.view.MyScrollView>
