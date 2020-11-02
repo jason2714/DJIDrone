@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "427845711080",
+    "firebase_url": "https://dji-drone-7d303.firebaseio.com",
+    "project_id": "dji-drone-7d303",
+    "storage_bucket": "dji-drone-7d303.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:427845711080:android:67f7094ee364ae23c0055d",
+        "android_client_info": {
+          "package_name": "ntou.project.djidrone"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "427845711080-gsotl6c0gqifddu4vvqet5gft53tf5p3.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBKLw3POeRm9I06VgQ13iSa7a0dA9L4MwE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "427845711080-gsotl6c0gqifddu4vvqet5gft53tf5p3.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

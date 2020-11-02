@@ -1,6 +1,7 @@
 package ntou.project.djidrone;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -24,8 +25,16 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import dji.common.error.DJIError;
@@ -41,7 +50,7 @@ public class MainActivity extends AppCompatActivity {
 
     private EditText account, password;
     private Button submit;
-    private TextView mProductInformation,mProductState;
+    private TextView mProductInformation, mProductState;
     //android integrate import
     private static final String TAG = MainActivity.class.getName();
     private static BaseProduct mProduct;
@@ -137,6 +146,8 @@ public class MainActivity extends AppCompatActivity {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             checkAndRequestPermissions();
         }
+//        DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference("UserData");
+//        mDatabase.child("test").setValue(new User("123", "456"));
         initView();
         initLinstener();
         mHandler = new Handler(Looper.getMainLooper());
@@ -214,17 +225,37 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void checkInformation() {
-        Intent intent = null;
-        if (account.getText().toString().equals(getResources().getString(R.string.account)) &&
-                password.getText().toString().equals(getResources().getString(R.string.password))) {
-            showToast("登入成功");
-            intent = new Intent(MainActivity.this, MobileActivity.class);
-            startActivity(intent);
-        } else {
-            Log.d(Define.LOG_TAG, "account : " + account.getText().toString() +
-                    "\npassword : " + password.getText().toString());
-            Toast.makeText(MainActivity.this, "帳號或密碼錯誤", Toast.LENGTH_SHORT).show();
-        }
+        User user = new User(account.getText().toString(), password.getText().toString());
+//        User Jason = new User("DJIDrone", "ntoucse");
+        DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference("UserData");
+        mDatabase.child("test").setValue(new User("123", "456"));
+        mDatabase.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                boolean loginSuccess = false;
+                for (DataSnapshot userData : snapshot.getChildren()) {
+                    User dbUser = userData.getValue(User.class);
+                    if (user.equals(dbUser)) {
+                        loginSuccess = true;
+                        break;
+                    }
+                }
+                if (loginSuccess) {
+                    showToast("登入成功");
+                    Intent intent = new Intent(MainActivity.this, MobileActivity.class);
+                    startActivity(intent);
+                } else {
+                    Log.d(Define.LOG_TAG, "account : " + user.username +
+                            "\npassword : " + user.password);
+                    Toast.makeText(MainActivity.this, "帳號或密碼錯誤", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                showToast("Net Work Error");
+            }
+        });
     }
 
     private class Onclick implements View.OnClickListener {
@@ -319,19 +350,18 @@ public class MainActivity extends AppCompatActivity {
         mProduct = DJIApplication.getProductInstance();
         if (null != mProduct) {
             Log.d(TAG, "refreshSDK: True");
-            if(mProduct.isConnected()){
+            if (mProduct.isConnected()) {
                 Log.d(TAG, "connect to icon_aircraft");
                 mProductState.setText(R.string.connection_success);
                 mProductInformation.setText(mProduct.getModel().getDisplayName());
                 submit.setEnabled(true);
-            }
-            else if(mProduct instanceof Aircraft){
+            } else if (mProduct instanceof Aircraft) {
                 Log.d(TAG, "only connect to remote controller");
                 mProductState.setText(R.string.connection_only_rc);
                 mProductInformation.setText(R.string.product_information);
                 submit.setEnabled(false);
             }
-        } else{
+        } else {
             Log.d(TAG, "refreshSDK: False");
             mProductState.setText(R.string.connection_loose);
             mProductInformation.setText(R.string.product_information);
