@@ -40,11 +40,6 @@ android {
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
-//        debug {
-//            shrinkResources true
-//            minifyEnabled true
-//            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-//        }
     }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
@@ -54,7 +49,6 @@ android {
     dexOptions {
         javaMaxHeapSize "4g"
     }
-    ndkVersion '20.0.5594570'
 }
 
 dependencies {

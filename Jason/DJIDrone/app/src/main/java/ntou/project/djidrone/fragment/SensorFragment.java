@@ -18,6 +18,7 @@ import dji.common.util.CommonCallbacks;
 import dji.sdk.flightcontroller.Compass;
 import dji.sdk.flightcontroller.FlightAssistant;
 import dji.sdk.flightcontroller.FlightController;
+import ntou.project.djidrone.MobileActivity;
 import ntou.project.djidrone.utils.DJIApplication;
 import ntou.project.djidrone.R;
 import ntou.project.djidrone.utils.ToastUtil;
@@ -113,11 +114,16 @@ public class SensorFragment extends Fragment {
             CommonCallbacks.CompletionCallback completionCallback = djiError -> {
                 ToastUtil.showErrorToast("set avoidance " + isOn + " success", djiError);
                 if (null == djiError) {
+                    String[] flightModes = getResources().getStringArray(R.array.mavic_pro2_mode);
                     getActivity().runOnUiThread(() -> {
-                        if (isOn)
+                        if(getActivity() instanceof MobileActivity)
+                            ((MobileActivity)getActivity()).getAvoidanceState(isOn);
+                        if (isOn){
                             mTvAvoidance.setText(R.string.open);
-                        else
+                        }
+                        else{
                             mTvAvoidance.setText(R.string.close);
+                        }
                     });
                 }
             };

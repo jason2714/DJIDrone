@@ -33,7 +33,9 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -226,10 +228,10 @@ public class MainActivity extends AppCompatActivity {
 
     private void checkInformation() {
         User user = new User(account.getText().toString(), password.getText().toString());
-//        User Jason = new User("DJIDrone", "ntoucse");
-        DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference("UserData");
-        mDatabase.child("test").setValue(new User("123", "456"));
-        mDatabase.addListenerForSingleValueEvent(new ValueEventListener() {
+        DatabaseReference mDatabase = FirebaseDatabase.getInstance()
+                .getReferenceFromUrl(getResources().getString(R.string.database_url));
+//        mDatabase.child("test").setValue(new User("123", "456"));
+        mDatabase.child("UserData").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 boolean loginSuccess = false;
@@ -253,7 +255,7 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                showToast("Net Work Error");
+                showToast(error.getMessage());
             }
         });
     }

@@ -29,8 +29,6 @@
     <string name="controller">Controller</string>
     <string name="camera">Camera</string>
     <string name="setting">Setting</string>
-    <string name="account">DJIDrone</string>
-    <string name="password">ntoucse</string>
     <string name="camera_mode_info">切換相機模式</string>
     <string name="shooting_mode_info">切換拍照模式</string>
     <string name="collision_avoidance_info">避障系統</string>
@@ -52,6 +50,7 @@
     <string name="success">成功</string>
     <string name="ok">確認</string>
     <string name="cancel">取消</string>
+    <string name="database_url">https://dji-drone-7d303.firebaseio.com/</string>
     <string name="RTMP_url">rtmp://140.121.198.99/show</string>
     <string name="live_stream_info">LiveStream</string>
     <string name="go_home_height_info">返航高度</string>

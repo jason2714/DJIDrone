@@ -107,29 +107,26 @@ public class CameraFragment extends Fragment {
             camera.setMode(cameraMode, new CommonCallbacks.CompletionCallback() {
                 @Override
                 public void onResult(DJIError djiError) {
+                    Handler mHandler = new Handler(Looper.getMainLooper());
+                    mHandler.post(() -> {
                     if (djiError == null) {
-                        Handler mHandler = new Handler(Looper.getMainLooper());
-                        mHandler.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                ToastUtil.showToast("Switch Camera Mode Succeeded");
-                                if (cameraMode == SettingsDefinitions.CameraMode.SHOOT_PHOTO) {
-                                    mTvCameraMode.setText(R.string.shoot_photo);
-                                    mBtnCamera.setImageResource(R.drawable.icon_shoot_photo);
-                                    mBtnCamera.setTag(R.drawable.icon_shoot_photo);
-                                } else if (cameraMode == SettingsDefinitions.CameraMode.RECORD_VIDEO) {
-                                    mTvCameraMode.setText(R.string.record_video);
-                                    mBtnCamera.setImageResource(R.drawable.icon_record_video);
-                                    mBtnCamera.setTag(R.drawable.icon_record_video);
-                                } else {
-                                    ToastUtil.showToast("" + cameraMode);
-                                }
+                            ToastUtil.showToast("Switch Camera Mode Succeeded");
+                            if (cameraMode == SettingsDefinitions.CameraMode.SHOOT_PHOTO) {
+                                mTvCameraMode.setText(R.string.shoot_photo);
+                                mBtnCamera.setImageResource(R.drawable.icon_shoot_photo);
+                                mBtnCamera.setTag(R.drawable.icon_shoot_photo);
+                            } else if (cameraMode == SettingsDefinitions.CameraMode.RECORD_VIDEO) {
+                                mTvCameraMode.setText(R.string.record_video);
+                                mBtnCamera.setImageResource(R.drawable.icon_record_video);
+                                mBtnCamera.setTag(R.drawable.icon_record_video);
+                            } else {
+                                ToastUtil.showToast("" + cameraMode);
                             }
-                        });
                     } else {
                         mSwCameraMode.setChecked(!mSwCameraMode.isChecked());
                         ToastUtil.showToast(djiError.getDescription());
                     }
+                    });
                 }
             });
         }

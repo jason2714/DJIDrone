@@ -117,6 +117,7 @@ public class MobileActivity extends FragmentActivity {
     private AlertDialog confirmLandingDialog;
     public VirtualStick mVirtualStick;
     private String[] flightModes;
+    private boolean isAvoidanceOn;
     private boolean isFlying, isRTH;
     protected BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @Override
@@ -185,33 +186,6 @@ public class MobileActivity extends FragmentActivity {
         initActiveTrack();
         initFlightControllerCallback();
         initUI();
-//        URI uri = null;
-//        try {
-//            uri = new URI("140.121.198.99");
-//        } catch (URISyntaxException e) {
-//            e.printStackTrace();
-//        }
-//        webSocketClient = new WebSocketClient(uri) {
-//            @Override
-//            public void onOpen(ServerHandshake handshakedata) {
-//                Log.d("TAG","open success");
-//            }
-//
-//            @Override
-//            public void onMessage(String message) {
-//                Log.d("TAG","receive" + message);
-//            }
-//
-//            @Override
-//            public void onClose(int code, String reason, boolean remote) {
-//                Log.d("TAG","close");
-//            }
-//
-//            @Override
-//            public void onError(Exception ex) {
-//                Log.d("TAG","error");
-//            }
-//        };
     }
 
     private void initUI() {
@@ -461,6 +435,7 @@ public class MobileActivity extends FragmentActivity {
 //            Log.d(DJIApplication.TAG, "isLandingConfirmationNeeded : " + flightControllerState.isLandingConfirmationNeeded());
 //            Log.d(DJIApplication.TAG, "flightModeToString : " + flightControllerState.getFlightMode().toString());
             if (isFlying != flightController.getState().isFlying()) {
+                isRTH = false;
                 isFlying = !isFlying;
                 refreshTakeoffLandingIcon();
             }
@@ -477,7 +452,11 @@ public class MobileActivity extends FragmentActivity {
             });
 
 //                ToastUtil.showToast(flightControllerState.getFlightMode().toString());
-            gMapUtil.initFlightController(flightControllerState);
+            if (isMapView)
+                gMapUtil.initFlightController(flightControllerState);
+            else
+                gMapUtilSmall.initFlightController(flightControllerState);
+            //TODO speed height
             if (flightControllerState.isLandingConfirmationNeeded()) {
                 if (confirmLandingDialog == null) {
                     confirmLandingDialog = new AlertDialog.Builder(MobileActivity.this, R.style.set_dialog)
@@ -632,6 +611,7 @@ public class MobileActivity extends FragmentActivity {
                 SettingFragment.setLiveStreamUrl(null);
                 //google map
                 gMapUtil.unInitFlightController();
+                gMapUtilSmall.unInitFlightController();
             }
         } else {
             Log.d(TAG, "product disconnected");
@@ -727,8 +707,12 @@ public class MobileActivity extends FragmentActivity {
         }
     }
 
+    public void getAvoidanceState(boolean isOn) {
+        isAvoidanceOn = isOn;
+    }
+
     private void setSensor(String flightMode) {
-        if (flightMode.equals(flightModes[0])) {//s禁用避障
+        if (!isAvoidanceOn || flightMode.equals(flightModes[0])) {//s禁用避障
             mImgSensor.setImageResource(R.drawable.sensor_none);
         } else if (flightMode.equals(flightModes[1])) {//p無法左右
             mImgSensor.setImageResource(R.drawable.sensor_frontandrear);

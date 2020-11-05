@@ -33,6 +33,7 @@ public class GoogleMapUtil implements GoogleMap.OnMapClickListener, OnMapReadyCa
     private Marker droneMarker = null;
     private FlightController mFlightController;
     private static Activity activity;
+    private LatLng userLocation;
     private Location location = null;
     private LocationManager locationManager = null;
     private UiSettings gMapUiSettings;
@@ -79,7 +80,6 @@ public class GoogleMapUtil implements GoogleMap.OnMapClickListener, OnMapReadyCa
             activity.startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)); //開啟設定頁面
         }
         LatLng NTOUCSE = new LatLng(25.150985, 121.779992);
-        LatLng userLocation;
         if (null != location) {
             Log.d("MobileActivity", "get location success");
             userLocation = new LatLng(location.getLatitude(), location.getLongitude());
@@ -110,33 +110,29 @@ public class GoogleMapUtil implements GoogleMap.OnMapClickListener, OnMapReadyCa
     }
 
     public void initFlightController(FlightControllerState mFlightControllerState) {
+        if(gMap == null)
+            return;
 //      ToastUtil.showToast("AircraftLocation" + djiFlightControllerCurrentState.getAircraftLocation());
         droneLocationLat = mFlightControllerState.getAircraftLocation().getLatitude();
         droneLocationLng = mFlightControllerState.getAircraftLocation().getLongitude();
-        updateDroneLocation();
-
+        updateDroneLocation( new LatLng(droneLocationLat, droneLocationLng));
     }
 
     public static boolean checkGpsCoordinates(double latitude, double longitude) {
         return (latitude > -90 && latitude < 90 && longitude > -180 && longitude < 180) && (latitude != 0f && longitude != 0f);
     }
 
-    private void updateDroneLocation() {
-
-        LatLng pos = new LatLng(droneLocationLat, droneLocationLng);
+    private void updateDroneLocation(LatLng pos) {
         //Create MarkerOptions object
         MarkerOptions markerOptions = new MarkerOptions();
         markerOptions.position(pos);
         markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.icon_aircraft));
-        activity.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                if (droneMarker != null) {
-                    droneMarker.remove();
-                }
-                if (checkGpsCoordinates(droneLocationLat, droneLocationLng)) {
-                    droneMarker = gMap.addMarker(markerOptions);
-                }
+        activity.runOnUiThread(() -> {
+            if (droneMarker != null) {
+                droneMarker.remove();
+            }
+            if (checkGpsCoordinates(droneLocationLat, droneLocationLng)) {
+                droneMarker = gMap.addMarker(markerOptions);
             }
         });
     }
@@ -170,7 +166,6 @@ public class GoogleMapUtil implements GoogleMap.OnMapClickListener, OnMapReadyCa
         Log.d("MobileActivity", bestProvider);
         location = locationManager.getLastKnownLocation(bestProvider);//取得上次定位位置
     }
-
 
 
 }
