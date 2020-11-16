@@ -55,7 +55,6 @@ public class SensorFragment extends Fragment {
             compass = mFlightController.getCompass();
             if (compass.hasError()) {
 //            compass.startCalibration(djiError -> {
-//                //TODO
 //            });
             }
         }

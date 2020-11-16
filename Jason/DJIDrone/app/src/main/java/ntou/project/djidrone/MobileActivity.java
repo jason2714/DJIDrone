@@ -82,6 +82,7 @@ public class MobileActivity extends FragmentActivity {
     private ToggleButton btn_changeMode, relativeLeftToggle;
     private LinearLayout linearLeft, linearRight;
     private ImageView mImgSensor;
+    private ImageView mImgController;
     private ImageView mBtnCamera;
     private ImageView mBtnTakeoffLanding, mBtnRTH;
     private ImageView mBtnTrackStop;
@@ -215,6 +216,7 @@ public class MobileActivity extends FragmentActivity {
         mBtnRTH = findViewById(R.id.btn_rth);
         mImgSensor = findViewById(R.id.sensorIcon);
         mImgSignal = findViewById(R.id.img_sensorIcon);
+        mImgController = findViewById(R.id.controllerIcon);
         //test
         mTvTest = findViewById(R.id.tv_test);
         //Virtual Stick
@@ -434,6 +436,8 @@ public class MobileActivity extends FragmentActivity {
             //test flightMode
 //            Log.d(DJIApplication.TAG, "isLandingConfirmationNeeded : " + flightControllerState.isLandingConfirmationNeeded());
 //            Log.d(DJIApplication.TAG, "flightModeToString : " + flightControllerState.getFlightMode().toString());
+            if (null == flightController)
+                return;
             if (isFlying != flightController.getState().isFlying()) {
                 isRTH = false;
                 isFlying = !isFlying;
@@ -598,6 +602,7 @@ public class MobileActivity extends FragmentActivity {
         //virtual stick
         mVirtualStick.flightControllerChange(flightController);
         if (null != mProduct) {
+            mImgController.setImageResource(R.drawable.controller);
             if (mProduct.isConnected()) {
                 Log.d(TAG, "connect to icon_aircraft");
                 mTvState.setText(R.string.connected);
@@ -614,6 +619,7 @@ public class MobileActivity extends FragmentActivity {
                 gMapUtilSmall.unInitFlightController();
             }
         } else {
+            mImgController.setImageResource(R.drawable.icon_controller);
             Log.d(TAG, "product disconnected");
             SettingFragment.setLiveStreamUrl(null);
             mTvState.setText(R.string.disconnected);
@@ -648,9 +654,9 @@ public class MobileActivity extends FragmentActivity {
     }
 
     private void setBattery() {
+        //TODO
         battery = DJIApplication.getBatteryInstance();
         if (null != battery) {
-            //TODO fail
 //            battery.getCellVoltages(new CommonCallbacks.CompletionCallbackWith<Integer[]>() {
 //                @Override
 //                public void onSuccess(Integer[] integers) {
@@ -712,6 +718,7 @@ public class MobileActivity extends FragmentActivity {
     }
 
     private void setSensor(String flightMode) {
+        mTvTest.setText(flightMode);
         if (!isAvoidanceOn || flightMode.equals(flightModes[0])) {//s禁用避障
             mImgSensor.setImageResource(R.drawable.sensor_none);
         } else if (flightMode.equals(flightModes[1])) {//p無法左右
@@ -834,7 +841,6 @@ public class MobileActivity extends FragmentActivity {
             return;
         }
 
-        //TODO 有什差????
 //        final int l = (int)((trackingRect.centerX() - trackingRect.width() / 2) * parent.getWidth());
 //        final int t = (int)((trackingRect.centerY() - trackingRect.height() / 2) * parent.getHeight());
 //        final int r = (int)((trackingRect.centerX() + trackingRect.width() / 2) * parent.getWidth());
@@ -850,7 +856,7 @@ public class MobileActivity extends FragmentActivity {
             if ((targetState == ActiveTrackTargetState.CANNOT_CONFIRM)
                     || (targetState == ActiveTrackTargetState.UNKNOWN)) {
                 mImgTargetRect.setImageResource(R.drawable.rect_active_track_cannotconfirm);
-                mHandler.post(() -> mTvTest.setText(trackingState.getReason().toString()));
+//                mHandler.post(() -> mTvTest.setText(trackingState.getReason().toString()));
             } else if (targetState == ActiveTrackTargetState.WAITING_FOR_CONFIRMATION) {
                 if (confirmActiveTrackDialog == null && isWaitingForConfirm) {
                     confirmActiveTrackDialog = new AlertDialog.Builder(MobileActivity.this, R.style.set_dialog)
@@ -887,7 +893,7 @@ public class MobileActivity extends FragmentActivity {
             } else if (targetState == ActiveTrackTargetState.TRACKING_WITH_LOW_CONFIDENCE) {
                 mImgTargetRect.setImageResource(R.drawable.rect_active_track_lowconfidence);
             } else if (targetState == ActiveTrackTargetState.TRACKING_WITH_HIGH_CONFIDENCE) {
-                mTvTest.setText(mActiveTrackOperator.getCurrentState().getName());
+//                mTvTest.setText(mActiveTrackOperator.getCurrentState().getName());
                 mImgTargetRect.setImageResource(R.drawable.rect_active_track_highconfidence);
             }
         });
