@@ -987,7 +987,7 @@ public class MobileActivity extends FragmentActivity {
     public void getSocketData(String socketData) {
         if (flightController == null)
             return;
-        float distance = 0.5f;
+        float distance = 1.0f;
         float mPitch = 0;
         float mRoll = 0;
         float mThrottle = 0;

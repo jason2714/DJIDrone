@@ -49,6 +49,7 @@ android {
     dexOptions {
         javaMaxHeapSize "4g"
     }
+    ndkVersion '20.0.5594570'
 }
 
 dependencies {
