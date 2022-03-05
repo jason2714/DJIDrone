@@ -6,7 +6,7 @@ Grotion Good
 ## Login Page
 <center>
 <p>登入頁面：在連結至無人機後可以進入主畫面</p>
-<img src="demo/login1.png" width="30%" alt="login1"/>&#8195&#8195<img src="demo/login2.png" width="30%" alt="login2"/>
+<img src="demo/login1.png" width="20%" alt="login1"/>&#8195<img src="demo/login2.png" width="20%" alt="login2"/>
 </center>
 
 ## Main Page
